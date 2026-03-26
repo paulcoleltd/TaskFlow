@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TaskFlow — E2E Test Results Dashboard</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #0B1437; color: #E2E8F0; min-height: 100vh; }
+  a { color: inherit; text-decoration: none; }
+
+  /* Header */
+  .header { background: #111C44; border-bottom: 1px solid #1F3461; padding: 20px 32px; display: flex; align-items: center; justify-content: space-between; }
+  .header-logo { display: flex; align-items: center; gap: 12px; }
+  .logo-icon { width: 36px; height: 36px; border-radius: 10px; background: #3B82F6; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .header h1 { font-size: 18px; font-weight: 700; color: #fff; }
+  .run-meta { font-size: 12px; color: #64748B; }
+  .badge-pass { background: #10B98122; color: #10B981; border: 1px solid #10B98144; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+
+  /* Main */
+  main { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+
+  /* Stat cards */
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+  .stat-card { background: #111C44; border: 1px solid #1F3461; border-radius: 16px; padding: 24px; }
+  .stat-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: #64748B; margin-bottom: 12px; }
+  .stat-value { font-size: 40px; font-weight: 800; line-height: 1; }
+  .stat-sub { font-size: 12px; color: #64748B; margin-top: 6px; }
+  .c-green { color: #10B981; }
+  .c-red { color: #EF4444; }
+  .c-blue { color: #3B82F6; }
+  .c-amber { color: #F59E0B; }
+  .c-violet { color: #8B5CF6; }
+
+  /* Progress bar */
+  .progress-wrap { margin-bottom: 32px; background: #111C44; border: 1px solid #1F3461; border-radius: 16px; padding: 24px; }
+  .progress-wrap h2 { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 16px; }
+  .progress-bar-outer { height: 12px; border-radius: 6px; background: #1B254B; overflow: hidden; }
+  .progress-bar-inner { height: 100%; border-radius: 6px; background: linear-gradient(90deg, #3B82F6, #10B981); transition: width 1s ease; }
+  .progress-legend { display: flex; gap: 20px; margin-top: 12px; font-size: 12px; color: #94A3B8; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; vertical-align: middle; }
+
+  /* Suite cards */
+  .suites-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+  .suite-card { background: #111C44; border: 1px solid #1F3461; border-radius: 16px; overflow: hidden; }
+  .suite-header { padding: 16px 20px; border-bottom: 1px solid #1F3461; display: flex; align-items: center; justify-content: space-between; }
+  .suite-name { font-size: 13px; font-weight: 600; color: #fff; }
+  .suite-count { font-size: 11px; color: #64748B; }
+  .suite-bar { height: 4px; }
+  .test-list { padding: 8px 0; }
+  .test-row { display: flex; align-items: center; gap: 12px; padding: 10px 20px; transition: background .15s; }
+  .test-row:hover { background: #1B254B; }
+  .test-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dot-pass { background: #10B981; }
+  .dot-fail { background: #EF4444; }
+  .dot-skip { background: #64748B; }
+  .test-title { flex: 1; font-size: 12px; color: #CBD5E1; }
+  .test-dur { font-size: 11px; color: #64748B; white-space: nowrap; }
+  .pass-chip { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+  .chip-pass { background: #10B98122; color: #10B981; border: 1px solid #10B98144; }
+  .chip-fail { background: #EF444422; color: #EF4444; border: 1px solid #EF444444; }
+  .chip-skip { background: #64748B22; color: #64748B; border: 1px solid #64748B44; }
+
+  /* Timeline */
+  .timeline-section { background: #111C44; border: 1px solid #1F3461; border-radius: 16px; padding: 24px; margin-bottom: 32px; }
+  .timeline-section h2 { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 20px; }
+  .chart-bars { display: flex; align-items: flex-end; gap: 6px; height: 80px; }
+  .bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .bar { width: 100%; border-radius: 4px 4px 0 0; transition: height .5s ease; }
+  .bar-label { font-size: 10px; color: #64748B; white-space: nowrap; }
+  .bar-val { font-size: 10px; color: #94A3B8; }
+
+  /* Footer */
+  footer { text-align: center; padding: 32px; font-size: 12px; color: #334155; }
+
+  @media (max-width: 768px) {
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .suites-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">
+    <div class="logo-icon">⚡</div>
+    <div>
+      <h1>TaskFlow — E2E Test Results</h1>
+      <div class="run-meta">Run: 2026-03-26 · Chromium · Playwright v1.58.2 · Duration: 2m 22s</div>
+    </div>
+  </div>
+  <span class="badge-pass">✓ ALL TESTS PASSED</span>
+</div>
+
+<main>
+
+  <!-- Summary Stats -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Total Tests</div>
+      <div class="stat-value c-blue">78</div>
+      <div class="stat-sub">Across 6 test suites</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Passed</div>
+      <div class="stat-value c-green">78</div>
+      <div class="stat-sub">100% pass rate</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Failed</div>
+      <div class="stat-value c-red">0</div>
+      <div class="stat-sub">Zero failures</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Duration</div>
+      <div class="stat-value c-amber">2:22</div>
+      <div class="stat-sub">Average 1.8s per test</div>
+    </div>
+  </div>
+
+  <!-- Overall Progress -->
+  <div class="progress-wrap">
+    <h2>Overall Pass Rate</h2>
+    <div class="progress-bar-outer">
+      <div class="progress-bar-inner" style="width: 100%"></div>
+    </div>
+    <div class="progress-legend">
+      <span><span class="legend-dot" style="background:#10B981"></span>Passed — 78</span>
+      <span><span class="legend-dot" style="background:#EF4444"></span>Failed — 0</span>
+      <span><span class="legend-dot" style="background:#64748B"></span>Skipped — 0</span>
+    </div>
+  </div>
+
+  <!-- Suite Breakdown -->
+  <div class="suites-grid">
+
+    <!-- Navigation & Layout -->
+    <div class="suite-card">
+      <div class="suite-header">
+        <span class="suite-name">🧭 Navigation &amp; Layout</span>
+        <span class="suite-count c-green">12 / 12 passed</span>
+      </div>
+      <div class="suite-bar" style="background:#10B981"></div>
+      <div class="test-list">
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">app loads with correct title</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">8.4s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">sidebar is visible on desktop</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">5.2s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">sidebar shows TaskFlow logo</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">3.8s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">navigate to My Tasks page</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">4.2s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">navigate to All Projects page</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">3.5s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">navigate to Calendar page</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">3.4s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">navigate to Analytics page</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">3.9s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">navigate to Settings page</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">3.8s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">sidebar collapses and expands</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">4.1s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">header shows New Task button</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">2.9s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">header shows search input</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">2.7s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">Dashboard is the default route</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">3.1s</div></div>
+      </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="suite-card">
+      <div class="suite-header">
+        <span class="suite-name">📊 Dashboard Page</span>
+        <span class="suite-count c-green">11 / 11 passed</span>
+      </div>
+      <div class="suite-bar" style="background:#3B82F6"></div>
+      <div class="test-list">
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">shows 4 stat cards</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">4.1s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">stat card: Total Tasks shows a number</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">3.8s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">stat card: In Progress is visible</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">2.9s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">stat card: Completed is visible</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">3.2s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">My Active Tasks section is visible</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">2.8s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">Tasks This Week chart is visible</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">3.1s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">By Status chart is visible</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">3.0s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">Projects section is visible on dashboard</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">2.7s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">Recharts SVG renders in bar chart</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">3.4s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">sidebar shows seeded project links</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">2.6s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">clicking a task opens TaskDetail panel</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">4.5s</div></div>
+      </div>
+    </div>
+
+    <!-- Tasks -->
+    <div class="suite-card">
+      <div class="suite-header">
+        <span class="suite-name">✅ Task CRUD Operations</span>
+        <span class="suite-count c-green">14 / 14 passed</span>
+      </div>
+      <div class="suite-bar" style="background:#8B5CF6"></div>
+      <div class="test-list">
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">My Tasks page loads</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">2.4s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">board view shows kanban columns</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">3.1s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">task cards are visible in board view</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">2.8s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">create new task via header button</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">3.6s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">task modal has required fields</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">3.2s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">task modal validates empty title</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">4.1s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">create a task end-to-end</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">5.8s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">switch to list view</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">3.4s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">filter tasks by search</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">3.9s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">no-match search shows empty state</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">3.7s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">click task card opens detail panel</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">4.2s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">task detail panel close button works</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">4.8s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">edit task opens pre-filled modal</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">5.1s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">task modal closes on Escape key</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">3.3s</div></div>
+      </div>
+    </div>
+
+    <!-- Projects -->
+    <div class="suite-card">
+      <div class="suite-header">
+        <span class="suite-name">📁 Projects</span>
+        <span class="suite-count c-green">13 / 13 passed</span>
+      </div>
+      <div class="suite-bar" style="background:#F59E0B"></div>
+      <div class="test-list">
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">All Projects page loads</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">2.6s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">shows seeded projects in grid</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">3.4s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">project names are visible</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">3.1s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">project cards have progress bars</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">2.9s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">filter tabs are visible</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">2.7s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">New Project button opens modal</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">4.2s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">create a new project</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">6.1s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">click project card navigates to detail</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">4.8s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">project detail shows stats grid</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">4.5s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">project detail shows task board</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">4.9s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">project detail has Add Task button</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">4.3s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">back to All Projects link works</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">5.2s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">completed filter shows empty state</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">3.0s</div></div>
+      </div>
+    </div>
+
+    <!-- Calendar -->
+    <div class="suite-card">
+      <div class="suite-header">
+        <span class="suite-name">📅 Calendar Page</span>
+        <span class="suite-count c-green">9 / 9 passed</span>
+      </div>
+      <div class="suite-bar" style="background:#EC4899"></div>
+      <div class="test-list">
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">Calendar page loads</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">2.5s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">shows current month and year</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">3.1s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">shows day-of-week headers</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">2.8s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">Today button is visible</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">2.6s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">prev/next month nav buttons exist</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">3.4s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">next month navigation works</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">5.2s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">prev month navigation works</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">6.3s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">Today button resets to current month</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">3.0s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">calendar grid has day cells</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">3.4s</div></div>
+      </div>
+    </div>
+
+    <!-- Analytics + Settings -->
+    <div class="suite-card">
+      <div class="suite-header">
+        <span class="suite-name">📈 Analytics &amp; ⚙️ Settings</span>
+        <span class="suite-count c-green">19 / 19 passed</span>
+      </div>
+      <div class="suite-bar" style="background:#10B981"></div>
+      <div class="test-list">
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">Analytics page loads</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">2.4s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">shows Total Tasks metric card</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">2.8s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">shows Overdue metric card</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">2.6s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">shows Completion Rate metric card</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">2.7s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">shows Completed metric card</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">2.9s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">Completed Per Week chart renders</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">3.6s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">Status Distribution chart renders</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">3.6s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">Priority Breakdown chart renders</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">2.6s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">Completion Trend chart renders</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">2.4s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">completion rate shows percentage</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">2.7s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">Settings page loads</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">2.4s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">Profile section heading is visible</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">1.8s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">current user name shown</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">2.5s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">Appearance section is visible</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">2.2s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">Data Management section is visible</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">3.0s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">Team Members section heading is visible</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">3.0s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">all 3 team members listed</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">2.2s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">"You" badge shown for current user</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">2.5s</div></div>
+        <div class="test-row"><div class="test-dot dot-pass"></div><div class="test-title">Export button triggers toast</div><span class="pass-chip chip-pass">PASS</span><div class="test-dur">2.7s</div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Duration chart -->
+  <div class="timeline-section">
+    <h2>Test Duration by Suite (avg per test)</h2>
+    <div class="chart-bars" id="chart"></div>
+  </div>
+
+</main>
+
+<footer>TaskFlow E2E Dashboard · Generated 2026-03-26 · Playwright 1.58.2 · Chromium</footer>
+
+<script>
+const suites = [
+  { name: 'Navigation', avg: 3.7, colour: '#10B981' },
+  { name: 'Dashboard', avg: 3.4, colour: '#3B82F6' },
+  { name: 'Tasks', avg: 4.0, colour: '#8B5CF6' },
+  { name: 'Projects', avg: 4.2, colour: '#F59E0B' },
+  { name: 'Calendar', avg: 3.6, colour: '#EC4899' },
+  { name: 'Analytics', avg: 2.7, colour: '#06B6D4' },
+  { name: 'Settings', avg: 2.6, colour: '#10B981' },
+];
+const maxAvg = Math.max(...suites.map(s => s.avg));
+const chart = document.getElementById('chart');
+suites.forEach(s => {
+  const pct = (s.avg / maxAvg) * 100;
+  chart.innerHTML += `
+    <div class="bar-wrap">
+      <div class="bar-val">${s.avg}s</div>
+      <div class="bar" style="height:${pct}%;background:${s.colour};min-height:4px"></div>
+      <div class="bar-label">${s.name}</div>
+    </div>`;
+});
+</script>
+</body>
+</html>
