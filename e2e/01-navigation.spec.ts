@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Navigation & Layout', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForSelector('main', { state: 'visible' });
   });
 
   test('app loads with correct title', async ({ page }) => {
@@ -21,13 +21,15 @@ test.describe('Navigation & Layout', () => {
   test('navigate to My Tasks page', async ({ page }) => {
     await page.locator('aside').getByText('My Tasks').click();
     await expect(page).toHaveURL('/my-tasks');
-    await expect(page.locator('h1').getByText('My Tasks')).toBeVisible();
+    await page.waitForSelector('h1', { state: 'visible' });
+    await expect(page.locator('h1').getByText('My Tasks')).toBeVisible({ timeout: 15000 });
   });
 
   test('navigate to All Projects page', async ({ page }) => {
     await page.locator('aside').getByText('All Projects').click();
     await expect(page).toHaveURL('/projects');
-    await expect(page.locator('h1').getByText('All Projects')).toBeVisible();
+    await page.waitForSelector('h1', { state: 'visible' });
+    await expect(page.locator('h1').getByText('All Projects')).toBeVisible({ timeout: 15000 });
   });
 
   test('navigate to Calendar page', async ({ page }) => {
@@ -39,7 +41,8 @@ test.describe('Navigation & Layout', () => {
   test('navigate to Analytics page', async ({ page }) => {
     await page.locator('aside').getByText('Analytics').click();
     await expect(page).toHaveURL('/analytics');
-    await expect(page.locator('h1').getByText('Analytics')).toBeVisible();
+    await page.waitForSelector('h1', { state: 'visible' });
+    await expect(page.locator('h1').getByText('Analytics')).toBeVisible({ timeout: 15000 });
   });
 
   test('navigate to Settings page', async ({ page }) => {

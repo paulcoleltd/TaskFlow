@@ -53,6 +53,9 @@ export const canDeleteProject = (role: Role): boolean => role === 'admin';
 /** Can the user clear all data? (admin-only) */
 export const canClearData = (role: Role): boolean => role === 'admin';
 
+/** Can the user create, rename, or delete tags? (admin-only) */
+export const canManageTags = (role: Role): boolean => role === 'admin';
+
 /** Can the user export data? (admin + member) */
 export const canExportData = (role: Role): boolean =>
   role === 'admin' || role === 'member';

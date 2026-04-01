@@ -11,6 +11,12 @@ interface ProjectStore {
   deleteProject: (id: string) => void;
   getProjectById: (id: string) => Project | undefined;
   seedProjects: (projects: Project[]) => void;
+  /** Apply a remotely-created project without re-emitting (echo prevention). */
+  _applyRemoteProjectCreate: (project: Project) => void;
+  /** Apply a remote project update without re-emitting (echo prevention). */
+  _applyRemoteProjectUpdate: (projectId: string, updates: Partial<Project>) => void;
+  /** Apply a remote project deletion without re-emitting (echo prevention). */
+  _applyRemoteProjectDelete: (projectId: string) => void;
 }
 
 export const useProjectStore = create<ProjectStore>()(
@@ -37,6 +43,27 @@ export const useProjectStore = create<ProjectStore>()(
         set(state => ({ projects: state.projects.filter(p => p.id !== id) })),
       getProjectById: (id) => get().projects.find(p => p.id === id),
       seedProjects: (projects) => set({ projects }),
+
+      // ── Remote-apply actions (echo-prevention) ───────────────────────────────
+
+      _applyRemoteProjectCreate: (project) => {
+        set(state => {
+          if (state.projects.some(p => p.id === project.id)) return state;
+          return { projects: [...state.projects, project] };
+        });
+      },
+
+      _applyRemoteProjectUpdate: (projectId, updates) => {
+        set(state => ({
+          projects: state.projects.map(p =>
+            p.id === projectId ? { ...p, ...updates } : p
+          ),
+        }));
+      },
+
+      _applyRemoteProjectDelete: (projectId) => {
+        set(state => ({ projects: state.projects.filter(p => p.id !== projectId) }));
+      },
     }),
     {
       name: 'taskflow-projects',

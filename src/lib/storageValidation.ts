@@ -30,6 +30,24 @@ const commentSchema = z.object({
   createdAt: zIso,
 });
 
+const attachmentSchema = z.object({
+  id: zId,
+  name: z.string().max(256),
+  size: z.number().int().min(0).max(10 * 1024 * 1024), // 10 MB hard cap
+  type: z.string().max(128),
+  data: z.string().max(15 * 1024 * 1024),              // base64 ≈ 1.33× raw
+  uploadedAt: zIso,
+  uploadedBy: zId,
+});
+
+const milestoneSchema = z.object({
+  id: zId,
+  title: z.string().max(256),
+  dueDate: zIso,
+  completed: z.boolean(),
+  description: z.string().max(1024).optional(),
+});
+
 export const taskSchema = z.object({
   id: zId,
   title: z.string().min(1).max(256),
@@ -44,10 +62,15 @@ export const taskSchema = z.object({
   tags: z.array(zId).max(20),
   subtasks: z.array(subtaskSchema).max(50),
   comments: z.array(commentSchema).max(100),
+  attachments: z.array(attachmentSchema).max(20).optional().default([]),
   attachmentCount: z.number().int().min(0).max(9999),
   estimatedHours: z.number().min(0).max(9999).optional(),
   loggedHours: z.number().min(0).max(9999).optional(),
   order: z.number().int().min(0).max(99999),
+  // Fields added after initial schema — must be kept in sync with types/index.ts
+  pinned: z.boolean().optional(),
+  recurrence: z.enum(['none', 'daily', 'weekly', 'monthly']).optional(),
+  blockedBy: z.array(zId).max(50).optional(),
 });
 
 // ── Project schema ───────────────────────────────────────────────────────────
@@ -56,6 +79,7 @@ export const projectSchema = z.object({
   id: zId,
   name: z.string().min(1).max(128),
   description: z.string().max(1024).optional(),
+  notes: z.string().max(8192).optional(),
   colour: zColour,
   icon: z.string().max(64),
   ownerId: zId,
@@ -64,6 +88,7 @@ export const projectSchema = z.object({
   dueDate: z.string().optional(),
   createdAt: zIso,
   updatedAt: zIso,
+  milestones: z.array(milestoneSchema).max(100).optional(),
 });
 
 // ── Sanitise helpers ─────────────────────────────────────────────────────────

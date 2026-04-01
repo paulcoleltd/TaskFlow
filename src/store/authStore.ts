@@ -1,14 +1,17 @@
 /**
  * Auth Store — session management and role-based identity.
  *
- * ⚠️  DEMO MODE: Credentials are validated client-side for this localStorage-only SPA.
- *     In a production app with a real backend, credentials must NEVER be validated
- *     on the client — always send to a server endpoint and receive a signed JWT.
+ * Login validates credentials server-side via POST /api/auth/login.
+ * The server issues an HMAC-signed token; the client stores only the
+ * opaque token + the user profile returned by the server.
  *
- * Demo accounts:
- *   alex@taskflow.io  / Admin1234!   → role: admin   (full access)
- *   sarah@taskflow.io / Member1234!  → role: member  (create/edit own, no delete)
- *   marcus@taskflow.io/ Viewer1234!  → role: viewer  (read-only)
+ * ⚠️  The server still uses demo passwords in DEMO mode. This is fine for
+ *     a demo/development build. In production, replace with a real user store.
+ *
+ * Demo accounts (shown in the login UI for convenience):
+ *   alex@taskflow.io   → Admin
+ *   sarah@taskflow.io  → Member
+ *   marcus@taskflow.io → Viewer
  */
 
 import { create } from 'zustand';
@@ -24,62 +27,84 @@ export interface AuthUser {
   role: Role;
 }
 
-interface AuthStore {
-  currentUser: AuthUser | null;
-  isAuthenticated: boolean;
-  login: (email: string, password: string) => { success: boolean; error?: string };
-  logout: () => void;
+// ── Auth endpoint — relative so it works through the Vite proxy in dev
+//    and a same-origin reverse proxy in production. No CORS required.
+const AUTH_URL = '/api/auth/login';
+
+// ── In-memory brute-force limiter (UX guard only) ─────────────────────────────
+// Resets on page refresh — real rate limiting lives on the server.
+const _attempts = new Map<string, { count: number; lockedUntil: number }>();
+const MAX_ATTEMPTS = 5;
+const LOCKOUT_MS   = 60_000; // 60 seconds
+
+function checkRateLimit(email: string): { allowed: boolean; error?: string } {
+  const key    = email.trim().toLowerCase();
+  const record = _attempts.get(key) ?? { count: 0, lockedUntil: 0 };
+  if (Date.now() < record.lockedUntil) {
+    const secs = Math.ceil((record.lockedUntil - Date.now()) / 1000);
+    return { allowed: false, error: `Too many attempts. Try again in ${secs}s.` };
+  }
+  return { allowed: true };
 }
 
-// ── Demo credential registry ─────────────────────────────────────────────────
-// In production this lookup never exists on the client — the server validates.
-const DEMO_USERS: Array<AuthUser & { password: string }> = [
-  {
-    id: 'user-1',
-    name: 'Alex Johnson',
-    email: 'alex@taskflow.io',
-    colour: '#3B82F6',
-    role: 'admin',
-    password: 'Admin1234!',
-  },
-  {
-    id: 'user-2',
-    name: 'Sarah Chen',
-    email: 'sarah@taskflow.io',
-    colour: '#8B5CF6',
-    role: 'member',
-    password: 'Member1234!',
-  },
-  {
-    id: 'user-3',
-    name: 'Marcus Williams',
-    email: 'marcus@taskflow.io',
-    colour: '#10B981',
-    role: 'viewer',
-    password: 'Viewer1234!',
-  },
-];
+function recordFailure(email: string): void {
+  const key    = email.trim().toLowerCase();
+  const record = _attempts.get(key) ?? { count: 0, lockedUntil: 0 };
+  const count  = record.count + 1;
+  _attempts.set(key, {
+    count,
+    lockedUntil: count >= MAX_ATTEMPTS ? Date.now() + LOCKOUT_MS : 0,
+  });
+}
+
+function clearAttempts(email: string): void {
+  _attempts.delete(email.trim().toLowerCase());
+}
+
+interface AuthStore {
+  currentUser:     AuthUser | null;
+  token:           string | null;
+  isAuthenticated: boolean;
+  login:  (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  logout: () => void;
+}
 
 export const useAuthStore = create<AuthStore>()(
   persist(
     (set) => ({
-      currentUser: null,
+      currentUser:     null,
+      token:           null,
       isAuthenticated: false,
 
-      login: (email, password) => {
-        // Normalise email — prevents case-sensitivity bypass
-        const match = DEMO_USERS.find(
-          (u) => u.email.toLowerCase() === email.trim().toLowerCase()
-        );
-        if (!match || match.password !== password) {
-          return { success: false, error: 'Invalid email or password.' };
+      login: async (email, password) => {
+        // Client-side rate limit (UX guard — blocks the UI before the round-trip)
+        const rateCheck = checkRateLimit(email);
+        if (!rateCheck.allowed) return { success: false, error: rateCheck.error };
+
+        try {
+          const res = await fetch(AUTH_URL, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ email: email.trim(), password }),
+          });
+
+          if (!res.ok) {
+            const data = (await res.json()) as { error?: string };
+            recordFailure(email);
+            return { success: false, error: data.error ?? 'Invalid email or password.' };
+          }
+
+          const data = (await res.json()) as { token: string; user: AuthUser };
+          clearAttempts(email);
+          set({ currentUser: data.user, token: data.token, isAuthenticated: true });
+          return { success: true };
+        } catch {
+          // Network error — server unreachable
+          return { success: false, error: 'Cannot reach the authentication server. Is the server running?' };
         }
-        const { password: _pw, ...user } = match;
-        set({ currentUser: user, isAuthenticated: true });
-        return { success: true };
       },
 
-      logout: () => set({ currentUser: null, isAuthenticated: false }),
+      logout: () => set({ currentUser: null, token: null, isAuthenticated: false }),
     }),
     { name: 'taskflow-auth' }
   )

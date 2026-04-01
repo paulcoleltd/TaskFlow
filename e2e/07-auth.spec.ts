@@ -1,0 +1,135 @@
+import { test, expect } from '@playwright/test';
+
+// Auth tests run without pre-loaded auth state — they test the login flow itself
+test.use({ storageState: { cookies: [], origins: [] } });
+
+test.describe('Authentication', () => {
+  test('unauthenticated user is redirected to /login', async ({ page }) => {
+    await page.goto('/');
+    await expect(page).toHaveURL('/login');
+  });
+
+  test('unauthenticated user visiting a deep route is redirected to /login', async ({ page }) => {
+    await page.goto('/my-tasks');
+    await expect(page).toHaveURL('/login');
+  });
+
+  test('login page renders all required elements', async ({ page }) => {
+    await page.goto('/login');
+    await expect(page.locator('input[type="email"]')).toBeVisible();
+    await expect(page.locator('input[type="password"]')).toBeVisible();
+    await expect(page.locator('button[type="submit"]')).toBeVisible();
+    await expect(page.locator('button[type="submit"]')).toHaveText('Sign in');
+    // Demo accounts section
+    await expect(page.getByText('Demo accounts')).toBeVisible();
+  });
+
+  test('admin can log in and reach dashboard', async ({ page }) => {
+    await page.goto('/login');
+    await page.fill('input[type="email"]', 'alex@taskflow.io');
+    await page.fill('input[type="password"]', 'Admin1234!');
+    await page.click('button[type="submit"]');
+    await page.waitForURL('/');
+    await expect(page.locator('h1').getByText('Dashboard')).toBeVisible();
+  });
+
+  test('member can log in', async ({ page }) => {
+    await page.goto('/login');
+    await page.fill('input[type="email"]', 'sarah@taskflow.io');
+    await page.fill('input[type="password"]', 'Member1234!');
+    await page.click('button[type="submit"]');
+    await page.waitForURL('/');
+    await expect(page).toHaveURL('/');
+  });
+
+  test('viewer can log in', async ({ page }) => {
+    await page.goto('/login');
+    await page.fill('input[type="email"]', 'marcus@taskflow.io');
+    await page.fill('input[type="password"]', 'Viewer1234!');
+    await page.click('button[type="submit"]');
+    await page.waitForURL('/');
+    await expect(page).toHaveURL('/');
+  });
+
+  test('wrong password shows "Invalid email or password" error', async ({ page }) => {
+    await page.goto('/login');
+    await page.fill('input[type="email"]', 'alex@taskflow.io');
+    await page.fill('input[type="password"]', 'WrongPassword!');
+    await page.click('button[type="submit"]');
+    await expect(page).toHaveURL('/login');
+    await expect(page.getByText('Invalid email or password.')).toBeVisible();
+  });
+
+  test('unknown email shows "Invalid email or password" error (no enumeration)', async ({ page }) => {
+    await page.goto('/login');
+    await page.fill('input[type="email"]', 'nobody@example.com');
+    await page.fill('input[type="password"]', 'SomePass123!');
+    await page.click('button[type="submit"]');
+    await expect(page.getByText('Invalid email or password.')).toBeVisible();
+  });
+
+  test('rate limit kicks in after 5 failed attempts', async ({ page }) => {
+    await page.goto('/login');
+    // Trigger 5 consecutive failures against the same email
+    for (let i = 0; i < 5; i++) {
+      await page.fill('input[type="email"]', 'alex@taskflow.io');
+      await page.fill('input[type="password"]', 'WrongPass!');
+      await page.click('button[type="submit"]');
+      // Wait for each error before the next attempt
+      await page.waitForSelector('text=Invalid email or password.', { state: 'visible' });
+    }
+    // 6th attempt should hit the rate limit
+    await page.fill('input[type="email"]', 'alex@taskflow.io');
+    await page.fill('input[type="password"]', 'Admin1234!');
+    await page.click('button[type="submit"]');
+    await expect(page.getByText(/Too many attempts/i)).toBeVisible();
+    await expect(page).toHaveURL('/login');
+  });
+
+  test('logout clears session and redirects to /login', async ({ page }) => {
+    // Log in first
+    await page.goto('/login');
+    await page.fill('input[type="email"]', 'alex@taskflow.io');
+    await page.fill('input[type="password"]', 'Admin1234!');
+    await page.click('button[type="submit"]');
+    await page.waitForURL('/');
+    // Click logout button in header — two buttons with this title exist (sidebar + header); use first
+    await page.locator('button[title="Sign out"]').first().click();
+    await expect(page).toHaveURL('/login');
+  });
+
+  test('demo account button pre-fills admin credentials', async ({ page }) => {
+    await page.goto('/login');
+    // Click the Admin demo account button
+    await page.getByText('Admin — alex@taskflow.io').click();
+    await expect(page.locator('input[type="email"]')).toHaveValue('alex@taskflow.io');
+    await expect(page.locator('input[type="password"]')).toHaveValue('Admin1234!');
+  });
+
+  test('demo account button pre-fills member credentials', async ({ page }) => {
+    await page.goto('/login');
+    await page.getByText('Member — sarah@taskflow.io').click();
+    await expect(page.locator('input[type="email"]')).toHaveValue('sarah@taskflow.io');
+  });
+
+  test('demo account button pre-fills viewer credentials', async ({ page }) => {
+    await page.goto('/login');
+    await page.getByText('Viewer — marcus@taskflow.io').click();
+    await expect(page.locator('input[type="email"]')).toHaveValue('marcus@taskflow.io');
+  });
+
+  test('after logout, navigating to protected route redirects to /login', async ({ page }) => {
+    // Log in
+    await page.goto('/login');
+    await page.fill('input[type="email"]', 'alex@taskflow.io');
+    await page.fill('input[type="password"]', 'Admin1234!');
+    await page.click('button[type="submit"]');
+    await page.waitForURL('/');
+    // Log out — two buttons with this title exist (sidebar + header); use first
+    await page.locator('button[title="Sign out"]').first().click();
+    await page.waitForURL('/login');
+    // Try accessing a protected route
+    await page.goto('/my-tasks');
+    await expect(page).toHaveURL('/login');
+  });
+});

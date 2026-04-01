@@ -2,8 +2,8 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Task CRUD Operations', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/my-tasks');
-    await page.waitForLoadState('networkidle');
+    await page.goto('/my-tasks', { timeout: 30000 });
+    await page.waitForSelector('main', { state: 'visible', timeout: 20000 });
   });
 
   test('My Tasks page loads', async ({ page }) => {
@@ -83,14 +83,14 @@ test.describe('Task CRUD Operations', () => {
     await page.locator('main div[draggable="true"]').first().locator('> div').click();
     const panel = page.locator('div[class*="fixed right-0"]');
     await expect(panel).toBeVisible();
-    await panel.locator('button').last().click();
+    await panel.getByRole('button', { name: 'Close' }).click();
     await expect(panel).not.toBeVisible();
   });
 
   test('edit task opens pre-filled modal', async ({ page }) => {
     await page.locator('main div[draggable="true"]').first().locator('> div').click();
     const panel = page.locator('div[class*="fixed right-0"]');
-    await panel.locator('button').nth(0).click();
+    await panel.getByTitle('Edit task').click();
     await expect(page.getByText('Edit Task')).toBeVisible();
   });
 

@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Analytics Page', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/analytics');
-    await page.waitForLoadState('networkidle');
+    await page.waitForSelector('main', { state: 'visible' });
   });
 
   test('Analytics page loads', async ({ page }) => {
@@ -19,7 +19,7 @@ test.describe('Analytics Page', () => {
   });
 
   test('shows Completion Rate metric card', async ({ page }) => {
-    await expect(page.locator('main').getByText('Completion Rate')).toBeVisible();
+    await expect(page.locator('main').getByText('Completion Rate', { exact: true })).toBeVisible();
   });
 
   test('shows Completed metric card', async ({ page }) => {
@@ -46,14 +46,14 @@ test.describe('Analytics Page', () => {
   });
 
   test('completion rate shows percentage', async ({ page }) => {
-    await expect(page.locator('main').getByText(/%/)).toBeVisible();
+    await expect(page.locator('main').getByText(/%/).first()).toBeVisible();
   });
 });
 
 test.describe('Settings Page', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/settings');
-    await page.waitForLoadState('networkidle');
+    await page.waitForSelector('main', { state: 'visible' });
   });
 
   test('Settings page loads', async ({ page }) => {
@@ -75,7 +75,7 @@ test.describe('Settings Page', () => {
 
   test('Data Management section is visible', async ({ page }) => {
     await expect(page.locator('h3', { hasText: 'Data Management' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Export' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'JSON' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Clear' })).toBeVisible();
   });
 
@@ -90,11 +90,11 @@ test.describe('Settings Page', () => {
   });
 
   test('"You" badge shown for current user', async ({ page }) => {
-    await expect(page.getByText('You')).toBeVisible();
+    await expect(page.getByText('You', { exact: true })).toBeVisible();
   });
 
   test('Export button triggers toast', async ({ page }) => {
-    await page.getByRole('button', { name: 'Export' }).click();
-    await expect(page.getByText('Data exported!')).toBeVisible();
+    await page.getByRole('button', { name: 'JSON' }).click();
+    await expect(page.getByText('JSON exported!')).toBeVisible();
   });
 });

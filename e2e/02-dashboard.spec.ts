@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Dashboard Page', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForSelector('main', { state: 'visible' });
   });
 
   test('shows 4 stat cards', async ({ page }) => {
@@ -37,7 +37,7 @@ test.describe('Dashboard Page', () => {
   });
 
   test('Tasks This Week chart is visible', async ({ page }) => {
-    await expect(page.locator('main').getByText('Tasks This Week')).toBeVisible();
+    await expect(page.locator('main').getByText('Tasks Created — Last 7 Days')).toBeVisible();
   });
 
   test('By Status chart is visible', async ({ page }) => {

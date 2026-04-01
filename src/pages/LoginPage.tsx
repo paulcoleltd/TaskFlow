@@ -32,9 +32,9 @@ export default function LoginPage() {
     resolver: zodResolver(schema),
   });
 
-  const onSubmit = (data: FormData) => {
+  const onSubmit = async (data: FormData) => {
     setServerError('');
-    const result = login(data.email, data.password);
+    const result = await login(data.email, data.password);
     if (!result.success) {
       setServerError(result.error ?? 'Login failed.');
       return;
