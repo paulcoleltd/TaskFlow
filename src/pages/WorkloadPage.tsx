@@ -60,12 +60,12 @@ export default function WorkloadPage() {
       {/* Team summary strip */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Active Tasks',    value: totalActive,  colour: '#3B82F6', icon: Loader2 },
+          { label: 'Active Tasks',    value: totalActive,  colour: '#4B8CF7', icon: Loader2 },
           { label: 'Overdue',         value: totalOverdue, colour: '#EF4444', icon: AlertTriangle },
           { label: 'Blocked',         value: totalBlocked, colour: '#F59E0B', icon: Clock3 },
           { label: 'Unassigned',      value: unassigned.length, colour: '#64748B', icon: CheckCircle2 },
         ].map(({ label, value, colour, icon: Icon }) => (
-          <div key={label} className="bg-[#111C44] border border-[#1F3461] rounded-xl p-5">
+          <div key={label} className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-5">
             <div className="flex items-center justify-between mb-3">
               <p className="text-xs text-slate-400 uppercase tracking-wider font-medium">{label}</p>
               <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${colour}22` }}>
@@ -86,7 +86,7 @@ export default function WorkloadPage() {
           const level     = score >= CAPACITY_HIGH ? 'Overloaded' : score >= CAPACITY_MED ? 'Busy' : 'Balanced';
 
           return (
-            <div key={user.id} className="bg-[#111C44] border border-[#1F3461] rounded-xl p-5">
+            <div key={user.id} className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-5">
               {/* Header */}
               <div className="flex items-center gap-4 mb-4">
                 <div
@@ -129,7 +129,7 @@ export default function WorkloadPage() {
                   <span className="text-[10px] text-slate-500">Workload score: {score.toFixed(1)}</span>
                   <span className="text-[10px]" style={{ color: barColour }}>{level}</span>
                 </div>
-                <div className="h-2 bg-[#0B1437] rounded-full overflow-hidden">
+                <div className="h-2 bg-[#06091A] rounded-full overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all duration-500"
                     style={{ width: `${barPct}%`, backgroundColor: barColour }}
@@ -167,7 +167,7 @@ export default function WorkloadPage() {
                             <button
                               key={task.id}
                               onClick={() => setSelectedTask(task.id)}
-                              className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-[#1B254B] transition-colors text-left"
+                              className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-[#122040] transition-colors text-left"
                             >
                               <span
                                 className="w-1.5 h-1.5 rounded-full flex-shrink-0"
@@ -203,7 +203,7 @@ export default function WorkloadPage() {
 
       {/* Unassigned tasks */}
       {unassigned.length > 0 && (
-        <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-5">
+        <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-5">
           <h3 className="text-sm font-semibold text-slate-400 mb-3 uppercase tracking-wider">
             Unassigned ({unassigned.length})
           </h3>
@@ -215,7 +215,7 @@ export default function WorkloadPage() {
                 <button
                   key={task.id}
                   onClick={() => setSelectedTask(task.id)}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-[#1B254B] transition-colors text-left"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-[#122040] transition-colors text-left"
                 >
                   <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: priorityOpt?.colour }} />
                   <span className="text-xs text-slate-300 flex-1 truncate">{task.title}</span>

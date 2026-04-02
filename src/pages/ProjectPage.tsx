@@ -278,7 +278,7 @@ export default function ProjectPage() {
         <ArrowLeft className="w-4 h-4" /> All Projects
       </button>
 
-      <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-5 mb-6">
+      <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-5 mb-6">
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-1 flex-wrap">
@@ -292,7 +292,7 @@ export default function ProjectPage() {
               </span>
               {/* Due date countdown */}
               {daysUntilDue !== null && (
-                <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${daysUntilDue < 0 ? 'text-red-400 border-red-500/30 bg-red-500/10' : daysUntilDue <= 7 ? 'text-amber-400 border-amber-500/30 bg-amber-500/10' : 'text-slate-400 border-[#1F3461] bg-[#0B1437]'}`}>
+                <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${daysUntilDue < 0 ? 'text-red-400 border-red-500/30 bg-red-500/10' : daysUntilDue <= 7 ? 'text-amber-400 border-amber-500/30 bg-amber-500/10' : 'text-slate-400 border-[#1C3054] bg-[#06091A]'}`}>
                   {daysUntilDue < 0 ? <AlertTriangle className="w-2.5 h-2.5" /> : <CalendarClock className="w-2.5 h-2.5" />}
                   {daysUntilDue < 0 ? `${Math.abs(daysUntilDue)}d overdue` : daysUntilDue === 0 ? 'Due today' : `${daysUntilDue}d left`}
                 </span>
@@ -306,7 +306,7 @@ export default function ProjectPage() {
             {pTasks.length > 0 && (
               <button
                 onClick={handleExportCSV}
-                className="p-1.5 rounded-lg hover:bg-[#1B254B] text-slate-500 hover:text-slate-300 transition-colors"
+                className="p-1.5 rounded-lg hover:bg-[#122040] text-slate-500 hover:text-slate-300 transition-colors"
                 title="Export tasks as CSV"
               >
                 <Download className="w-4 h-4" />
@@ -316,7 +316,7 @@ export default function ProjectPage() {
               {/* Status cycle button */}
               <button
                 onClick={handleCycleStatus}
-                className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg bg-[#0B1437] border border-[#1F3461] hover:border-blue-500/40 transition-all ${currentStatusMeta.colour}`}
+                className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg bg-[#06091A] border border-[#1C3054] hover:border-blue-500/40 transition-all ${currentStatusMeta.colour}`}
                 title={`Mark as ${nextStatus.label}`}
               >
                 <StatusIcon className="w-3.5 h-3.5" />
@@ -354,7 +354,7 @@ export default function ProjectPage() {
             ['Est. hrs', totalEst > 0 ? `${totalEst}h` : '—'],
             ['Logged', totalLogged > 0 ? `${Math.round(totalLogged * 10) / 10}h` : '—'],
           ].map(([l, v]) => (
-            <div key={l} className="bg-[#0B1437] rounded-xl p-3">
+            <div key={l} className="bg-[#06091A] rounded-xl p-3">
               <p className={`text-xl font-bold ${l === 'Logged' && totalLogged > totalEst && totalEst > 0 ? 'text-red-400' : 'text-white'}`}>{v}</p>
               <p className="text-xs text-slate-500">{l}</p>
             </div>
@@ -363,7 +363,7 @@ export default function ProjectPage() {
         <ProgressBar value={pct} colour={project.colour} showLabel />
 
         {/* Project notes — inline editable */}
-        <div className="mt-4 pt-4 border-t border-[#1F3461]">
+        <div className="mt-4 pt-4 border-t border-[#1C3054]">
           {editingNotes ? (
             <div>
               <textarea
@@ -382,7 +382,7 @@ export default function ProjectPage() {
                 rows={3}
                 maxLength={4096}
                 placeholder="Add project notes, links, or context…"
-                className="w-full bg-[#0B1437] border border-blue-500 rounded-xl px-3 py-2 text-sm text-slate-200 placeholder-slate-600 outline-none resize-none transition-colors"
+                className="w-full bg-[#06091A] border border-blue-500 rounded-xl px-3 py-2 text-sm text-slate-200 placeholder-slate-600 outline-none resize-none transition-colors"
               />
               <div className="flex items-center gap-2 mt-1.5">
                 <button
@@ -400,7 +400,7 @@ export default function ProjectPage() {
               title="Click to edit project notes"
             >
               {project.notes ? (
-                <div className="border border-transparent hover:border-[#1F3461] rounded-lg px-2 py-1 -mx-2 -my-1 transition-colors">
+                <div className="border border-transparent hover:border-[#1C3054] rounded-lg px-2 py-1 -mx-2 -my-1 transition-colors">
                   <Markdown className="text-sm opacity-80 group-hover/notes:opacity-100 transition-opacity">{project.notes}</Markdown>
                 </div>
               ) : (
@@ -412,7 +412,7 @@ export default function ProjectPage() {
 
         {/* Assignee quick-filter */}
         {members.length > 1 && (
-          <div className="flex items-center gap-2 mt-4 pt-4 border-t border-[#1F3461]">
+          <div className="flex items-center gap-2 mt-4 pt-4 border-t border-[#1C3054]">
             <span className="text-xs text-slate-500">Filter by:</span>
             <div className="flex gap-1.5 flex-wrap">
               {members.map(m => {
@@ -423,13 +423,13 @@ export default function ProjectPage() {
                     key={m.id}
                     onClick={() => setAssigneeFilter(isActive ? null : m.id)}
                     title={m.name}
-                    className={`flex items-center gap-1.5 pl-1 pr-2.5 py-1 rounded-full text-xs font-medium border transition-all ${isActive ? 'border-blue-500/50 bg-blue-500/10 text-blue-300' : 'border-[#1F3461] text-slate-400 hover:border-[#3B82F6]/40 hover:text-slate-200'}`}
+                    className={`flex items-center gap-1.5 pl-1 pr-2.5 py-1 rounded-full text-xs font-medium border transition-all ${isActive ? 'border-blue-500/50 bg-blue-500/10 text-blue-300' : 'border-[#1C3054] text-slate-400 hover:border-[#4B8CF7]/40 hover:text-slate-200'}`}
                   >
                     <div className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white flex-shrink-0" style={{ backgroundColor: m.colour }}>
                       {m.name.split(' ').map((n: string) => n[0]).join('')}
                     </div>
                     {m.name.split(' ')[0]}
-                    {mCount > 0 && <span className={`text-[10px] px-1 rounded-full ${isActive ? 'bg-blue-500/30 text-blue-200' : 'bg-[#1B254B] text-slate-500'}`}>{mCount}</span>}
+                    {mCount > 0 && <span className={`text-[10px] px-1 rounded-full ${isActive ? 'bg-blue-500/30 text-blue-200' : 'bg-[#122040] text-slate-500'}`}>{mCount}</span>}
                   </button>
                 );
               })}
@@ -448,13 +448,13 @@ export default function ProjectPage() {
 
       {/* ── Milestones ── */}
       {(milestones.length > 0 || role === 'admin') && (
-        <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-5 mb-6">
+        <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-5 mb-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Flag className="w-4 h-4 text-purple-400" />
               <h3 className="text-sm font-semibold text-white">Milestones</h3>
               {milestones.length > 0 && (
-                <span className="text-[10px] text-slate-500 bg-[#1B254B] px-1.5 py-0.5 rounded-full">
+                <span className="text-[10px] text-slate-500 bg-[#122040] px-1.5 py-0.5 rounded-full">
                   {milestones.filter(m => m.completed).length}/{milestones.length}
                 </span>
               )}
@@ -462,7 +462,7 @@ export default function ProjectPage() {
             <RoleGuard allowed={role === 'admin'}>
               <button
                 onClick={() => setShowMilestoneForm(v => !v)}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs text-slate-400 hover:text-blue-400 hover:bg-[#1B254B] border border-transparent hover:border-[#1F3461] transition-all"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs text-slate-400 hover:text-blue-400 hover:bg-[#122040] border border-transparent hover:border-[#1C3054] transition-all"
               >
                 <Plus className="w-3.5 h-3.5" />
                 Add milestone
@@ -472,7 +472,7 @@ export default function ProjectPage() {
 
           {/* Add form */}
           {showMilestoneForm && (
-            <div className="flex items-center gap-3 mb-4 p-3 bg-[#0B1437] border border-blue-500/30 rounded-xl">
+            <div className="flex items-center gap-3 mb-4 p-3 bg-[#06091A] border border-blue-500/30 rounded-xl">
               <input
                 autoFocus
                 value={milestoneTitle}
@@ -557,15 +557,15 @@ export default function ProjectPage() {
 
       {/* ── Burndown Chart ── */}
       {pTasks.length > 0 && (
-        <div className="bg-[#111C44] border border-[#1F3461] rounded-xl mb-6 overflow-hidden">
+        <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl mb-6 overflow-hidden">
           <button
             onClick={() => setShowBurndown(v => !v)}
-            className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-[#1B254B]/50 transition-colors"
+            className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-[#122040]/50 transition-colors"
           >
             <div className="flex items-center gap-2">
               <TrendingDown className="w-4 h-4 text-blue-400" />
               <h3 className="text-sm font-semibold text-white">Burndown Chart</h3>
-              <span className="text-[10px] text-slate-500 bg-[#1B254B] px-1.5 py-0.5 rounded-full">
+              <span className="text-[10px] text-slate-500 bg-[#122040] px-1.5 py-0.5 rounded-full">
                 {pTasks.filter(t => t.status !== 'done').length} remaining
               </span>
             </div>
@@ -599,16 +599,16 @@ export default function ProjectPage() {
                         width={28}
                       />
                       <Tooltip
-                        contentStyle={{ backgroundColor: '#111C44', border: '1px solid #1F3461', borderRadius: 8, color: '#E2E8F0', fontSize: 12 }}
+                        contentStyle={{ backgroundColor: '#0C1526', border: '1px solid #1C3054', borderRadius: 8, color: '#E2E8F0', fontSize: 12 }}
                         formatter={(v, name) => [v, name === 'remaining' ? 'Remaining' : 'Ideal']}
                       />
                       <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11, color: '#94A3B8' }} />
-                      <ReferenceLine y={0} stroke="#1F3461" />
+                      <ReferenceLine y={0} stroke="#1C3054" />
                       <Line
                         type="monotone"
                         dataKey="ideal"
                         name="Ideal"
-                        stroke="#1F3461"
+                        stroke="#1C3054"
                         strokeWidth={1.5}
                         strokeDasharray="4 3"
                         dot={false}
@@ -634,7 +634,7 @@ export default function ProjectPage() {
 
       {/* ── Sprints ── */}
       {(projectSprints.length > 0 || role === 'admin') && (
-        <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-5 mb-6">
+        <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-5 mb-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Zap className="w-4 h-4 text-blue-400" />
@@ -648,7 +648,7 @@ export default function ProjectPage() {
             <RoleGuard allowed={role === 'admin'}>
               <button
                 onClick={() => setShowSprintForm(v => !v)}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs text-slate-400 hover:text-blue-400 hover:bg-[#1B254B] border border-transparent hover:border-[#1F3461] transition-all"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs text-slate-400 hover:text-blue-400 hover:bg-[#122040] border border-transparent hover:border-[#1C3054] transition-all"
               >
                 <Plus className="w-3.5 h-3.5" />
                 New sprint
@@ -658,7 +658,7 @@ export default function ProjectPage() {
 
           {/* Create sprint form */}
           {showSprintForm && (
-            <div className="mb-4 p-4 bg-[#0B1437] border border-blue-500/30 rounded-xl space-y-3">
+            <div className="mb-4 p-4 bg-[#06091A] border border-blue-500/30 rounded-xl space-y-3">
               <div className="flex gap-3">
                 <input
                   autoFocus
@@ -666,7 +666,7 @@ export default function ProjectPage() {
                   onChange={e => setSprintName(e.target.value)}
                   placeholder="Sprint name…"
                   maxLength={64}
-                  className="flex-1 bg-transparent border-b border-[#1F3461] focus:border-blue-500 text-sm text-slate-200 placeholder-slate-600 outline-none pb-1 transition-colors"
+                  className="flex-1 bg-transparent border-b border-[#1C3054] focus:border-blue-500 text-sm text-slate-200 placeholder-slate-600 outline-none pb-1 transition-colors"
                 />
               </div>
               <div className="flex gap-3">
@@ -694,7 +694,7 @@ export default function ProjectPage() {
                 onChange={e => setSprintGoal(e.target.value)}
                 placeholder="Sprint goal (optional)…"
                 maxLength={256}
-                className="w-full bg-transparent border-b border-[#1F3461] focus:border-blue-500 text-sm text-slate-200 placeholder-slate-600 outline-none pb-1 transition-colors"
+                className="w-full bg-transparent border-b border-[#1C3054] focus:border-blue-500 text-sm text-slate-200 placeholder-slate-600 outline-none pb-1 transition-colors"
               />
               <div className="flex gap-2 pt-1">
                 <button
@@ -719,13 +719,13 @@ export default function ProjectPage() {
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setSprintFilter(null)}
-                  className={cn('text-[10px] font-medium px-2.5 py-1 rounded-full border transition-all', sprintFilter === null ? 'bg-blue-500/15 border-blue-500/40 text-blue-300' : 'border-[#1F3461] text-slate-500 hover:border-slate-600 hover:text-slate-400')}
+                  className={cn('text-[10px] font-medium px-2.5 py-1 rounded-full border transition-all', sprintFilter === null ? 'bg-blue-500/15 border-blue-500/40 text-blue-300' : 'border-[#1C3054] text-slate-500 hover:border-slate-600 hover:text-slate-400')}
                 >
                   All tasks
                 </button>
                 <button
                   onClick={() => setSprintFilter('backlog')}
-                  className={cn('text-[10px] font-medium px-2.5 py-1 rounded-full border transition-all', sprintFilter === 'backlog' ? 'bg-slate-500/15 border-slate-500/40 text-slate-300' : 'border-[#1F3461] text-slate-500 hover:border-slate-600 hover:text-slate-400')}
+                  className={cn('text-[10px] font-medium px-2.5 py-1 rounded-full border transition-all', sprintFilter === 'backlog' ? 'bg-slate-500/15 border-slate-500/40 text-slate-300' : 'border-[#1C3054] text-slate-500 hover:border-slate-600 hover:text-slate-400')}
                 >
                   Backlog
                 </button>
@@ -733,7 +733,7 @@ export default function ProjectPage() {
                   <button
                     key={sp.id}
                     onClick={() => setSprintFilter(sp.id === sprintFilter ? null : sp.id)}
-                    className={cn('text-[10px] font-medium px-2.5 py-1 rounded-full border transition-all', sprintFilter === sp.id ? 'bg-blue-500/15 border-blue-500/40 text-blue-300' : 'border-[#1F3461] text-slate-500 hover:border-slate-600 hover:text-slate-400')}
+                    className={cn('text-[10px] font-medium px-2.5 py-1 rounded-full border transition-all', sprintFilter === sp.id ? 'bg-blue-500/15 border-blue-500/40 text-blue-300' : 'border-[#1C3054] text-slate-500 hover:border-slate-600 hover:text-slate-400')}
                   >
                     {sp.name}
                     {sp.status === 'active' && <span className="ml-1 text-green-400">●</span>}
@@ -746,14 +746,14 @@ export default function ProjectPage() {
                 const spTasks = pTasks.filter(t => t.sprintId === sp.id);
                 const spDone = spTasks.filter(t => t.status === 'done').length;
                 const spPct = spTasks.length ? Math.round((spDone / spTasks.length) * 100) : 0;
-                const statusColour = sp.status === 'active' ? '#10B981' : sp.status === 'completed' ? '#3B82F6' : '#64748B';
+                const statusColour = sp.status === 'active' ? '#10B981' : sp.status === 'completed' ? '#4B8CF7' : '#64748B';
                 const spEnd = new Date(sp.endDate);
                 const daysLeft = Math.ceil((spEnd.getTime() - Date.now()) / 86_400_000);
                 const overdue = sp.status === 'active' && isPast(spEnd);
                 const backlogCount = pTasks.filter(t => !t.sprintId).length;
 
                 return (
-                  <div key={sp.id} className="border border-[#1F3461] rounded-xl p-4 hover:border-blue-500/20 transition-colors">
+                  <div key={sp.id} className="border border-[#1C3054] rounded-xl p-4 hover:border-blue-500/20 transition-colors">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
@@ -783,7 +783,7 @@ export default function ProjectPage() {
                       {/* Sprint progress ring */}
                       <div className="flex-shrink-0 relative w-10 h-10">
                         <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                          <circle cx="18" cy="18" r="15.9" fill="none" stroke="#1F3461" strokeWidth="3" />
+                          <circle cx="18" cy="18" r="15.9" fill="none" stroke="#1C3054" strokeWidth="3" />
                           <circle
                             cx="18" cy="18" r="15.9" fill="none"
                             stroke={statusColour}
@@ -806,7 +806,7 @@ export default function ProjectPage() {
 
                     {/* Retrospective notes (completed sprints) */}
                     {sp.status === 'completed' && sp.retrospective && (
-                      <div className="mt-3 px-3 py-2.5 bg-[#0B1437] border border-[#1F3461] rounded-lg">
+                      <div className="mt-3 px-3 py-2.5 bg-[#06091A] border border-[#1C3054] rounded-lg">
                         <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold mb-1.5">Retrospective</p>
                         <p className="text-xs text-slate-400 whitespace-pre-line leading-relaxed">{sp.retrospective}</p>
                       </div>
@@ -835,13 +835,13 @@ export default function ProjectPage() {
                       {role === 'admin' && (
                         <button
                           onClick={() => setSprintFilter(sp.id === sprintFilter ? null : sp.id)}
-                          className={cn('flex items-center gap-1 px-2.5 py-1 rounded-lg border text-xs font-medium transition-colors', sprintFilter === sp.id ? 'bg-blue-500/10 border-blue-500/30 text-blue-400' : 'border-[#1F3461] text-slate-500 hover:text-slate-300')}
+                          className={cn('flex items-center gap-1 px-2.5 py-1 rounded-lg border text-xs font-medium transition-colors', sprintFilter === sp.id ? 'bg-blue-500/10 border-blue-500/30 text-blue-400' : 'border-[#1C3054] text-slate-500 hover:text-slate-300')}
                         >
                           {sprintFilter === sp.id ? 'Showing sprint tasks' : 'View tasks'}
                         </button>
                       )}
                       {sp.status === 'completed' && sp.velocity !== undefined && (
-                        <span className="flex items-center gap-1 text-[10px] text-slate-500 px-2 py-1 rounded-lg bg-[#0B1437]">
+                        <span className="flex items-center gap-1 text-[10px] text-slate-500 px-2 py-1 rounded-lg bg-[#06091A]">
                           <Zap className="w-3 h-3 text-amber-400" />
                           {sp.velocity} task{sp.velocity !== 1 ? 's' : ''} done
                         </span>
@@ -854,7 +854,7 @@ export default function ProjectPage() {
                               .forEach(t => handleAssignToSprint(t.id, sp.id));
                             toast.success(`${backlogCount} backlog task${backlogCount !== 1 ? 's' : ''} added to ${sp.name}`);
                           }}
-                          className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#1F3461] text-slate-500 text-xs hover:text-slate-300 hover:border-slate-600 transition-colors"
+                          className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#1C3054] text-slate-500 text-xs hover:text-slate-300 hover:border-slate-600 transition-colors"
                         >
                           <Plus className="w-3 h-3" />
                           Add {backlogCount} backlog tasks
@@ -916,11 +916,11 @@ export default function ProjectPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setRetroSprint(null)}>
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
             <div
-              className="relative bg-[#111C44] border border-[#1F3461] rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden"
+              className="relative bg-[#0C1526] border border-[#1C3054] rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden"
               onClick={e => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="px-6 pt-6 pb-4 border-b border-[#1F3461]">
+              <div className="px-6 pt-6 pb-4 border-b border-[#1C3054]">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
@@ -939,24 +939,24 @@ export default function ProjectPage() {
               </div>
 
               {/* Velocity Stats */}
-              <div className="px-6 py-4 border-b border-[#1F3461]">
+              <div className="px-6 py-4 border-b border-[#1C3054]">
                 <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-3 font-semibold">Sprint Summary</p>
                 <div className="grid grid-cols-3 gap-3 mb-4">
-                  <div className="bg-[#0B1437] rounded-xl p-3 text-center">
+                  <div className="bg-[#06091A] rounded-xl p-3 text-center">
                     <p className="text-2xl font-bold text-green-400">{spDone}</p>
                     <p className="text-[10px] text-slate-500 mt-0.5">Completed</p>
                   </div>
-                  <div className="bg-[#0B1437] rounded-xl p-3 text-center">
+                  <div className="bg-[#06091A] rounded-xl p-3 text-center">
                     <p className={`text-2xl font-bold ${spIncomplete > 0 ? 'text-amber-400' : 'text-slate-400'}`}>{spIncomplete}</p>
                     <p className="text-[10px] text-slate-500 mt-0.5">Incomplete</p>
                   </div>
-                  <div className="bg-[#0B1437] rounded-xl p-3 text-center">
+                  <div className="bg-[#06091A] rounded-xl p-3 text-center">
                     <p className={`text-2xl font-bold ${velocityPct >= 80 ? 'text-green-400' : velocityPct >= 50 ? 'text-amber-400' : 'text-red-400'}`}>{velocityPct}%</p>
                     <p className="text-[10px] text-slate-500 mt-0.5">Velocity</p>
                   </div>
                 </div>
                 {retroSprint.goal && (
-                  <div className="text-xs text-slate-400 bg-[#0B1437] px-3 py-2 rounded-lg mb-3">
+                  <div className="text-xs text-slate-400 bg-[#06091A] px-3 py-2 rounded-lg mb-3">
                     <span className="text-slate-600 font-medium">Goal: </span>{retroSprint.goal}
                   </div>
                 )}
@@ -964,7 +964,7 @@ export default function ProjectPage() {
                   <label className="flex items-center gap-2.5 cursor-pointer group">
                     <div
                       onClick={() => setRetroMoveIncomplete(v => !v)}
-                      className={`w-8 h-4 rounded-full transition-colors flex-shrink-0 relative ${retroMoveIncomplete ? 'bg-blue-500' : 'bg-[#1F3461]'}`}
+                      className={`w-8 h-4 rounded-full transition-colors flex-shrink-0 relative ${retroMoveIncomplete ? 'bg-blue-500' : 'bg-[#1C3054]'}`}
                     >
                       <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white shadow transition-transform ${retroMoveIncomplete ? 'translate-x-4' : 'translate-x-0.5'}`} />
                     </div>
@@ -986,7 +986,7 @@ export default function ProjectPage() {
                   maxLength={2048}
                   rows={4}
                   placeholder="What went well? What to improve? Any blockers?&#10;&#10;e.g. ✓ Good collaboration on auth tickets&#10;✗ Underestimated API integration work"
-                  className="w-full bg-[#0B1437] border border-[#1F3461] focus:border-blue-500/60 rounded-xl px-3 py-2.5 text-sm text-slate-200 placeholder-slate-600 outline-none resize-none transition-colors"
+                  className="w-full bg-[#06091A] border border-[#1C3054] focus:border-blue-500/60 rounded-xl px-3 py-2.5 text-sm text-slate-200 placeholder-slate-600 outline-none resize-none transition-colors"
                 />
                 <p className="text-[10px] text-slate-600 text-right mt-1">{retroNotes.length}/2048</p>
               </div>
@@ -1002,7 +1002,7 @@ export default function ProjectPage() {
                 </button>
                 <button
                   onClick={() => setRetroSprint(null)}
-                  className="px-4 py-2.5 rounded-xl border border-[#1F3461] text-slate-400 text-sm hover:text-slate-200 hover:border-slate-600 transition-colors"
+                  className="px-4 py-2.5 rounded-xl border border-[#1C3054] text-slate-400 text-sm hover:text-slate-200 hover:border-slate-600 transition-colors"
                 >
                   Cancel
                 </button>

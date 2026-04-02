@@ -16,21 +16,27 @@ import {
 } from 'recharts';
 import { STATUS_OPTIONS } from '../lib/constants';
 
-function StatCard({ label, value, icon: Icon, colour, trend, subtitle }: {
-  label: string; value: number | string; icon: any; colour: string; trend?: { value: number }; subtitle?: string;
+function StatCard({ label, value, icon: Icon, colour, trend, subtitle, accentClass }: {
+  label: string; value: number | string; icon: any; colour: string; trend?: { value: number }; subtitle?: string; accentClass?: string;
 }) {
   return (
-    <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-5">
-      <div className="flex items-center justify-between mb-4">
+    <div className={`card-nebula rounded-xl p-5 relative overflow-hidden group`}>
+      {/* Accent top border */}
+      <div className={`absolute top-0 left-0 right-0 h-[2px] ${accentClass ?? 'bg-gradient-accent'} opacity-70 group-hover:opacity-100 transition-opacity`} />
+      {/* Subtle background glow */}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+        style={{ background: `radial-gradient(ellipse at top left, ${colour}0A 0%, transparent 60%)` }}
+      />
+      <div className="relative flex items-center justify-between mb-4">
         <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">{label}</p>
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${colour}22` }}>
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center shadow-inner" style={{ backgroundColor: `${colour}1A`, border: `1px solid ${colour}30` }}>
           <Icon className="w-4 h-4" style={{ color: colour }} />
         </div>
       </div>
-      <p className="text-3xl font-bold text-white mb-1">{value}</p>
-      {subtitle && <p className="text-xs text-slate-500 mb-0.5">{subtitle}</p>}
+      <p className="relative text-3xl font-bold text-white mb-1">{value}</p>
+      {subtitle && <p className="relative text-xs text-slate-500 mb-0.5">{subtitle}</p>}
       {trend !== undefined && (
-        <p className={`text-xs flex items-center gap-1 ${trend.value >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+        <p className={`relative text-xs flex items-center gap-1 ${trend.value >= 0 ? 'text-green-400' : 'text-red-400'}`}>
           {trend.value >= 0 ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
           {Math.abs(trend.value)}% vs last week
         </p>
@@ -214,7 +220,7 @@ export default function DashboardPage() {
               <button
                 key={task.id}
                 onClick={() => setSelectedTask(task.id)}
-                className="flex items-center gap-2 px-3 py-1.5 bg-[#111C44] border border-amber-500/20 hover:border-amber-500/40 rounded-xl text-sm text-slate-200 hover:text-white transition-all"
+                className="flex items-center gap-2 px-3 py-1.5 bg-[#0C1526] border border-amber-500/20 hover:border-amber-500/40 rounded-xl text-sm text-slate-200 hover:text-white transition-all"
               >
                 <PriorityBadge priority={task.priority} />
                 <span className="truncate max-w-[200px]">{task.title}</span>
@@ -226,23 +232,23 @@ export default function DashboardPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Total Tasks" value={tasks.length} icon={CheckSquare} colour="#3B82F6" trend={{ value: 12 }} />
-        <StatCard label="In Progress" value={inProgress.length} icon={Clock} colour="#F59E0B" trend={{ value: 5 }} />
-        <StatCard label="Due Today" value={dueToday.length + overdue.length} icon={AlertCircle} colour="#EF4444" />
-        <StatCard label="Completed" value={doneTotal.length} icon={TrendingUp} colour="#10B981" subtitle={completedToday > 0 ? `+${completedToday} today` : undefined} />
+        <StatCard label="Total Tasks" value={tasks.length} icon={CheckSquare} colour="#4B8CF7" trend={{ value: 12 }} accentClass="bg-gradient-to-r from-blue-500 to-indigo-500" />
+        <StatCard label="In Progress" value={inProgress.length} icon={Clock} colour="#F59E0B" trend={{ value: 5 }} accentClass="bg-gradient-to-r from-amber-500 to-orange-500" />
+        <StatCard label="Due / Overdue" value={dueToday.length + overdue.length} icon={AlertCircle} colour="#EF4444" accentClass="bg-gradient-to-r from-red-500 to-rose-500" />
+        <StatCard label="Completed" value={doneTotal.length} icon={TrendingUp} colour="#10B981" subtitle={completedToday > 0 ? `+${completedToday} today` : undefined} accentClass="bg-gradient-to-r from-emerald-500 to-green-500" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* My Tasks */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-5">
+          <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-5">
             <h3 className="text-sm font-semibold text-white mb-4">My Active Tasks</h3>
             <div className="space-y-2">
               {myTasks.filter(t => t.status !== 'done').slice(0, 6).map(task => (
                 <div
                   key={task.id}
                   onClick={() => setSelectedTask(task.id)}
-                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-[#1B254B] cursor-pointer transition-colors"
+                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-[#122040] cursor-pointer transition-colors"
                 >
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-slate-200 truncate">{task.title}</p>
@@ -265,21 +271,21 @@ export default function DashboardPage() {
           </div>
 
           {/* Weekly bar chart — real data */}
-          <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-5">
+          <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-5">
             <h3 className="text-sm font-semibold text-white mb-1">Tasks Created — Last 7 Days</h3>
             <p className="text-xs text-slate-500 mb-4">Tasks added to the system per day</p>
             <ResponsiveContainer width="100%" height={160}>
               <BarChart data={weeklyData} barSize={24}>
                 <XAxis dataKey="week" tick={{ fill: '#64748B', fontSize: 11 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fill: '#64748B', fontSize: 11 }} axisLine={false} tickLine={false} width={24} allowDecimals={false} />
-                <RTooltip contentStyle={{ backgroundColor: '#111C44', border: '1px solid #1F3461', borderRadius: 8, color: '#E2E8F0', fontSize: 12 }} cursor={{ fill: '#1B254B' }} />
-                <Bar dataKey="tasks" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+                <RTooltip contentStyle={{ backgroundColor: '#0C1526', border: '1px solid #1C3054', borderRadius: 8, color: '#E2E8F0', fontSize: 12 }} cursor={{ fill: '#122040' }} />
+                <Bar dataKey="tasks" fill="#4B8CF7" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
 
           {/* Recent activity */}
-          <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-5">
+          <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-5">
             <div className="flex items-center gap-2 mb-4">
               <Activity className="w-4 h-4 text-blue-400" />
               <h3 className="text-sm font-semibold text-white">Recent Activity</h3>
@@ -294,7 +300,7 @@ export default function DashboardPage() {
                   {/* Timeline line */}
                   <div className="flex flex-col items-center flex-shrink-0 mt-1">
                     <div className="w-2 h-2 rounded-full bg-blue-500 ring-2 ring-blue-500/20" />
-                    {i < recentActivity.length - 1 && <div className="w-px flex-1 bg-[#1F3461] mt-1 h-4" />}
+                    {i < recentActivity.length - 1 && <div className="w-px flex-1 bg-[#1C3054] mt-1 h-4" />}
                   </div>
                   <div className="flex-1 min-w-0 pb-1">
                     <p className="text-sm text-slate-300 truncate group-hover:text-white transition-colors">{task.title}</p>
@@ -312,14 +318,14 @@ export default function DashboardPage() {
         {/* Right column */}
         <div className="space-y-6">
           {/* Status donut */}
-          <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-5">
+          <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-5">
             <h3 className="text-sm font-semibold text-white mb-4">By Status</h3>
             <ResponsiveContainer width="100%" height={180}>
               <PieChart>
                 <Pie data={statusData} cx="50%" cy="50%" innerRadius={45} outerRadius={70} paddingAngle={3} dataKey="value">
                   {statusData.map((entry, i) => <Cell key={i} fill={entry.colour} />)}
                 </Pie>
-                <RTooltip contentStyle={{ backgroundColor: '#111C44', border: '1px solid #1F3461', borderRadius: 8, fontSize: 12, color: '#E2E8F0' }} />
+                <RTooltip contentStyle={{ backgroundColor: '#0C1526', border: '1px solid #1C3054', borderRadius: 8, fontSize: 12, color: '#E2E8F0' }} />
                 <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11, color: '#94A3B8' }} />
               </PieChart>
             </ResponsiveContainer>
@@ -327,7 +333,7 @@ export default function DashboardPage() {
 
           {/* Upcoming deadlines */}
           {upcoming.length > 0 && (
-            <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-5">
+            <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-5">
               <div className="flex items-center gap-2 mb-4">
                 <CalendarClock className="w-4 h-4 text-amber-400" />
                 <h3 className="text-sm font-semibold text-white">Upcoming Deadlines</h3>
@@ -339,7 +345,7 @@ export default function DashboardPage() {
                     <div
                       key={task.id}
                       onClick={() => setSelectedTask(task.id)}
-                      className="flex items-center gap-3 p-2 rounded-xl hover:bg-[#1B254B] cursor-pointer transition-colors"
+                      className="flex items-center gap-3 p-2 rounded-xl hover:bg-[#122040] cursor-pointer transition-colors"
                     >
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-slate-200 truncate">{task.title}</p>
@@ -355,16 +361,16 @@ export default function DashboardPage() {
 
           {/* Recently viewed */}
           {recentlyViewed.length > 0 && (
-            <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-5">
+            <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-5">
               <h3 className="text-sm font-semibold text-white mb-3">Recently Viewed</h3>
               <div className="space-y-1">
                 {recentlyViewed.map(task => (
                   <button
                     key={task.id}
                     onClick={() => setSelectedTask(task.id)}
-                    className="w-full flex items-center gap-2.5 px-2 py-2 rounded-xl hover:bg-[#1B254B] transition-colors text-left"
+                    className="w-full flex items-center gap-2.5 px-2 py-2 rounded-xl hover:bg-[#122040] transition-colors text-left"
                   >
-                    <div className="w-1.5 h-1.5 rounded-full flex-shrink-0 mt-0.5" style={{ backgroundColor: task.status === 'done' ? '#10B981' : '#3B82F6' }} />
+                    <div className="w-1.5 h-1.5 rounded-full flex-shrink-0 mt-0.5" style={{ backgroundColor: task.status === 'done' ? '#10B981' : '#4B8CF7' }} />
                     <span className={`text-xs text-slate-300 truncate flex-1 ${task.status === 'done' ? 'line-through text-slate-500' : ''}`}>{task.title}</span>
                     <StatusBadge status={task.status} />
                   </button>
@@ -375,7 +381,7 @@ export default function DashboardPage() {
 
           {/* Team workload */}
           {teamWorkload.length > 0 && (
-            <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-5">
+            <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-5">
               <div className="flex items-center gap-2 mb-4">
                 <Users className="w-4 h-4 text-slate-500" />
                 <h3 className="text-sm font-semibold text-white">Team Workload</h3>
@@ -397,7 +403,7 @@ export default function DashboardPage() {
                           <span className="text-slate-500">{u.active} active</span>
                         </div>
                       </div>
-                      <div className="h-1.5 bg-[#1B254B] rounded-full overflow-hidden">
+                      <div className="h-1.5 bg-[#122040] rounded-full overflow-hidden">
                         <div className="h-full rounded-full transition-all" style={{ width: `${(u.active / max) * 100}%`, backgroundColor: u.colour + 'BB' }} />
                       </div>
                     </div>
@@ -408,7 +414,7 @@ export default function DashboardPage() {
           )}
 
           {/* Projects overview */}
-          <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-5">
+          <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-5">
             <h3 className="text-sm font-semibold text-white mb-4">Projects</h3>
             <div className="space-y-3">
               {projects.map(p => {

@@ -64,7 +64,7 @@ function App() {
         <Toaster
           position="bottom-right"
           toastOptions={{
-            style: { background: '#111C44', color: '#E2E8F0', border: '1px solid #1F3461', fontSize: 13 },
+            style: { background: '#0C1526', color: '#E2E8F0', border: '1px solid #1C3054', fontSize: 13 },
           }}
         />
         <Routes>

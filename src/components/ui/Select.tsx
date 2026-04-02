@@ -18,14 +18,14 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(({ label, optio
         ref={ref}
         id={selectId}
         className={cn(
-          'w-full rounded-lg px-3 py-2 pr-8 text-sm bg-[#0B2060] border border-[#1F3461] text-slate-100 appearance-none cursor-pointer',
+          'w-full rounded-lg px-3 py-2 pr-8 text-sm bg-[#091020] border border-[#1C3054] text-slate-100 appearance-none cursor-pointer',
           'focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition-colors',
           error && 'border-red-500',
           className
         )}
         {...props}
       >
-        {options.map(o => <option key={o.value} value={o.value} className="bg-[#111C44]">{o.label}</option>)}
+        {options.map(o => <option key={o.value} value={o.value} className="bg-[#0C1526]">{o.label}</option>)}
       </select>
       <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
     </div>

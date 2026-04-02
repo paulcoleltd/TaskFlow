@@ -53,7 +53,7 @@ test.describe('Task CRUD Operations', () => {
 
   test('switch to list view', async ({ page }) => {
     // Click the List icon in the view switcher (second button in the switcher group)
-    const switcher = page.locator('div[class*="bg-\\[\\#111C44\\]"][class*="rounded-xl"][class*="p-1"]');
+    const switcher = page.locator('div[class*="bg-\\[\\#0C1526\\]"][class*="rounded-xl"][class*="p-1"]');
     await switcher.locator('button').nth(1).click();
     // List view should show grouped task sections
     await expect(page.locator('main')).toBeVisible();

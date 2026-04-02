@@ -222,13 +222,13 @@ export function TaskCard({ task, dragging }: TaskCardProps) {
       onClick={() => { if (!editingTitle) setSelectedTask(task.id); }}
       onContextMenu={e => { e.preventDefault(); setCtxMenu({ x: e.clientX, y: e.clientY }); }}
       className={cn(
-        'group bg-[#111C44] border border-[#1F3461] rounded-xl overflow-hidden cursor-pointer',
-        'hover:border-blue-500/40 hover:bg-[#1B254B] transition-all duration-150',
+        'group bg-[#0C1526] border border-[#1C3054] rounded-xl overflow-hidden cursor-pointer',
+        'hover:border-blue-500/40 hover:bg-[#122040] transition-all duration-150',
         dragging && 'shadow-card opacity-90 rotate-1 scale-105'
       )}
     >
       {/* Priority accent bar */}
-      <div className="h-0.5 w-full" style={{ backgroundColor: priorityMeta?.colour ?? '#1F3461' }} />
+      <div className="h-0.5 w-full" style={{ backgroundColor: priorityMeta?.colour ?? '#1C3054' }} />
       <div className="p-4">
       {/* Priority + Project + quick-advance + pin */}
       <div className="flex items-center justify-between mb-2">
@@ -243,8 +243,8 @@ export function TaskCard({ task, dragging }: TaskCardProps) {
               <PriorityBadge priority={task.priority} />
             </button>
             {showPriorityMenu && canEdit && (
-              <div className="absolute left-0 top-full mt-1 w-36 bg-[#111C44] border border-[#1F3461] rounded-xl shadow-xl overflow-hidden z-50">
-                <div className="px-3 py-2 border-b border-[#1F3461]">
+              <div className="absolute left-0 top-full mt-1 w-36 bg-[#0C1526] border border-[#1C3054] rounded-xl shadow-xl overflow-hidden z-50">
+                <div className="px-3 py-2 border-b border-[#1C3054]">
                   <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Priority</p>
                 </div>
                 {PRIORITY_OPTIONS.map(opt => (
@@ -252,7 +252,7 @@ export function TaskCard({ task, dragging }: TaskCardProps) {
                     key={opt.value}
                     onClick={e => { e.stopPropagation(); updateTask(task.id, { priority: opt.value as Task['priority'] }); emitTaskUpdate(task.id, { priority: opt.value as Task['priority'] }); setShowPriorityMenu(false); }}
                     className={cn(
-                      'w-full flex items-center gap-2.5 px-3 py-2 hover:bg-[#1B254B] transition-colors text-left',
+                      'w-full flex items-center gap-2.5 px-3 py-2 hover:bg-[#122040] transition-colors text-left',
                       task.priority === opt.value && 'bg-blue-500/10'
                     )}
                   >
@@ -294,8 +294,8 @@ export function TaskCard({ task, dragging }: TaskCardProps) {
                 title="Change status"
                 className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-lg text-[10px] font-medium border transition-all hover:border-blue-500/50"
                 style={{
-                  backgroundColor: `${statusMeta?.colour ?? '#3B82F6'}18`,
-                  borderColor: `${statusMeta?.colour ?? '#3B82F6'}33`,
+                  backgroundColor: `${statusMeta?.colour ?? '#4B8CF7'}18`,
+                  borderColor: `${statusMeta?.colour ?? '#4B8CF7'}33`,
                   color: statusMeta?.colour ?? '#94A3B8',
                 }}
               >
@@ -303,7 +303,7 @@ export function TaskCard({ task, dragging }: TaskCardProps) {
                 <ChevronRight className="w-2.5 h-2.5" />
               </button>
               {showStatusMenu && (
-                <div className="absolute right-0 top-full mt-1 w-40 bg-[#111C44] border border-[#1F3461] rounded-xl shadow-xl overflow-hidden z-50">
+                <div className="absolute right-0 top-full mt-1 w-40 bg-[#0C1526] border border-[#1C3054] rounded-xl shadow-xl overflow-hidden z-50">
                   {STATUS_OPTIONS.map(opt => (
                     <button
                       key={opt.value}
@@ -346,8 +346,8 @@ export function TaskCard({ task, dragging }: TaskCardProps) {
                       className={cn(
                         'w-full flex items-center gap-2 px-3 py-2 text-xs transition-colors text-left',
                         opt.value === task.status
-                          ? 'bg-[#1B254B] font-semibold'
-                          : 'hover:bg-[#1B254B] text-slate-400 hover:text-slate-200'
+                          ? 'bg-[#122040] font-semibold'
+                          : 'hover:bg-[#122040] text-slate-400 hover:text-slate-200'
                       )}
                     >
                       <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: opt.colour }} />
@@ -388,7 +388,7 @@ export function TaskCard({ task, dragging }: TaskCardProps) {
               }}
               onBlur={commitTitle}
               maxLength={256}
-              className="flex-1 bg-[#0B1437] border border-blue-500 rounded-lg px-2 py-0.5 text-sm text-slate-100 outline-none"
+              className="flex-1 bg-[#06091A] border border-blue-500 rounded-lg px-2 py-0.5 text-sm text-slate-100 outline-none"
             />
           </div>
         ) : (
@@ -434,12 +434,12 @@ export function TaskCard({ task, dragging }: TaskCardProps) {
             <span>{task.loggedHours ?? 0}h logged</span>
             <span>{task.estimatedHours}h est.</span>
           </div>
-          <div className="h-1 bg-[#1B254B] rounded-full overflow-hidden">
+          <div className="h-1 bg-[#122040] rounded-full overflow-hidden">
             <div
               className="h-full rounded-full transition-all"
               style={{
                 width: `${Math.min(100, ((task.loggedHours ?? 0) / task.estimatedHours!) * 100)}%`,
-                backgroundColor: (task.loggedHours ?? 0) > task.estimatedHours! ? '#EF4444' : '#3B82F6',
+                backgroundColor: (task.loggedHours ?? 0) > task.estimatedHours! ? '#EF4444' : '#4B8CF7',
               }}
             />
           </div>
@@ -467,10 +467,10 @@ export function TaskCard({ task, dragging }: TaskCardProps) {
             </button>
             {showDueDateMenu && canEdit && (
               <div
-                className="absolute left-0 bottom-full mb-1 w-52 bg-[#111C44] border border-[#1F3461] rounded-xl shadow-xl overflow-hidden z-50"
+                className="absolute left-0 bottom-full mb-1 w-52 bg-[#0C1526] border border-[#1C3054] rounded-xl shadow-xl overflow-hidden z-50"
                 onClick={e => e.stopPropagation()}
               >
-                <div className="px-3 py-2 border-b border-[#1F3461]">
+                <div className="px-3 py-2 border-b border-[#1C3054]">
                   <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Due Date</p>
                 </div>
                 <div className="p-3 space-y-2">
@@ -478,7 +478,7 @@ export function TaskCard({ task, dragging }: TaskCardProps) {
                     type="date"
                     defaultValue={task.dueDate ?? ''}
                     onChange={e => { const dueDate = e.target.value || undefined; updateTask(task.id, { dueDate }); emitTaskUpdate(task.id, { dueDate }); setShowDueDateMenu(false); }}
-                    className="w-full bg-[#0B1437] border border-[#1F3461] rounded-lg px-2 py-1.5 text-xs text-slate-300 outline-none focus:border-blue-500"
+                    className="w-full bg-[#06091A] border border-[#1C3054] rounded-lg px-2 py-1.5 text-xs text-slate-300 outline-none focus:border-blue-500"
                   />
                   <div className="grid grid-cols-2 gap-1.5">
                     {[
@@ -493,7 +493,7 @@ export function TaskCard({ task, dragging }: TaskCardProps) {
                         <button
                           key={label}
                           onClick={() => { updateTask(task.id, { dueDate: iso }); emitTaskUpdate(task.id, { dueDate: iso }); setShowDueDateMenu(false); }}
-                          className="px-2 py-1 rounded-lg bg-[#1B254B] hover:bg-[#243060] text-xs text-slate-400 hover:text-slate-200 transition-colors text-left"
+                          className="px-2 py-1 rounded-lg bg-[#122040] hover:bg-[#152645] text-xs text-slate-400 hover:text-slate-200 transition-colors text-left"
                         >
                           {label}
                         </button>
@@ -564,8 +564,8 @@ export function TaskCard({ task, dragging }: TaskCardProps) {
             }
           </button>
           {showAssigneeMenu && canEdit && (
-            <div className="absolute bottom-full right-0 mb-1 w-40 bg-[#111C44] border border-[#1F3461] rounded-xl shadow-xl overflow-hidden z-50">
-              <div className="px-3 py-2 border-b border-[#1F3461]">
+            <div className="absolute bottom-full right-0 mb-1 w-40 bg-[#0C1526] border border-[#1C3054] rounded-xl shadow-xl overflow-hidden z-50">
+              <div className="px-3 py-2 border-b border-[#1C3054]">
                 <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Assign to</p>
               </div>
               {task.assigneeId && (
@@ -576,7 +576,7 @@ export function TaskCard({ task, dragging }: TaskCardProps) {
                     emitTaskUpdate(task.id, { assigneeId: undefined });
                     setShowAssigneeMenu(false);
                   }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-[#1B254B] transition-colors text-left"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-[#122040] transition-colors text-left"
                 >
                   <div className="w-5 h-5 rounded-full border border-dashed border-slate-600 flex items-center justify-center flex-shrink-0" />
                   <span className="text-xs text-slate-400">Unassign</span>
@@ -592,7 +592,7 @@ export function TaskCard({ task, dragging }: TaskCardProps) {
                     setShowAssigneeMenu(false);
                   }}
                   className={cn(
-                    'w-full flex items-center gap-2.5 px-3 py-2 hover:bg-[#1B254B] transition-colors text-left',
+                    'w-full flex items-center gap-2.5 px-3 py-2 hover:bg-[#122040] transition-colors text-left',
                     task.assigneeId === u.id && 'bg-blue-500/10'
                   )}
                 >

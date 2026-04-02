@@ -62,14 +62,14 @@ export default function AllProjectsPage() {
   return (
     <div className="pb-20 md:pb-0">
       <div className="flex flex-wrap items-center gap-3 mb-6">
-        <div className="flex gap-1 bg-[#111C44] border border-[#1F3461] rounded-xl p-1">
+        <div className="flex gap-1 bg-[#0C1526] border border-[#1C3054] rounded-xl p-1">
           {(['all', 'active', 'completed', 'archived'] as const).map(t => (
             <button key={t} onClick={() => setTab(t)} className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-all ${tab === t ? 'bg-blue-500 text-white' : 'text-slate-400 hover:text-slate-200'}`}>{t}</button>
           ))}
         </div>
 
         {/* Project search */}
-        <div className="flex items-center gap-2 bg-[#111C44] border border-[#1F3461] rounded-xl px-3 py-2">
+        <div className="flex items-center gap-2 bg-[#0C1526] border border-[#1C3054] rounded-xl px-3 py-2">
           <Search className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
           <input
             value={search}
@@ -87,7 +87,7 @@ export default function AllProjectsPage() {
         <select
           value={sortBy}
           onChange={e => setSortBy(e.target.value as typeof sortBy)}
-          className="bg-[#111C44] border border-[#1F3461] rounded-xl px-3 py-2 text-xs text-slate-300 outline-none cursor-pointer"
+          className="bg-[#0C1526] border border-[#1C3054] rounded-xl px-3 py-2 text-xs text-slate-300 outline-none cursor-pointer"
         >
           <option value="updated">Recently updated</option>
           <option value="name">Name A–Z</option>
@@ -155,7 +155,7 @@ export default function AllProjectsPage() {
               <div
                 key={project.id}
                 onClick={() => navigate(`/projects/${project.id}`)}
-                className="bg-[#111C44] border border-[#1F3461] rounded-xl overflow-hidden hover:border-blue-500/40 cursor-pointer transition-all group"
+                className="bg-[#0C1526] border border-[#1C3054] rounded-xl overflow-hidden hover:border-blue-500/40 cursor-pointer transition-all group"
               >
                 <div className="h-1.5" style={{ backgroundColor: project.colour }} />
                 <div className="p-5">
@@ -169,9 +169,9 @@ export default function AllProjectsPage() {
                         className={`text-xs px-2 py-0.5 rounded-full font-medium bg-transparent border-0 outline-none cursor-pointer appearance-none ${project.status === 'active' ? 'text-green-400' : project.status === 'completed' ? 'text-blue-400' : 'text-slate-400'}`}
                         style={{ backgroundColor: project.status === 'active' ? 'rgba(52,211,153,0.1)' : project.status === 'completed' ? 'rgba(59,130,246,0.1)' : 'rgba(148,163,184,0.1)' }}
                       >
-                        <option value="active" className="bg-[#111C44] text-slate-200">active</option>
-                        <option value="completed" className="bg-[#111C44] text-slate-200">completed</option>
-                        <option value="archived" className="bg-[#111C44] text-slate-200">archived</option>
+                        <option value="active" className="bg-[#0C1526] text-slate-200">active</option>
+                        <option value="completed" className="bg-[#0C1526] text-slate-200">completed</option>
+                        <option value="archived" className="bg-[#0C1526] text-slate-200">archived</option>
                       </select>
                       <RoleGuard allowed={canDeleteProject(role)}>
                         <button
@@ -201,7 +201,7 @@ export default function AllProjectsPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex -space-x-2">
                       {members.slice(0, 4).map(m => (
-                        <div key={m.id} className="w-7 h-7 rounded-full border-2 border-[#111C44] flex items-center justify-center text-[10px] font-bold text-white" style={{ backgroundColor: m.colour }}>
+                        <div key={m.id} className="w-7 h-7 rounded-full border-2 border-[#0C1526] flex items-center justify-center text-[10px] font-bold text-white" style={{ backgroundColor: m.colour }}>
                           {m.name.split(' ').map((n: string) => n[0]).join('')}
                         </div>
                       ))}

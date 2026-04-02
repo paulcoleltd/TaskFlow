@@ -187,7 +187,7 @@ export default function CalendarPage() {
             ? 'border-blue-500 bg-blue-500/10'
             : isDragTarget
               ? 'border-blue-400/60 bg-blue-400/10 scale-[1.02]'
-              : 'border-transparent hover:border-[#1F3461] hover:bg-[#1B254B]',
+              : 'border-transparent hover:border-[#1C3054] hover:bg-[#122040]',
           outOfMonth && 'opacity-30',
           canCreate && !draggingTaskId && 'cursor-pointer',
           draggingTaskId && 'cursor-copy'
@@ -233,12 +233,12 @@ export default function CalendarPage() {
 
   return (
     <div className="pb-20 md:pb-0">
-      <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-5">
+      <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-5">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-base font-semibold text-white">{headerTitle}</h2>
           <div className="flex items-center gap-2">
-            <div className="flex gap-0.5 bg-[#0B1437] border border-[#1F3461] rounded-lg p-0.5">
+            <div className="flex gap-0.5 bg-[#06091A] border border-[#1C3054] rounded-lg p-0.5">
               {(['month', 'week'] as CalView[]).map(v => (
                 <button
                   key={v}
@@ -256,12 +256,12 @@ export default function CalendarPage() {
               onClick={() => setShowDone(v => !v)}
               className={cn(
                 'px-3 py-1.5 rounded-lg text-xs font-medium border transition-all',
-                showDone ? 'bg-green-500/15 border-green-500/30 text-green-400' : 'border-[#1F3461] text-slate-500 hover:text-slate-300'
+                showDone ? 'bg-green-500/15 border-green-500/30 text-green-400' : 'border-[#1C3054] text-slate-500 hover:text-slate-300'
               )}
             >
               {showDone ? 'Hiding done' : 'Show done'}
             </button>
-            <button onClick={prev} aria-label="Previous" className="p-2 rounded-lg hover:bg-[#1B254B] text-slate-400 hover:text-slate-200 transition-colors">
+            <button onClick={prev} aria-label="Previous" className="p-2 rounded-lg hover:bg-[#122040] text-slate-400 hover:text-slate-200 transition-colors">
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
@@ -270,7 +270,7 @@ export default function CalendarPage() {
             >
               Today
             </button>
-            <button onClick={next} aria-label="Next" className="p-2 rounded-lg hover:bg-[#1B254B] text-slate-400 hover:text-slate-200 transition-colors">
+            <button onClick={next} aria-label="Next" className="p-2 rounded-lg hover:bg-[#122040] text-slate-400 hover:text-slate-200 transition-colors">
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
@@ -304,7 +304,7 @@ export default function CalendarPage() {
 
       {/* Period summary */}
       {periodStats.total > 0 && (
-        <div className="flex items-center gap-4 mt-4 pt-4 border-t border-[#1F3461]">
+        <div className="flex items-center gap-4 mt-4 pt-4 border-t border-[#1C3054]">
           <span className="text-xs text-slate-500">{view === 'week' ? 'This week' : 'This month'}:</span>
           <span className="text-xs text-slate-300"><span className="font-semibold text-white">{periodStats.total}</span> tasks scheduled</span>
           <span className="text-xs text-slate-300"><span className="font-semibold text-green-400">{periodStats.done}</span> completed</span>

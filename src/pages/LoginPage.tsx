@@ -49,18 +49,22 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B1437] flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-navy flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Ambient background orbs */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/8 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-violet-600/8 rounded-full blur-3xl pointer-events-none" />
+
+      <div className="w-full max-w-md relative">
         {/* Logo */}
         <div className="flex items-center justify-center gap-3 mb-8">
-          <div className="w-10 h-10 rounded-xl bg-blue-500 flex items-center justify-center">
+          <div className="w-11 h-11 rounded-xl bg-gradient-accent flex items-center justify-center shadow-glow-lg">
             <Zap className="w-5 h-5 text-white" />
           </div>
-          <span className="text-2xl font-bold text-white">TaskFlow</span>
+          <span className="text-2xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">TaskFlow</span>
         </div>
 
         {/* Card */}
-        <div className="bg-[#111C44] border border-[#1F3461] rounded-2xl p-8">
+        <div className="card-nebula rounded-2xl p-8">
           <h2 className="text-xl font-bold text-white mb-1">Sign in</h2>
           <p className="text-sm text-slate-400 mb-6">Enter your credentials to access your workspace.</p>
 
@@ -75,8 +79,8 @@ export default function LoginPage() {
                   type="email"
                   autoComplete="email"
                   placeholder="you@taskflow.io"
-                  className={`w-full bg-[#0B1437] border rounded-xl pl-9 pr-4 py-2.5 text-sm text-slate-200 placeholder-slate-600 outline-none transition-colors ${
-                    errors.email ? 'border-red-500' : 'border-[#1F3461] focus:border-blue-500'
+                  className={`w-full bg-[#06091A] border rounded-xl pl-9 pr-4 py-2.5 text-sm text-slate-200 placeholder-slate-600 outline-none transition-colors ${
+                    errors.email ? 'border-red-500' : 'border-[#1C3054] focus:border-[#4B8CF7]/70 focus:shadow-glow'
                   }`}
                 />
               </div>
@@ -93,8 +97,8 @@ export default function LoginPage() {
                   type={showPw ? 'text' : 'password'}
                   autoComplete="current-password"
                   placeholder="••••••••"
-                  className={`w-full bg-[#0B1437] border rounded-xl pl-9 pr-10 py-2.5 text-sm text-slate-200 placeholder-slate-600 outline-none transition-colors ${
-                    errors.password ? 'border-red-500' : 'border-[#1F3461] focus:border-blue-500'
+                  className={`w-full bg-[#06091A] border rounded-xl pl-9 pr-10 py-2.5 text-sm text-slate-200 placeholder-slate-600 outline-none transition-colors ${
+                    errors.password ? 'border-red-500' : 'border-[#1C3054] focus:border-[#4B8CF7]/70 focus:shadow-glow'
                   }`}
                 />
                 <button
@@ -123,7 +127,7 @@ export default function LoginPage() {
         </div>
 
         {/* Demo accounts */}
-        <div className="mt-4 bg-[#111C44] border border-[#1F3461] rounded-2xl p-5">
+        <div className="mt-4 card-nebula rounded-2xl p-5">
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Demo accounts</p>
           <div className="space-y-2">
             {DEMO_ACCOUNTS.map(acc => (
@@ -131,7 +135,7 @@ export default function LoginPage() {
                 key={acc.email}
                 type="button"
                 onClick={() => fillDemo(acc.email, acc.password)}
-                className="w-full flex items-center justify-between p-3 rounded-xl bg-[#0B1437] border border-[#1F3461] hover:border-blue-500/40 transition-all text-left group"
+                className="w-full flex items-center justify-between p-3 rounded-xl bg-[#06091A] border border-[#1C3054] hover:border-[#4B8CF7]/40 hover:bg-[#0C1526] transition-all duration-200 text-left group"
               >
                 <div>
                   <p className="text-xs font-semibold text-slate-200 group-hover:text-blue-300 transition-colors">

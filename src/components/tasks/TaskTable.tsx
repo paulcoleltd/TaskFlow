@@ -132,7 +132,7 @@ export function TaskTable({ tasks }: TaskTableProps) {
             <select
               value={bulkStatus}
               onChange={e => setBulkStatus(e.target.value)}
-              className="bg-[#111C44] border border-[#1F3461] rounded-lg px-2 py-1 text-xs text-slate-300 outline-none"
+              className="bg-[#0C1526] border border-[#1C3054] rounded-lg px-2 py-1 text-xs text-slate-300 outline-none"
             >
               <option value="">Status…</option>
               {STATUS_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
@@ -147,7 +147,7 @@ export function TaskTable({ tasks }: TaskTableProps) {
             <select
               value={bulkAssignee}
               onChange={e => setBulkAssignee(e.target.value)}
-              className="bg-[#111C44] border border-[#1F3461] rounded-lg px-2 py-1 text-xs text-slate-300 outline-none"
+              className="bg-[#0C1526] border border-[#1C3054] rounded-lg px-2 py-1 text-xs text-slate-300 outline-none"
             >
               <option value="">Assign to…</option>
               {SEED_USERS.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
@@ -162,7 +162,7 @@ export function TaskTable({ tasks }: TaskTableProps) {
             <select
               value={bulkPriority}
               onChange={e => setBulkPriority(e.target.value)}
-              className="bg-[#111C44] border border-[#1F3461] rounded-lg px-2 py-1 text-xs text-slate-300 outline-none"
+              className="bg-[#0C1526] border border-[#1C3054] rounded-lg px-2 py-1 text-xs text-slate-300 outline-none"
             >
               <option value="">Priority…</option>
               {PRIORITY_OPTIONS.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
@@ -190,10 +190,10 @@ export function TaskTable({ tasks }: TaskTableProps) {
         </div>
       )}
 
-      <div className="overflow-x-auto rounded-xl border border-[#1F3461]">
+      <div className="overflow-x-auto rounded-xl border border-[#1C3054]">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-[#1F3461] bg-[#0D1B4B]/60">
+            <tr className="border-b border-[#1C3054] bg-[#0D1B4B]/60">
               {/* Select all checkbox */}
               <th className="px-3 py-3 w-10" onClick={e => e.stopPropagation()}>
                 <button onClick={toggleAll} className="flex items-center justify-center text-slate-500 hover:text-slate-300">
@@ -224,8 +224,8 @@ export function TaskTable({ tasks }: TaskTableProps) {
                 <tr
                   key={task.id}
                   className={cn(
-                    'border-b border-[#1F3461] last:border-0 hover:bg-[#1B254B] transition-colors cursor-pointer group',
-                    i % 2 === 0 ? 'bg-[#111C44]' : 'bg-[#111C44]/80',
+                    'border-b border-[#1C3054] last:border-0 hover:bg-[#122040] transition-colors cursor-pointer group',
+                    i % 2 === 0 ? 'bg-[#0C1526]' : 'bg-[#0C1526]/80',
                     isSelected && 'bg-blue-500/5'
                   )}
                   onClick={() => setSelectedTask(task.id)}
@@ -259,7 +259,7 @@ export function TaskTable({ tasks }: TaskTableProps) {
                         style={{ color: STATUS_OPTIONS.find(s => s.value === task.status)?.colour }}
                       >
                         {STATUS_OPTIONS.map(s => (
-                          <option key={s.value} value={s.value} className="bg-[#111C44] text-slate-200">{s.label}</option>
+                          <option key={s.value} value={s.value} className="bg-[#0C1526] text-slate-200">{s.label}</option>
                         ))}
                       </select>
                     ) : (
@@ -277,7 +277,7 @@ export function TaskTable({ tasks }: TaskTableProps) {
                         style={{ color: PRIORITY_OPTIONS.find(p => p.value === task.priority)?.colour }}
                       >
                         {PRIORITY_OPTIONS.map(p => (
-                          <option key={p.value} value={p.value} className="bg-[#111C44] text-slate-200">{p.label}</option>
+                          <option key={p.value} value={p.value} className="bg-[#0C1526] text-slate-200">{p.label}</option>
                         ))}
                       </select>
                     ) : (

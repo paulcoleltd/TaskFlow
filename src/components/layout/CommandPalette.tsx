@@ -155,7 +155,7 @@ export function CommandPalette() {
       { id: 'nav-activity', kind: 'action', label: 'Go to Activity Feed', icon: <Activity className="w-4 h-4" />, onSelect: () => go(() => navigate('/activity')) },
       { id: 'nav-settings',  kind: 'action', label: 'Go to Settings',  icon: <Settings className="w-4 h-4" />,       onSelect: () => go(() => navigate('/settings')) },
       ...(canCreate ? [
-        { id: 'action-new-task',    kind: 'action' as ResultKind, label: 'New Task',    icon: <Plus className="w-4 h-4" />, accent: '#3B82F6', onSelect: () => go(() => openTaskModal()) },
+        { id: 'action-new-task',    kind: 'action' as ResultKind, label: 'New Task',    icon: <Plus className="w-4 h-4" />, accent: '#4B8CF7', onSelect: () => go(() => openTaskModal()) },
         { id: 'action-new-project', kind: 'action' as ResultKind, label: 'New Project', icon: <Plus className="w-4 h-4" />, accent: '#8B5CF6', onSelect: () => go(() => openProjectModal()) },
       ] : []),
     ];
@@ -278,9 +278,9 @@ export function CommandPalette() {
 
       {/* Palette */}
       <div className="fixed inset-x-0 top-[12vh] z-50 mx-auto w-full max-w-xl px-4">
-        <div className="bg-[#111C44] border border-[#1F3461] rounded-2xl shadow-2xl overflow-hidden">
+        <div className="bg-[#0C1526] border border-[#1C3054] rounded-2xl shadow-2xl overflow-hidden">
           {/* Search input */}
-          <div className="flex items-center gap-3 px-4 py-3.5 border-b border-[#1F3461]">
+          <div className="flex items-center gap-3 px-4 py-3.5 border-b border-[#1C3054]">
             <Search className="w-4 h-4 text-slate-500 flex-shrink-0" />
             <input
               ref={inputRef}
@@ -292,11 +292,11 @@ export function CommandPalette() {
               className="flex-1 bg-transparent text-sm text-white placeholder:text-slate-600 outline-none"
             />
             {query && (
-              <button onClick={() => setQuery('')} className="text-xs text-slate-600 hover:text-slate-400 px-1.5 py-0.5 rounded border border-[#1F3461]">
+              <button onClick={() => setQuery('')} className="text-xs text-slate-600 hover:text-slate-400 px-1.5 py-0.5 rounded border border-[#1C3054]">
                 Clear
               </button>
             )}
-            <kbd className="hidden sm:flex items-center justify-center px-1.5 py-0.5 rounded border border-[#1F3461] text-[10px] text-slate-600 font-mono">Esc</kbd>
+            <kbd className="hidden sm:flex items-center justify-center px-1.5 py-0.5 rounded border border-[#1C3054] text-[10px] text-slate-600 font-mono">Esc</kbd>
           </div>
 
           {/* Results */}
@@ -329,7 +329,7 @@ export function CommandPalette() {
                   <button
                     className={cn(
                       'w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors',
-                      isActive ? 'bg-[#1B254B]' : 'hover:bg-[#0B1437]/50'
+                      isActive ? 'bg-[#122040]' : 'hover:bg-[#06091A]/50'
                     )}
                     onMouseEnter={() => setActiveIdx(idx)}
                     onClick={item.onSelect}
@@ -361,7 +361,7 @@ export function CommandPalette() {
           </div>
 
           {/* Footer */}
-          <div className="border-t border-[#1F3461] px-4 py-2 flex items-center gap-4 text-[10px] text-slate-700">
+          <div className="border-t border-[#1C3054] px-4 py-2 flex items-center gap-4 text-[10px] text-slate-700">
             <span><kbd className="font-mono">↑↓</kbd> navigate</span>
             <span><kbd className="font-mono">↵</kbd> select</span>
             <span><kbd className="font-mono">Esc</kbd> close</span>

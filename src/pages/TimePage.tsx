@@ -17,8 +17,8 @@ import { emitTaskUpdate } from '../lib/collabEmit';
 type Range = 'week' | 'month' | 'all';
 
 const CHART_STYLE = {
-  backgroundColor: '#111C44',
-  border: '1px solid #1F3461',
+  backgroundColor: '#0C1526',
+  border: '1px solid #1C3054',
   borderRadius: 8,
   color: '#E2E8F0',
   fontSize: 12,
@@ -26,7 +26,7 @@ const CHART_STYLE = {
 
 function efficiencyColour(pct: number): string {
   if (pct <= 90) return '#10B981';
-  if (pct <= 110) return '#3B82F6';
+  if (pct <= 110) return '#4B8CF7';
   if (pct <= 130) return '#F59E0B';
   return '#EF4444';
 }
@@ -149,7 +149,7 @@ export default function TimePage() {
                 'px-3 py-1.5 rounded-xl text-xs font-medium transition-all',
                 range === r
                   ? 'bg-blue-500 text-white'
-                  : 'bg-[#111C44] border border-[#1F3461] text-slate-400 hover:text-slate-200'
+                  : 'bg-[#0C1526] border border-[#1C3054] text-slate-400 hover:text-slate-200'
               )}
             >
               {r === 'week' ? 'This Week' : r === 'month' ? 'This Month' : 'All Time'}
@@ -157,7 +157,7 @@ export default function TimePage() {
           ))}
           <button
             onClick={handleExportCSV}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#111C44] border border-[#1F3461] text-slate-400 hover:text-slate-200 text-xs font-medium transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0C1526] border border-[#1C3054] text-slate-400 hover:text-slate-200 text-xs font-medium transition-colors"
           >
             <Download className="w-3.5 h-3.5" />
             Export
@@ -201,7 +201,7 @@ export default function TimePage() {
             accent: 'text-amber-400',
           },
         ].map(card => (
-          <div key={card.label} className="bg-[#111C44] border border-[#1F3461] rounded-xl p-4">
+          <div key={card.label} className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs text-slate-500">{card.label}</span>
               {card.icon}
@@ -216,7 +216,7 @@ export default function TimePage() {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
 
         {/* Logged vs Estimated per project */}
-        <div className="xl:col-span-2 bg-[#111C44] border border-[#1F3461] rounded-xl p-5">
+        <div className="xl:col-span-2 bg-[#0C1526] border border-[#1C3054] rounded-xl p-5">
           <h3 className="text-sm font-semibold text-white mb-4">Hours by Project</h3>
           {projectData.length === 0 ? (
             <div className="h-48 flex items-center justify-center text-xs text-slate-500">
@@ -248,7 +248,7 @@ export default function TimePage() {
         </div>
 
         {/* Hours by user donut */}
-        <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-5">
+        <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-5">
           <h3 className="text-sm font-semibold text-white mb-4">Hours by Person</h3>
           {userData.length === 0 ? (
             <div className="h-48 flex items-center justify-center text-xs text-slate-500">
@@ -281,8 +281,8 @@ export default function TimePage() {
       </div>
 
       {/* ── Task time log table ──────────────────────────────────────── */}
-      <div className="bg-[#111C44] border border-[#1F3461] rounded-xl overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#1F3461]">
+      <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#1C3054]">
           <h3 className="text-sm font-semibold text-white">Task Time Log</h3>
           <div className="flex items-center gap-2">
             <span className="text-xs text-slate-500">Sort by:</span>
@@ -313,7 +313,7 @@ export default function TimePage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-[#1F3461]">
+                <tr className="border-b border-[#1C3054]">
                   {['Task', 'Project', 'Assignee', 'Status', 'Estimated', 'Logged', 'Efficiency', ''].map((h, i) => (
                     <th key={i} className="px-4 py-3 text-left text-[10px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                       {h}
@@ -321,7 +321,7 @@ export default function TimePage() {
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#1F3461]">
+              <tbody className="divide-y divide-[#1C3054]">
                 {sortedTasks.map(task => {
                   const project  = projects.find(p => p.id === task.projectId);
                   const assignee = SEED_USERS.find(u => u.id === task.assigneeId);
@@ -329,12 +329,12 @@ export default function TimePage() {
                   const est      = task.estimatedHours ?? 0;
                   const eff      = est > 0 ? Math.round((logged / est) * 100) : null;
                   const barPct   = est > 0 ? Math.min(100, (logged / est) * 100) : 0;
-                  const colour   = eff != null ? efficiencyColour(eff) : '#3B82F6';
+                  const colour   = eff != null ? efficiencyColour(eff) : '#4B8CF7';
                   return (
                     <tr
                       key={task.id}
                       onClick={() => setSelectedTask(task.id)}
-                      className="hover:bg-[#1B254B] cursor-pointer transition-colors group"
+                      className="hover:bg-[#122040] cursor-pointer transition-colors group"
                     >
                       {/* Task */}
                       <td className="px-4 py-3 max-w-[240px]">
@@ -387,7 +387,7 @@ export default function TimePage() {
                       <td className="px-4 py-3">
                         {eff != null ? (
                           <div className="flex items-center gap-2 min-w-[120px]">
-                            <div className="flex-1 h-1.5 bg-[#1B254B] rounded-full overflow-hidden">
+                            <div className="flex-1 h-1.5 bg-[#122040] rounded-full overflow-hidden">
                               <div
                                 className="h-full rounded-full transition-all"
                                 style={{ width: `${barPct}%`, backgroundColor: colour }}
@@ -426,7 +426,7 @@ export default function TimePage() {
                                 if (e.key === 'Escape') setLogInput(null);
                               }}
                               placeholder="0"
-                              className="w-16 bg-[#0B1437] border border-blue-500/60 rounded-lg px-2 py-1 text-xs text-slate-200 outline-none text-center"
+                              className="w-16 bg-[#06091A] border border-blue-500/60 rounded-lg px-2 py-1 text-xs text-slate-200 outline-none text-center"
                             />
                             <button
                               onClick={() => {

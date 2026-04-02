@@ -55,7 +55,7 @@ export function ViewerPile({ projectId, taskId }: ViewerPileProps) {
         {shown.map((viewer) => (
           <Tooltip key={viewer.userId} content={`${viewer.userName} is viewing`}>
             <div
-              className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white ring-1 ring-[#0B1437] flex-shrink-0"
+              className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white ring-1 ring-[#06091A] flex-shrink-0"
               style={{ backgroundColor: viewer.userColour }}
             >
               {getInitials(viewer.userName)}
@@ -63,7 +63,7 @@ export function ViewerPile({ projectId, taskId }: ViewerPileProps) {
           </Tooltip>
         ))}
         {overflow > 0 && (
-          <div className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-slate-400 bg-[#111C44] ring-1 ring-[#0B1437] flex-shrink-0">
+          <div className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-slate-400 bg-[#0C1526] ring-1 ring-[#06091A] flex-shrink-0">
             +{overflow}
           </div>
         )}

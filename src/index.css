@@ -2,25 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Theme colour tokens ────────────────────────────────────── */
+/* ── Nebula Pro — Theme colour tokens ──────────────────────── */
 :root {
-  --tf-bg-base:    #0B1437;
-  --tf-bg-surface: #111C44;
-  --tf-bg-raised:  #1B254B;
-  --tf-border:     #1F3461;
-  --tf-text:       #E2E8F0;
-  --tf-scrollbar-track: #111C44;
-  --tf-scrollbar-thumb: #1F3461;
+  --tf-bg-base:          #06091A;
+  --tf-bg-surface:       #0C1526;
+  --tf-bg-raised:        #122040;
+  --tf-border:           #1C3054;
+  --tf-text:             #E0E9FF;
+  --tf-text-muted:       #6B82A8;
+  --tf-accent:           #4B8CF7;
+  --tf-accent-violet:    #7B6CF8;
+  --tf-scrollbar-track:  #0C1526;
+  --tf-scrollbar-thumb:  #1C3054;
+
+  /* Gradient tokens */
+  --tf-grad-accent: linear-gradient(135deg, #4B8CF7 0%, #7B6CF8 100%);
+  --tf-grad-card:   linear-gradient(145deg, #0C1526 0%, #0F1C3A 100%);
+  --tf-grad-active: linear-gradient(135deg, rgba(75,140,247,0.18) 0%, rgba(123,108,248,0.12) 100%);
 }
 
 [data-theme="light"] {
-  --tf-bg-base:    #F0F4FF;
-  --tf-bg-surface: #FFFFFF;
-  --tf-bg-raised:  #EEF2FF;
-  --tf-border:     #C7D2FE;
-  --tf-text:       #1E293B;
-  --tf-scrollbar-track: #EEF2FF;
-  --tf-scrollbar-thumb: #A5B4FC;
+  --tf-bg-base:          #F0F4FF;
+  --tf-bg-surface:       #FFFFFF;
+  --tf-bg-raised:        #EEF2FF;
+  --tf-border:           #C7D2FE;
+  --tf-text:             #1E293B;
+  --tf-text-muted:       #64748B;
+  --tf-scrollbar-track:  #EEF2FF;
+  --tf-scrollbar-thumb:  #A5B4FC;
 }
 
 @layer base {
@@ -36,6 +45,80 @@
   #root { width: 100%; min-height: 100vh; }
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: var(--tf-scrollbar-track); }
-  ::-webkit-scrollbar-thumb { background: var(--tf-scrollbar-thumb); border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: #3B82F6; }
+  ::-webkit-scrollbar-thumb {
+    background: var(--tf-scrollbar-thumb);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--tf-accent);
+  }
+}
+
+/* ── Nebula Pro Utility Classes ─────────────────────────────── */
+@layer components {
+
+  /* Glass-morphism surface */
+  .glass {
+    background: rgba(12, 21, 38, 0.75);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(28, 48, 84, 0.6);
+  }
+
+  /* Gradient accent button / badge */
+  .btn-gradient {
+    background: var(--tf-grad-accent);
+    box-shadow: 0 4px 16px rgba(123, 108, 248, 0.25);
+    transition: box-shadow 0.2s ease, transform 0.15s ease;
+  }
+  .btn-gradient:hover {
+    box-shadow: 0 6px 24px rgba(123, 108, 248, 0.40);
+    transform: translateY(-1px);
+  }
+  .btn-gradient:active { transform: translateY(0); }
+
+  /* Gradient card surface */
+  .card-nebula {
+    background: var(--tf-grad-card);
+    border: 1px solid #1C3054;
+    box-shadow: 0 4px 32px rgba(0,0,0,0.50), inset 0 1px 0 rgba(255,255,255,0.04);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+  .card-nebula:hover {
+    border-color: #2A4878;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.60), 0 0 0 1px rgba(75,140,247,0.08);
+  }
+
+  /* Active nav item with gradient + left bar */
+  .nav-active {
+    background: var(--tf-grad-active);
+    border-left: 2px solid transparent;
+    border-image: linear-gradient(180deg, #4B8CF7, #7B6CF8) 1;
+    color: #E0E9FF;
+  }
+
+  /* Ambient blue glow for focus/interactive elements */
+  .glow-blue:focus-visible,
+  .glow-blue:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(75, 140, 247, 0.45);
+  }
+
+  /* Gradient border (uses pseudo-element pattern) */
+  .border-gradient {
+    position: relative;
+  }
+  .border-gradient::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, #4B8CF7, #7B6CF8);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box,
+                  linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
 }

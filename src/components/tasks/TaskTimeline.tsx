@@ -73,7 +73,7 @@ export function TaskTimeline({ tasks }: Props) {
 
   if (tasks.length === 0) {
     return (
-      <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-12 text-center">
+      <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-12 text-center">
         <p className="text-slate-500 text-sm">No tasks to display on timeline.</p>
         <p className="text-slate-600 text-xs mt-1">Add tasks with due dates to see them here.</p>
       </div>
@@ -81,9 +81,9 @@ export function TaskTimeline({ tasks }: Props) {
   }
 
   return (
-    <div className="bg-[#111C44] border border-[#1F3461] rounded-xl overflow-hidden">
+    <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl overflow-hidden">
       {/* Legend */}
-      <div className="flex items-center gap-4 px-4 py-2.5 border-b border-[#1F3461] flex-wrap">
+      <div className="flex items-center gap-4 px-4 py-2.5 border-b border-[#1C3054] flex-wrap">
         <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Timeline</span>
         <div className="flex items-center gap-3 ml-auto flex-wrap">
           {STATUS_OPTIONS.map(s => (
@@ -103,15 +103,15 @@ export function TaskTimeline({ tasks }: Props) {
         {/* Fixed left column — task names */}
         <div className="flex-shrink-0" style={{ width: LABEL_W }}>
           {/* Header spacer */}
-          <div style={{ height: HEADER_H }} className="border-b border-r border-[#1F3461] bg-[#0B1437]" />
+          <div style={{ height: HEADER_H }} className="border-b border-r border-[#1C3054] bg-[#06091A]" />
           {/* Task labels */}
           {rows.map(({ task, assignee }, i) => (
             <button
               key={task.id}
               onClick={() => setSelectedTask(task.id)}
               className={cn(
-                'flex items-center gap-2 w-full px-3 border-b border-r border-[#1F3461] hover:bg-[#1B254B] transition-colors text-left',
-                i % 2 === 0 ? 'bg-[#111C44]' : 'bg-[#0E1840]'
+                'flex items-center gap-2 w-full px-3 border-b border-r border-[#1C3054] hover:bg-[#122040] transition-colors text-left',
+                i % 2 === 0 ? 'bg-[#0C1526]' : 'bg-[#0E1840]'
               )}
               style={{ height: ROW_H }}
             >
@@ -143,7 +143,7 @@ export function TaskTimeline({ tasks }: Props) {
           <div style={{ width: totalWidth, minWidth: '100%', position: 'relative' }}>
             {/* ── Date header ───────────────────────────────────────────── */}
             <div
-              className="flex border-b border-[#1F3461] bg-[#0B1437] sticky top-0 z-10"
+              className="flex border-b border-[#1C3054] bg-[#06091A] sticky top-0 z-10"
               style={{ height: HEADER_H }}
             >
               {/* Month labels row */}
@@ -164,7 +164,7 @@ export function TaskTimeline({ tasks }: Props) {
                     {months.map(({ label, dayCount }) => (
                       <div
                         key={label}
-                        className="border-r border-[#1F3461] flex items-center px-2 overflow-hidden"
+                        className="border-r border-[#1C3054] flex items-center px-2 overflow-hidden"
                         style={{ width: dayCount * DAY_W, height: 20 }}
                       >
                         <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
@@ -185,7 +185,7 @@ export function TaskTimeline({ tasks }: Props) {
                     <div
                       key={i}
                       className={cn(
-                        'flex items-center justify-center border-r border-[#1F3461] text-[10px] flex-shrink-0',
+                        'flex items-center justify-center border-r border-[#1C3054] text-[10px] flex-shrink-0',
                         isT ? 'text-blue-400 font-bold' : isWe ? 'text-slate-600' : 'text-slate-500'
                       )}
                       style={{ width: DAY_W, height: 32 }}
@@ -206,8 +206,8 @@ export function TaskTimeline({ tasks }: Props) {
               <div
                 key={task.id}
                 className={cn(
-                  'relative flex items-center border-b border-[#1F3461]',
-                  i % 2 === 0 ? 'bg-[#111C44]' : 'bg-[#0E1840]'
+                  'relative flex items-center border-b border-[#1C3054]',
+                  i % 2 === 0 ? 'bg-[#0C1526]' : 'bg-[#0E1840]'
                 )}
                 style={{ height: ROW_H }}
               >
@@ -216,7 +216,7 @@ export function TaskTimeline({ tasks }: Props) {
                   isWeekend(d) ? (
                     <div
                       key={di}
-                      className="absolute top-0 bottom-0 bg-[#0B1437]/40"
+                      className="absolute top-0 bottom-0 bg-[#06091A]/40"
                       style={{ left: di * DAY_W, width: DAY_W }}
                     />
                   ) : null
@@ -265,7 +265,7 @@ export function TaskTimeline({ tasks }: Props) {
 
       {/* Footer: tasks without due dates */}
       {tasks.some(t => !t.dueDate) && (
-        <div className="px-4 py-2 border-t border-[#1F3461] flex items-center gap-2">
+        <div className="px-4 py-2 border-t border-[#1C3054] flex items-center gap-2">
           <span className="text-[10px] text-slate-600">
             {tasks.filter(t => !t.dueDate).length} task{tasks.filter(t => !t.dueDate).length !== 1 ? 's' : ''} without a due date — shown with 3-day placeholder width
           </span>

@@ -129,7 +129,7 @@ function NotificationsPanel({ enabled, setEnabled }: { enabled: boolean; setEnab
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between p-3 bg-[#0B1437] rounded-xl">
+      <div className="flex items-center justify-between p-3 bg-[#06091A] rounded-xl">
         <div className="flex items-center gap-3">
           {enabled ? (
             <Bell className="w-4 h-4 text-blue-400 flex-shrink-0" />
@@ -151,7 +151,7 @@ function NotificationsPanel({ enabled, setEnabled }: { enabled: boolean; setEnab
           onClick={handleToggle}
           disabled={unsupported || denied}
           className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed ${
-            enabled ? 'bg-blue-500' : 'bg-[#1F3461]'
+            enabled ? 'bg-blue-500' : 'bg-[#1C3054]'
           }`}
           role="switch"
           aria-checked={enabled}
@@ -394,7 +394,7 @@ export default function SettingsPage() {
   return (
     <div className="max-w-2xl space-y-6 pb-20 md:pb-0">
       {/* Profile */}
-      <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-6">
+      <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-6">
         <h3 className="text-sm font-semibold text-white mb-4">Profile</h3>
         {currentUser && (
           <div className="flex items-center justify-between">
@@ -413,14 +413,14 @@ export default function SettingsPage() {
       </div>
 
       {/* Appearance */}
-      <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-6">
+      <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-6">
         <h3 className="text-sm font-semibold text-white mb-4">Appearance</h3>
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-slate-200">Theme</p>
             <p className="text-xs text-slate-400">{theme === 'light' ? 'Light mode active' : 'Dark mode active'}</p>
           </div>
-          <div className="flex items-center gap-1 bg-[#0B1437] border border-[#1F3461] rounded-xl p-1">
+          <div className="flex items-center gap-1 bg-[#06091A] border border-[#1C3054] rounded-xl p-1">
             <button
               onClick={() => setTheme('dark')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
@@ -448,13 +448,13 @@ export default function SettingsPage() {
       </div>
 
       {/* Notifications */}
-      <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-6">
+      <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-6">
         <h3 className="text-sm font-semibold text-white mb-4">Notifications</h3>
         <NotificationsPanel enabled={notificationsEnabled} setEnabled={setNotificationsEnabled} />
       </div>
 
       {/* Tags */}
-      <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-6">
+      <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-semibold text-white">Tags</h3>
           <span className="text-xs text-slate-500">{tags.length} tag{tags.length !== 1 ? 's' : ''}</span>
@@ -463,7 +463,7 @@ export default function SettingsPage() {
         {/* Existing tags */}
         <div className="space-y-2 mb-4">
           {tags.map(tag => (
-            <div key={tag.id} className="flex items-center gap-3 p-2.5 bg-[#0B1437] rounded-xl">
+            <div key={tag.id} className="flex items-center gap-3 p-2.5 bg-[#06091A] rounded-xl">
               {editingTagId === tag.id ? (
                 <>
                   {/* Colour picker dots */}
@@ -508,14 +508,14 @@ export default function SettingsPage() {
                     <RoleGuard allowed={canManageTags(role)}>
                       <button
                         onClick={() => { setEditingTagId(tag.id); setEditTagName(tag.name); }}
-                        className="p-1 rounded-lg text-slate-600 hover:text-blue-400 hover:bg-[#1B254B] transition-colors"
+                        className="p-1 rounded-lg text-slate-600 hover:text-blue-400 hover:bg-[#122040] transition-colors"
                         title="Rename tag"
                       >
                         <Pencil className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={() => handleDeleteTag(tag.id, tag.name)}
-                        className="p-1 rounded-lg text-slate-600 hover:text-red-400 hover:bg-[#1B254B] transition-colors"
+                        className="p-1 rounded-lg text-slate-600 hover:text-red-400 hover:bg-[#122040] transition-colors"
                         title="Delete tag"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -533,7 +533,7 @@ export default function SettingsPage() {
           allowed={canManageTags(role)}
           fallback={<p className="text-xs text-slate-600 italic">Only admins can create or edit tags.</p>}
         >
-          <div className="flex items-center gap-2 p-3 bg-[#0B1437] rounded-xl border border-dashed border-[#1F3461] hover:border-[#3B82F6]/30 transition-colors">
+          <div className="flex items-center gap-2 p-3 bg-[#06091A] rounded-xl border border-dashed border-[#1C3054] hover:border-[#4B8CF7]/30 transition-colors">
             <div className="flex gap-1 flex-shrink-0">
               {PROJECT_COLOURS.map(c => (
                 <button
@@ -566,7 +566,7 @@ export default function SettingsPage() {
 
       {/* My Templates */}
       {userTemplates.length > 0 && (
-        <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-6">
+        <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-white">My Templates</h3>
             <span className="text-xs text-slate-500">{userTemplates.length} saved</span>
@@ -574,12 +574,12 @@ export default function SettingsPage() {
           <div className="space-y-2">
             {userTemplates.map(tpl => (
               editingTemplateId === tpl.id ? (
-                <div key={tpl.id} className="flex items-start gap-3 p-3 bg-[#0B1437] border border-blue-500/40 rounded-xl">
+                <div key={tpl.id} className="flex items-start gap-3 p-3 bg-[#06091A] border border-blue-500/40 rounded-xl">
                   <input
                     value={editTemplateIcon}
                     onChange={e => setEditTemplateIcon(e.target.value)}
                     maxLength={4}
-                    className="w-10 bg-[#111C44] border border-[#1F3461] rounded-lg text-center text-base p-1 outline-none focus:border-blue-500"
+                    className="w-10 bg-[#0C1526] border border-[#1C3054] rounded-lg text-center text-base p-1 outline-none focus:border-blue-500"
                   />
                   <div className="flex-1 min-w-0 space-y-1.5">
                     <input
@@ -589,23 +589,23 @@ export default function SettingsPage() {
                       onKeyDown={e => { if (e.key === 'Enter') handleSaveTemplateEdit(tpl.id); if (e.key === 'Escape') setEditingTemplateId(null); }}
                       placeholder="Template name"
                       maxLength={100}
-                      className="w-full bg-[#111C44] border border-[#1F3461] rounded-lg px-2.5 py-1.5 text-sm text-slate-100 outline-none focus:border-blue-500"
+                      className="w-full bg-[#0C1526] border border-[#1C3054] rounded-lg px-2.5 py-1.5 text-sm text-slate-100 outline-none focus:border-blue-500"
                     />
                     <input
                       value={editTemplateDesc}
                       onChange={e => setEditTemplateDesc(e.target.value)}
                       placeholder="Description (optional)"
                       maxLength={200}
-                      className="w-full bg-[#111C44] border border-[#1F3461] rounded-lg px-2.5 py-1.5 text-xs text-slate-300 outline-none focus:border-blue-500"
+                      className="w-full bg-[#0C1526] border border-[#1C3054] rounded-lg px-2.5 py-1.5 text-xs text-slate-300 outline-none focus:border-blue-500"
                     />
                   </div>
                   <div className="flex items-center gap-1 flex-shrink-0 pt-0.5">
                     <button onClick={() => handleSaveTemplateEdit(tpl.id)} className="p-1.5 rounded-lg text-green-400 hover:bg-green-500/10 transition-colors" title="Save"><Check className="w-3.5 h-3.5" /></button>
-                    <button onClick={() => setEditingTemplateId(null)} className="p-1.5 rounded-lg text-slate-500 hover:text-slate-300 hover:bg-[#1B254B] transition-colors" title="Cancel"><X className="w-3.5 h-3.5" /></button>
+                    <button onClick={() => setEditingTemplateId(null)} className="p-1.5 rounded-lg text-slate-500 hover:text-slate-300 hover:bg-[#122040] transition-colors" title="Cancel"><X className="w-3.5 h-3.5" /></button>
                   </div>
                 </div>
               ) : (
-                <div key={tpl.id} className="flex items-center gap-3 p-2.5 bg-[#0B1437] rounded-xl group">
+                <div key={tpl.id} className="flex items-center gap-3 p-2.5 bg-[#06091A] rounded-xl group">
                   <span className="text-base">{tpl.icon}</span>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-slate-200 truncate">{tpl.name}</p>
@@ -616,7 +616,7 @@ export default function SettingsPage() {
                   </div>
                   <button
                     onClick={() => { setEditingTemplateId(tpl.id); setEditTemplateName(tpl.name); setEditTemplateIcon(tpl.icon); setEditTemplateDesc(tpl.description); }}
-                    className="p-1.5 rounded-lg text-slate-600 hover:text-blue-400 hover:bg-[#1B254B] transition-colors opacity-0 group-hover:opacity-100"
+                    className="p-1.5 rounded-lg text-slate-600 hover:text-blue-400 hover:bg-[#122040] transition-colors opacity-0 group-hover:opacity-100"
                     title="Edit template"
                   >
                     <Pencil className="w-3.5 h-3.5" />
@@ -625,7 +625,7 @@ export default function SettingsPage() {
                     onClick={() => {
                       if (window.confirm(`Delete template "${tpl.name}"?`)) deleteTemplate(tpl.id);
                     }}
-                    className="p-1.5 rounded-lg text-slate-600 hover:text-red-400 hover:bg-[#1B254B] transition-colors"
+                    className="p-1.5 rounded-lg text-slate-600 hover:text-red-400 hover:bg-[#122040] transition-colors"
                     title="Delete template"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -641,13 +641,13 @@ export default function SettingsPage() {
       )}
 
       {/* Data Management */}
-      <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-6">
+      <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-6">
         <h3 className="text-sm font-semibold text-white mb-4">Data Management</h3>
         <div className="space-y-3">
           <RoleGuard
             allowed={canExportData(role)}
             fallback={
-              <div className="flex items-center justify-between p-3 bg-[#0B1437] rounded-xl opacity-50">
+              <div className="flex items-center justify-between p-3 bg-[#06091A] rounded-xl opacity-50">
                 <div>
                   <p className="text-sm text-slate-400">Export Data</p>
                   <p className="text-xs text-slate-500">Requires Member or Admin role</p>
@@ -656,7 +656,7 @@ export default function SettingsPage() {
               </div>
             }
           >
-            <div className="flex items-center justify-between p-3 bg-[#0B1437] rounded-xl">
+            <div className="flex items-center justify-between p-3 bg-[#06091A] rounded-xl">
               <div>
                 <p className="text-sm text-slate-200">Export Data</p>
                 <p className="text-xs text-slate-400">Download all tasks and projects as JSON</p>
@@ -681,7 +681,7 @@ export default function SettingsPage() {
           </RoleGuard>
 
           <RoleGuard allowed={canClearData(role)}>
-            <div className="flex items-center justify-between p-3 bg-[#0B1437] rounded-xl">
+            <div className="flex items-center justify-between p-3 bg-[#06091A] rounded-xl">
               <div>
                 <p className="text-sm text-slate-200">Import Data</p>
                 <p className="text-xs text-slate-400">Restore from a TaskFlow JSON export file</p>
@@ -693,7 +693,7 @@ export default function SettingsPage() {
                 </Button>
               </div>
             </div>
-            <div className="flex items-center justify-between p-3 bg-[#0B1437] rounded-xl">
+            <div className="flex items-center justify-between p-3 bg-[#06091A] rounded-xl">
               <div>
                 <p className="text-sm text-slate-200">Import from CSV</p>
                 <p className="text-xs text-slate-400">Import tasks from a spreadsheet export (Excel, Google Sheets, Asana…)</p>
@@ -710,7 +710,7 @@ export default function SettingsPage() {
           <RoleGuard
             allowed={canClearData(role)}
             fallback={
-              <div className="flex items-center justify-between p-3 bg-[#0B1437] rounded-xl opacity-50">
+              <div className="flex items-center justify-between p-3 bg-[#06091A] rounded-xl opacity-50">
                 <div>
                   <p className="text-sm text-slate-400">Clear All Data</p>
                   <p className="text-xs text-slate-500">Requires Admin role</p>
@@ -719,7 +719,7 @@ export default function SettingsPage() {
               </div>
             }
           >
-            <div className="flex items-center justify-between p-3 bg-[#0B1437] rounded-xl">
+            <div className="flex items-center justify-between p-3 bg-[#06091A] rounded-xl">
               <div>
                 <p className="text-sm text-slate-200">Clear All Data</p>
                 <p className="text-xs text-slate-400">Remove all tasks and projects permanently</p>
@@ -731,7 +731,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Team */}
-      <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-6">
+      <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-6">
         <h3 className="text-sm font-semibold text-white mb-4">Team Members</h3>
         <div className="space-y-3">
           {SEED_USERS.map(u => {
@@ -766,7 +766,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Sign out */}
-      <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-6">
+      <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-6">
         <h3 className="text-sm font-semibold text-white mb-4">Session</h3>
         <div className="flex items-center justify-between">
           <div>
@@ -784,11 +784,11 @@ export default function SettingsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setCsvPreview(null)}>
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
           <div
-            className="relative bg-[#111C44] border border-[#1F3461] rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+            className="relative bg-[#0C1526] border border-[#1C3054] rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
             onClick={e => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="px-6 pt-5 pb-4 border-b border-[#1F3461] flex items-start justify-between gap-3">
+            <div className="px-6 pt-5 pb-4 border-b border-[#1C3054] flex items-start justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <FileSpreadsheet className="w-4 h-4 text-green-400" />
@@ -802,11 +802,11 @@ export default function SettingsPage() {
             </div>
 
             {/* Column mapping info */}
-            <div className="px-6 py-3 bg-[#0B1437] border-b border-[#1F3461]">
+            <div className="px-6 py-3 bg-[#06091A] border-b border-[#1C3054]">
               <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold mb-2">Detected columns</p>
               <div className="flex flex-wrap gap-2">
                 {csvPreview.headers.map((h, i) => (
-                  <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-[#1B254B] border border-[#1F3461] text-slate-300 font-mono">
+                  <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-[#122040] border border-[#1C3054] text-slate-300 font-mono">
                     {h || `col${i}`}
                   </span>
                 ))}
@@ -824,12 +824,12 @@ export default function SettingsPage() {
               <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold mb-2">
                 Preview (first {Math.min(5, csvPreview.rows.length)} of {csvPreview.rows.length} rows)
               </p>
-              <div className="overflow-x-auto rounded-xl border border-[#1F3461]">
+              <div className="overflow-x-auto rounded-xl border border-[#1C3054]">
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="bg-[#0B1437]">
+                    <tr className="bg-[#06091A]">
                       {csvPreview.headers.map((h, i) => (
-                        <th key={i} className="px-3 py-2 text-left text-slate-500 font-medium whitespace-nowrap border-b border-[#1F3461]">
+                        <th key={i} className="px-3 py-2 text-left text-slate-500 font-medium whitespace-nowrap border-b border-[#1C3054]">
                           {h || `col${i}`}
                         </th>
                       ))}
@@ -837,7 +837,7 @@ export default function SettingsPage() {
                   </thead>
                   <tbody>
                     {csvPreview.rows.slice(0, 5).map((row, ri) => (
-                      <tr key={ri} className="border-b border-[#1F3461] last:border-0 hover:bg-[#1B254B]/50">
+                      <tr key={ri} className="border-b border-[#1C3054] last:border-0 hover:bg-[#122040]/50">
                         {csvPreview.headers.map((_, ci) => (
                           <td key={ci} className="px-3 py-2 text-slate-300 max-w-[180px] truncate whitespace-nowrap">
                             {row[ci] ?? ''}
@@ -865,7 +865,7 @@ export default function SettingsPage() {
             </div>
 
             {/* Footer actions */}
-            <div className="px-6 pb-5 flex items-center gap-3 border-t border-[#1F3461] pt-4">
+            <div className="px-6 pb-5 flex items-center gap-3 border-t border-[#1C3054] pt-4">
               <button
                 onClick={handleCsvImport}
                 className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-green-500 hover:bg-green-600 text-white text-sm font-semibold transition-colors"
@@ -875,7 +875,7 @@ export default function SettingsPage() {
               </button>
               <button
                 onClick={() => setCsvPreview(null)}
-                className="px-4 py-2.5 rounded-xl border border-[#1F3461] text-slate-400 text-sm hover:text-slate-200 hover:border-slate-600 transition-colors"
+                className="px-4 py-2.5 rounded-xl border border-[#1C3054] text-slate-400 text-sm hover:text-slate-200 hover:border-slate-600 transition-colors"
               >
                 Cancel
               </button>

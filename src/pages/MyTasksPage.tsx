@@ -89,11 +89,11 @@ export default function MyTasksPage() {
                 'flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all',
                 quickFilter === 'today'
                   ? 'bg-amber-500/15 border-amber-500/30 text-amber-400'
-                  : 'border-[#1F3461] text-slate-500 hover:text-slate-300 bg-[#111C44]'
+                  : 'border-[#1C3054] text-slate-500 hover:text-slate-300 bg-[#0C1526]'
               )}
             >
               Due Today
-              <span className={cn('min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center', quickFilter === 'today' ? 'bg-amber-500/30' : 'bg-[#1B254B]')}>{dueTodayCount}</span>
+              <span className={cn('min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center', quickFilter === 'today' ? 'bg-amber-500/30' : 'bg-[#122040]')}>{dueTodayCount}</span>
             </button>
           )}
           {overdueCount > 0 && (
@@ -103,11 +103,11 @@ export default function MyTasksPage() {
                 'flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all',
                 quickFilter === 'overdue'
                   ? 'bg-red-500/15 border-red-500/30 text-red-400'
-                  : 'border-[#1F3461] text-slate-500 hover:text-slate-300 bg-[#111C44]'
+                  : 'border-[#1C3054] text-slate-500 hover:text-slate-300 bg-[#0C1526]'
               )}
             >
               Overdue
-              <span className={cn('min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center', quickFilter === 'overdue' ? 'bg-red-500/30' : 'bg-[#1B254B]')}>{overdueCount}</span>
+              <span className={cn('min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center', quickFilter === 'overdue' ? 'bg-red-500/30' : 'bg-[#122040]')}>{overdueCount}</span>
             </button>
           )}
           {highPriorityCount > 0 && (
@@ -117,11 +117,11 @@ export default function MyTasksPage() {
                 'flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all',
                 quickFilter === 'high'
                   ? 'bg-orange-500/15 border-orange-500/30 text-orange-400'
-                  : 'border-[#1F3461] text-slate-500 hover:text-slate-300 bg-[#111C44]'
+                  : 'border-[#1C3054] text-slate-500 hover:text-slate-300 bg-[#0C1526]'
               )}
             >
               High Priority
-              <span className={cn('min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center', quickFilter === 'high' ? 'bg-orange-500/30' : 'bg-[#1B254B]')}>{highPriorityCount}</span>
+              <span className={cn('min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center', quickFilter === 'high' ? 'bg-orange-500/30' : 'bg-[#122040]')}>{highPriorityCount}</span>
             </button>
           )}
           {thisWeekCount > 0 && (
@@ -131,11 +131,11 @@ export default function MyTasksPage() {
                 'flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all',
                 quickFilter === 'this-week'
                   ? 'bg-blue-500/15 border-blue-500/30 text-blue-400'
-                  : 'border-[#1F3461] text-slate-500 hover:text-slate-300 bg-[#111C44]'
+                  : 'border-[#1C3054] text-slate-500 hover:text-slate-300 bg-[#0C1526]'
               )}
             >
               This Week
-              <span className={cn('min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center', quickFilter === 'this-week' ? 'bg-blue-500/30' : 'bg-[#1B254B]')}>{thisWeekCount}</span>
+              <span className={cn('min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center', quickFilter === 'this-week' ? 'bg-blue-500/30' : 'bg-[#122040]')}>{thisWeekCount}</span>
             </button>
           )}
           {quickFilter !== 'none' && (
@@ -149,7 +149,7 @@ export default function MyTasksPage() {
       {/* Stats bar */}
       <div className="flex items-center gap-3 mb-5 overflow-x-auto pb-1">
         {stats.map(s => (
-          <div key={s.value} className="flex items-center gap-2 bg-[#111C44] border border-[#1F3461] rounded-xl px-3 py-2 flex-shrink-0">
+          <div key={s.value} className="flex items-center gap-2 bg-[#0C1526] border border-[#1C3054] rounded-xl px-3 py-2 flex-shrink-0">
             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: s.colour }} />
             <span className="text-xs text-slate-400">{s.label}</span>
             <span className="text-sm font-bold text-white">{s.count}</span>
@@ -176,7 +176,7 @@ export default function MyTasksPage() {
                   'px-2.5 py-1 rounded-lg text-xs font-medium border transition-all',
                   groupBy === opt.value
                     ? 'bg-blue-500 border-blue-500 text-white'
-                    : 'border-[#1F3461] text-slate-500 hover:text-slate-300 bg-[#111C44]'
+                    : 'border-[#1C3054] text-slate-500 hover:text-slate-300 bg-[#0C1526]'
                 )}
               >
                 {opt.label}

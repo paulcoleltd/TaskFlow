@@ -220,7 +220,7 @@ export function TaskList({ tasks, groupBy = 'status', projectId }: TaskListProps
                   }
                   {group.colour && <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: group.colour }} />}
                   <span className="text-sm font-semibold text-slate-300 group-hover/header:text-slate-100 transition-colors">{group.label}</span>
-                  <span className="text-xs text-slate-500 bg-[#1B254B] px-1.5 py-0.5 rounded-full">{group.tasks.length}</span>
+                  <span className="text-xs text-slate-500 bg-[#122040] px-1.5 py-0.5 rounded-full">{group.tasks.length}</span>
                 </button>
                 {/* Mark all done — only when canEdit and some tasks are not done */}
                 {group.tasks.some(t => t.status !== 'done' && canEditTask(role, t.assigneeId, userId)) && (
@@ -287,13 +287,13 @@ export function TaskList({ tasks, groupBy = 'status', projectId }: TaskListProps
                       onClick={() => !hasSelection ? setSelectedTask(task.id) : undefined}
                       onContextMenu={e => { e.preventDefault(); setCtxMenu({ task, x: e.clientX, y: e.clientY }); }}
                       className={cn(
-                        'relative flex items-center gap-4 px-4 py-3 bg-[#111C44] border rounded-xl transition-all group',
+                        'relative flex items-center gap-4 px-4 py-3 bg-[#0C1526] border rounded-xl transition-all group',
                         isDragging && 'opacity-40 scale-[0.99]',
                         isDropTop && 'border-t-2 border-t-blue-500',
                         isDropBot && 'border-b-2 border-b-blue-500',
                         isSelected
                           ? 'border-blue-500/50 bg-blue-500/5'
-                          : 'border-[#1F3461] hover:border-blue-500/40 hover:bg-[#1B254B] cursor-pointer'
+                          : 'border-[#1C3054] hover:border-blue-500/40 hover:bg-[#122040] cursor-pointer'
                       )}
                     >
                       {/* Drag handle */}
@@ -351,7 +351,7 @@ export function TaskList({ tasks, groupBy = 'status', projectId }: TaskListProps
                               setEditingTaskId(null);
                             }}
                             maxLength={256}
-                            className="flex-1 bg-[#0B1437] border border-blue-500 rounded-lg px-2 py-0.5 text-sm text-slate-100 outline-none min-w-0"
+                            className="flex-1 bg-[#06091A] border border-blue-500 rounded-lg px-2 py-0.5 text-sm text-slate-100 outline-none min-w-0"
                             onClick={e => e.stopPropagation()}
                           />
                         ) : (
@@ -401,7 +401,7 @@ export function TaskList({ tasks, groupBy = 'status', projectId }: TaskListProps
                 {/* Inline task creation — available when a projectId is provided */}
                 {projectId && canCreate && groupBy === 'status' && group.key !== 'done' && (
                   inlineGroup === group.key ? (
-                    <div className="flex items-center gap-3 px-4 py-2.5 bg-[#111C44] border border-blue-500/50 rounded-xl">
+                    <div className="flex items-center gap-3 px-4 py-2.5 bg-[#0C1526] border border-blue-500/50 rounded-xl">
                       <Plus className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
                       <input
                         ref={inlineRef}
@@ -427,7 +427,7 @@ export function TaskList({ tasks, groupBy = 'status', projectId }: TaskListProps
                   ) : (
                     <button
                       onClick={() => { setInlineGroup(group.key); setInlineTitle(''); setTimeout(() => inlineRef.current?.focus(), 30); }}
-                      className="flex items-center gap-2 w-full px-4 py-2 rounded-xl text-xs text-slate-600 hover:text-blue-400 hover:bg-[#111C44] transition-all"
+                      className="flex items-center gap-2 w-full px-4 py-2 rounded-xl text-xs text-slate-600 hover:text-blue-400 hover:bg-[#0C1526] transition-all"
                     >
                       <Plus className="w-3.5 h-3.5" />
                       Add task
@@ -456,7 +456,7 @@ export function TaskList({ tasks, groupBy = 'status', projectId }: TaskListProps
               }
               <div className="w-2 h-2 rounded-full flex-shrink-0 bg-green-500" />
               <span className="text-sm font-semibold text-slate-500 group-hover/header:text-slate-300 transition-colors">Completed</span>
-              <span className="text-xs text-slate-600 bg-[#1B254B] px-1.5 py-0.5 rounded-full">{doneTasks.length}</span>
+              <span className="text-xs text-slate-600 bg-[#122040] px-1.5 py-0.5 rounded-full">{doneTasks.length}</span>
             </button>
             {showCompleted && (
               <div className="space-y-1.5 opacity-60">
@@ -467,7 +467,7 @@ export function TaskList({ tasks, groupBy = 'status', projectId }: TaskListProps
                     <div
                       key={task.id}
                       onClick={() => setSelectedTask(task.id)}
-                      className="flex items-center gap-4 px-4 py-3 bg-[#111C44] border border-[#1F3461] rounded-xl hover:border-green-500/20 cursor-pointer transition-all group"
+                      className="flex items-center gap-4 px-4 py-3 bg-[#0C1526] border border-[#1C3054] rounded-xl hover:border-green-500/20 cursor-pointer transition-all group"
                     >
                       <button
                         onClick={e => { e.stopPropagation(); if (canEdit) updateTask(task.id, { status: 'todo' }); }}
@@ -545,11 +545,11 @@ export function TaskList({ tasks, groupBy = 'status', projectId }: TaskListProps
 
       {/* ── Bulk action toolbar — floats at bottom when items selected ─────── */}
       {hasSelection && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-[#111C44] border border-[#1F3461] rounded-2xl px-4 py-3 shadow-2xl shadow-black/50">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-[#0C1526] border border-[#1C3054] rounded-2xl px-4 py-3 shadow-2xl shadow-black/50">
           <span className="text-xs font-semibold text-slate-300 mr-1">
             {selected.size} selected
           </span>
-          <div className="w-px h-4 bg-[#1F3461]" />
+          <div className="w-px h-4 bg-[#1C3054]" />
 
           {/* Mark done */}
           <button
@@ -563,16 +563,16 @@ export function TaskList({ tasks, groupBy = 'status', projectId }: TaskListProps
 
           {/* Priority dropdown */}
           <div className="relative group/prio">
-            <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#1B254B] border border-[#1F3461] text-slate-300 hover:text-white hover:border-[#2A4080] text-xs font-medium transition-colors">
+            <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#122040] border border-[#1C3054] text-slate-300 hover:text-white hover:border-[#2A4080] text-xs font-medium transition-colors">
               <Flag className="w-3.5 h-3.5" />
               Priority
             </button>
-            <div className="absolute bottom-full mb-1 left-0 hidden group-hover/prio:flex flex-col bg-[#111C44] border border-[#1F3461] rounded-xl overflow-hidden shadow-xl z-10 min-w-[110px]">
+            <div className="absolute bottom-full mb-1 left-0 hidden group-hover/prio:flex flex-col bg-[#0C1526] border border-[#1C3054] rounded-xl overflow-hidden shadow-xl z-10 min-w-[110px]">
               {PRIORITY_OPTIONS.map(p => (
                 <button
                   key={p.value}
                   onClick={() => bulkSetPriority(p.value as Task['priority'])}
-                  className="flex items-center gap-2 px-3 py-2 hover:bg-[#1B254B] text-xs text-left transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 hover:bg-[#122040] text-xs text-left transition-colors"
                   style={{ color: p.colour }}
                 >
                   <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: p.colour }} />
@@ -584,14 +584,14 @@ export function TaskList({ tasks, groupBy = 'status', projectId }: TaskListProps
 
           {/* Assignee dropdown */}
           <div className="relative group/assign">
-            <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#1B254B] border border-[#1F3461] text-slate-300 hover:text-white hover:border-[#2A4080] text-xs font-medium transition-colors">
+            <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#122040] border border-[#1C3054] text-slate-300 hover:text-white hover:border-[#2A4080] text-xs font-medium transition-colors">
               <User className="w-3.5 h-3.5" />
               Assign
             </button>
-            <div className="absolute bottom-full mb-1 left-0 hidden group-hover/assign:flex flex-col bg-[#111C44] border border-[#1F3461] rounded-xl overflow-hidden shadow-xl z-10 min-w-[140px]">
+            <div className="absolute bottom-full mb-1 left-0 hidden group-hover/assign:flex flex-col bg-[#0C1526] border border-[#1C3054] rounded-xl overflow-hidden shadow-xl z-10 min-w-[140px]">
               <button
                 onClick={() => bulkAssign(undefined)}
-                className="flex items-center gap-2 px-3 py-2 hover:bg-[#1B254B] text-xs text-slate-500 text-left transition-colors"
+                className="flex items-center gap-2 px-3 py-2 hover:bg-[#122040] text-xs text-slate-500 text-left transition-colors"
               >
                 Unassign
               </button>
@@ -599,7 +599,7 @@ export function TaskList({ tasks, groupBy = 'status', projectId }: TaskListProps
                 <button
                   key={u.id}
                   onClick={() => bulkAssign(u.id)}
-                  className="flex items-center gap-2 px-3 py-2 hover:bg-[#1B254B] text-xs text-slate-300 text-left transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 hover:bg-[#122040] text-xs text-slate-300 text-left transition-colors"
                 >
                   <div className="w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center text-[8px] font-bold text-white" style={{ backgroundColor: u.colour }}>
                     {u.name[0]}
@@ -613,7 +613,7 @@ export function TaskList({ tasks, groupBy = 'status', projectId }: TaskListProps
           {/* Delete — admin only */}
           {canDelete && (
             <>
-              <div className="w-px h-4 bg-[#1F3461]" />
+              <div className="w-px h-4 bg-[#1C3054]" />
               <button
                 onClick={bulkDelete}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 text-xs font-medium transition-colors"
@@ -625,7 +625,7 @@ export function TaskList({ tasks, groupBy = 'status', projectId }: TaskListProps
             </>
           )}
 
-          <div className="w-px h-4 bg-[#1F3461]" />
+          <div className="w-px h-4 bg-[#1C3054]" />
           <button
             onClick={clearSelection}
             className="text-xs text-slate-500 hover:text-slate-300 transition-colors px-1"

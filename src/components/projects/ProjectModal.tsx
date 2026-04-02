@@ -60,7 +60,7 @@ export function ProjectModal() {
           <input
             type="date"
             {...register('dueDate')}
-            className="w-full bg-[#0B1437] border border-[#1F3461] focus:border-blue-500 rounded-xl px-3 py-2 text-sm text-slate-300 placeholder-slate-600 outline-none transition-colors [color-scheme:dark]"
+            className="w-full bg-[#06091A] border border-[#1C3054] focus:border-blue-500 rounded-xl px-3 py-2 text-sm text-slate-300 placeholder-slate-600 outline-none transition-colors [color-scheme:dark]"
           />
         </div>
         <div>
@@ -71,13 +71,13 @@ export function ProjectModal() {
                 key={c}
                 type="button"
                 onClick={() => setValue('colour', c)}
-                className={cn('w-7 h-7 rounded-full transition-all', selectedColour === c ? 'ring-2 ring-offset-2 ring-offset-[#111C44] ring-white scale-110' : 'hover:scale-105')}
+                className={cn('w-7 h-7 rounded-full transition-all', selectedColour === c ? 'ring-2 ring-offset-2 ring-offset-[#0C1526] ring-white scale-110' : 'hover:scale-105')}
                 style={{ backgroundColor: c }}
               />
             ))}
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full flex-shrink-0 border border-[#1F3461]" style={{ backgroundColor: selectedColour }} />
+            <div className="w-6 h-6 rounded-full flex-shrink-0 border border-[#1C3054]" style={{ backgroundColor: selectedColour }} />
             <input
               type="text"
               value={selectedColour}
@@ -85,9 +85,9 @@ export function ProjectModal() {
                 const val = e.target.value;
                 if (/^#[0-9A-Fa-f]{0,6}$/.test(val)) setValue('colour', val.length === 7 ? val : val);
               }}
-              placeholder="#3B82F6"
+              placeholder="#4B8CF7"
               maxLength={7}
-              className="flex-1 bg-[#0B1437] border border-[#1F3461] focus:border-blue-500 rounded-lg px-3 py-1.5 text-xs text-slate-300 placeholder-slate-600 outline-none font-mono transition-colors"
+              className="flex-1 bg-[#06091A] border border-[#1C3054] focus:border-blue-500 rounded-lg px-3 py-1.5 text-xs text-slate-300 placeholder-slate-600 outline-none font-mono transition-colors"
             />
             {errors.colour && <span className="text-xs text-red-400">{errors.colour.message}</span>}
           </div>

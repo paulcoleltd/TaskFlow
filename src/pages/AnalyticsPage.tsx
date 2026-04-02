@@ -9,7 +9,7 @@ import { SEED_USERS } from '../lib/sampleData';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LineChart, Line } from 'recharts';
 import { cn } from '../lib/utils';
 
-const CHART_STYLE = { backgroundColor: '#111C44', border: '1px solid #1F3461', borderRadius: 8, color: '#E2E8F0', fontSize: 12 };
+const CHART_STYLE = { backgroundColor: '#0C1526', border: '1px solid #1C3054', borderRadius: 8, color: '#E2E8F0', fontSize: 12 };
 
 type DateRange = '7d' | '30d' | '90d' | '6m' | 'all';
 const DATE_RANGES: { value: DateRange; label: string }[] = [
@@ -108,7 +108,7 @@ export default function AnalyticsPage() {
     const completedTasks = tasks.filter(t => t.status === 'done');
     const buckets = [
       { label: 'Same day', min: 0, max: 0, count: 0, colour: '#10B981' },
-      { label: '1–3 days', min: 1, max: 3, count: 0, colour: '#3B82F6' },
+      { label: '1–3 days', min: 1, max: 3, count: 0, colour: '#4B8CF7' },
       { label: '4–7 days', min: 4, max: 7, count: 0, colour: '#8B5CF6' },
       { label: '8–14 d',   min: 8, max: 14, count: 0, colour: '#F59E0B' },
       { label: '15+ days', min: 15, max: Infinity, count: 0, colour: '#EF4444' },
@@ -180,7 +180,7 @@ export default function AnalyticsPage() {
           name: sp.name.length > 12 ? sp.name.slice(0, 12) + '…' : sp.name,
           velocity: sp.velocity ?? 0,
           project: project?.name ?? 'Unknown',
-          colour: project?.colour ?? '#3B82F6',
+          colour: project?.colour ?? '#4B8CF7',
         };
       });
   }, [sprints, projects]);
@@ -205,7 +205,7 @@ export default function AnalyticsPage() {
                 'px-3 py-1 rounded-lg text-xs font-medium border transition-all',
                 dateRange === r.value
                   ? 'bg-blue-500 border-blue-500 text-white'
-                  : 'border-[#1F3461] text-slate-500 hover:text-slate-300 bg-[#111C44]'
+                  : 'border-[#1C3054] text-slate-500 hover:text-slate-300 bg-[#0C1526]'
               )}
             >
               {r.label}
@@ -222,14 +222,14 @@ export default function AnalyticsPage() {
       {/* KPI cards */}
       <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
         {[
-          { label: 'Total Tasks', value: tasks.length, colour: '#3B82F6' },
+          { label: 'Total Tasks', value: tasks.length, colour: '#4B8CF7' },
           { label: 'Completed', value: done, colour: '#10B981' },
           { label: 'Overdue', value: overdue, colour: '#EF4444' },
           { label: 'Completion Rate', value: `${tasks.length ? Math.round((done / tasks.length) * 100) : 0}%`, colour: '#8B5CF6' },
           { label: 'Avg Velocity', value: `${avgVelocity}/wk`, colour: '#F59E0B' },
           { label: 'Sprint Velocity', value: avgSprintVelocity > 0 ? `${avgSprintVelocity} tasks` : '—', colour: '#06B6D4' },
         ].map(({ label, value, colour }) => (
-          <div key={label} className="bg-[#111C44] border border-[#1F3461] rounded-xl p-5">
+          <div key={label} className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-5">
             <p className="text-xs text-slate-400 mb-2 uppercase tracking-wider">{label}</p>
             <p className="text-3xl font-bold" style={{ color: colour }}>{value}</p>
           </div>
@@ -238,21 +238,21 @@ export default function AnalyticsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Completed per week — real data */}
-        <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-5">
+        <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-5">
           <h3 className="text-sm font-semibold text-white mb-1">Completed Per Week</h3>
           <p className="text-xs text-slate-500 mb-4">Tasks marked done over the last 8 weeks</p>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={weeklyCompleted} barSize={20}>
               <XAxis dataKey="week" tick={{ fill: '#64748B', fontSize: 11 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fill: '#64748B', fontSize: 11 }} axisLine={false} tickLine={false} width={24} allowDecimals={false} />
-              <Tooltip contentStyle={CHART_STYLE} cursor={{ fill: '#1B254B' }} />
-              <Bar dataKey="completed" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+              <Tooltip contentStyle={CHART_STYLE} cursor={{ fill: '#122040' }} />
+              <Bar dataKey="completed" fill="#4B8CF7" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
         {/* Status distribution */}
-        <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-5">
+        <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-5">
           <h3 className="text-sm font-semibold text-white mb-4">Status Distribution</h3>
           <ResponsiveContainer width="100%" height={200}>
             <PieChart>
@@ -266,13 +266,13 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Priority breakdown */}
-        <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-5">
+        <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-5">
           <h3 className="text-sm font-semibold text-white mb-4">Priority Breakdown</h3>
           <ResponsiveContainer width="100%" height={160}>
             <BarChart data={priorityData} layout="vertical" barSize={16}>
               <XAxis type="number" tick={{ fill: '#64748B', fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} />
               <YAxis type="category" dataKey="name" tick={{ fill: '#94A3B8', fontSize: 11 }} axisLine={false} tickLine={false} width={60} />
-              <Tooltip contentStyle={CHART_STYLE} cursor={{ fill: '#1B254B' }} />
+              <Tooltip contentStyle={CHART_STYLE} cursor={{ fill: '#122040' }} />
               <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                 {priorityData.map((e, i) => <Cell key={i} fill={e.colour} />)}
               </Bar>
@@ -281,29 +281,29 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Completion trend */}
-        <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-5">
+        <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-5">
           <h3 className="text-sm font-semibold text-white mb-4">Completion Trend</h3>
           <ResponsiveContainer width="100%" height={160}>
             <LineChart data={weeklyCompleted}>
               <XAxis dataKey="week" tick={{ fill: '#64748B', fontSize: 11 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fill: '#64748B', fontSize: 11 }} axisLine={false} tickLine={false} width={24} allowDecimals={false} />
               <Tooltip contentStyle={CHART_STYLE} />
-              <Line type="monotone" dataKey="completed" stroke="#3B82F6" strokeWidth={2} dot={{ fill: '#3B82F6', r: 3 }} />
+              <Line type="monotone" dataKey="completed" stroke="#4B8CF7" strokeWidth={2} dot={{ fill: '#4B8CF7', r: 3 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
 
         {/* Team performance */}
-        <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-5 lg:col-span-2">
+        <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-5 lg:col-span-2">
           <h3 className="text-sm font-semibold text-white mb-1">Team Performance</h3>
           <p className="text-xs text-slate-500 mb-4">Tasks assigned, in progress, and completed per team member</p>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={teamData} barSize={20} barGap={4}>
               <XAxis dataKey="name" tick={{ fill: '#94A3B8', fontSize: 12 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fill: '#64748B', fontSize: 11 }} axisLine={false} tickLine={false} width={24} allowDecimals={false} />
-              <Tooltip contentStyle={CHART_STYLE} cursor={{ fill: '#1B254B' }} />
+              <Tooltip contentStyle={CHART_STYLE} cursor={{ fill: '#122040' }} />
               <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11, color: '#94A3B8' }} />
-              <Bar dataKey="assigned" name="Assigned" fill="#1F3461" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="assigned" name="Assigned" fill="#1C3054" radius={[4, 4, 0, 0]} />
               <Bar dataKey="inProgress" name="In Progress" fill="#F59E0B" radius={[4, 4, 0, 0]} />
               <Bar dataKey="completed" name="Completed" fill="#10B981" radius={[4, 4, 0, 0]} />
             </BarChart>
@@ -312,7 +312,7 @@ export default function AnalyticsPage() {
 
         {/* Sprint velocity */}
         {sprintVelocityData.length > 0 && (
-          <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-5 lg:col-span-2">
+          <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-5 lg:col-span-2">
             <h3 className="text-sm font-semibold text-white mb-1">Sprint Velocity</h3>
             <p className="text-xs text-slate-500 mb-4">
               Tasks completed per sprint — avg <span className="text-slate-300 font-medium">{avgSprintVelocity} tasks/sprint</span> across {sprintVelocityData.length} sprint{sprintVelocityData.length !== 1 ? 's' : ''}
@@ -323,7 +323,7 @@ export default function AnalyticsPage() {
                 <YAxis tick={{ fill: '#64748B', fontSize: 11 }} axisLine={false} tickLine={false} width={24} allowDecimals={false} />
                 <Tooltip
                   contentStyle={CHART_STYLE}
-                  cursor={{ fill: '#1B254B' }}
+                  cursor={{ fill: '#122040' }}
                   formatter={(v, _name, props) => [`${v} tasks`, props.payload.project]}
                 />
                 <Bar dataKey="velocity" name="Velocity" radius={[4, 4, 0, 0]}>
@@ -336,14 +336,14 @@ export default function AnalyticsPage() {
 
         {/* Tasks by project */}
         {projectData.length > 0 && (
-          <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-5 lg:col-span-2">
+          <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-5 lg:col-span-2">
             <h3 className="text-sm font-semibold text-white mb-4">Tasks by Project</h3>
             <ResponsiveContainer width="100%" height={180}>
               <BarChart data={projectData} barSize={24} barGap={4}>
                 <XAxis dataKey="name" tick={{ fill: '#64748B', fontSize: 11 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fill: '#64748B', fontSize: 11 }} axisLine={false} tickLine={false} width={24} allowDecimals={false} />
-                <Tooltip contentStyle={CHART_STYLE} cursor={{ fill: '#1B254B' }} />
-                <Bar dataKey="total" name="Total" fill="#1F3461" radius={[4, 4, 0, 0]} />
+                <Tooltip contentStyle={CHART_STYLE} cursor={{ fill: '#122040' }} />
+                <Bar dataKey="total" name="Total" fill="#1C3054" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="done" name="Done" radius={[4, 4, 0, 0]}>
                   {projectData.map((e, i) => <Cell key={i} fill={e.colour} />)}
                 </Bar>
@@ -355,7 +355,7 @@ export default function AnalyticsPage() {
 
         {/* Completion rate per project */}
         {completionRateData.length > 0 && (
-          <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-5 lg:col-span-2">
+          <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-5 lg:col-span-2">
             <h3 className="text-sm font-semibold text-white mb-1">Completion Rate by Project</h3>
             <p className="text-xs text-slate-500 mb-4">Percentage of tasks marked done</p>
             <div className="space-y-3">
@@ -365,7 +365,7 @@ export default function AnalyticsPage() {
                     <span className="text-slate-300 truncate max-w-[200px]">{p.name}</span>
                     <span className="text-slate-400 font-medium ml-2">{p.rate}%</span>
                   </div>
-                  <div className="h-2 bg-[#1B254B] rounded-full overflow-hidden">
+                  <div className="h-2 bg-[#122040] rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all duration-500"
                       style={{ width: `${p.rate}%`, backgroundColor: p.colour }}
@@ -379,16 +379,16 @@ export default function AnalyticsPage() {
 
         {/* Time tracking summary */}
         {timeData && (
-          <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-5 lg:col-span-2">
+          <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-5 lg:col-span-2">
             <h3 className="text-sm font-semibold text-white mb-1">Time Tracking</h3>
             <p className="text-xs text-slate-500 mb-4">Estimated vs logged hours across all tasks</p>
             <ResponsiveContainer width="100%" height={120}>
               <BarChart data={timeData} layout="vertical" barSize={28} barGap={6}>
                 <XAxis type="number" tick={{ fill: '#64748B', fontSize: 11 }} axisLine={false} tickLine={false} unit="h" />
                 <YAxis type="category" dataKey="name" hide />
-                <Tooltip contentStyle={CHART_STYLE} cursor={{ fill: '#1B254B' }} formatter={(v) => [`${v}h`]} />
-                <Bar dataKey="estimated" name="Estimated" fill="#1F3461" radius={[0, 4, 4, 0]} />
-                <Bar dataKey="logged" name="Logged" fill="#3B82F6" radius={[0, 4, 4, 0]} />
+                <Tooltip contentStyle={CHART_STYLE} cursor={{ fill: '#122040' }} formatter={(v) => [`${v}h`]} />
+                <Bar dataKey="estimated" name="Estimated" fill="#1C3054" radius={[0, 4, 4, 0]} />
+                <Bar dataKey="logged" name="Logged" fill="#4B8CF7" radius={[0, 4, 4, 0]} />
                 <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11, color: '#94A3B8' }} />
               </BarChart>
             </ResponsiveContainer>
@@ -397,7 +397,7 @@ export default function AnalyticsPage() {
 
         {/* Cycle time distribution */}
         {cycleTimeData.length > 0 && (
-          <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-5">
+          <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-5">
             <h3 className="text-sm font-semibold text-white mb-1">Cycle Time Distribution</h3>
             <p className="text-xs text-slate-500 mb-1">Days from creation to completion — avg <span className="text-slate-300 font-medium">{avgCycleTime}d</span></p>
             <div className="mb-4" />
@@ -405,7 +405,7 @@ export default function AnalyticsPage() {
               <BarChart data={cycleTimeData} barSize={28}>
                 <XAxis dataKey="label" tick={{ fill: '#64748B', fontSize: 10 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fill: '#64748B', fontSize: 11 }} axisLine={false} tickLine={false} width={24} allowDecimals={false} />
-                <Tooltip contentStyle={CHART_STYLE} cursor={{ fill: '#1B254B' }} />
+                <Tooltip contentStyle={CHART_STYLE} cursor={{ fill: '#122040' }} />
                 <Bar dataKey="count" name="Tasks" radius={[4, 4, 0, 0]}>
                   {cycleTimeData.map((e, i) => <Cell key={i} fill={e.colour} />)}
                 </Bar>
@@ -416,14 +416,14 @@ export default function AnalyticsPage() {
 
         {/* Tag usage */}
         {tagUsageData.length > 0 && (
-          <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-5">
+          <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-5">
             <h3 className="text-sm font-semibold text-white mb-1">Tag Usage</h3>
             <p className="text-xs text-slate-500 mb-4">Tasks per tag across the workspace</p>
             <ResponsiveContainer width="100%" height={180}>
               <BarChart data={tagUsageData} layout="vertical" barSize={14}>
                 <XAxis type="number" tick={{ fill: '#64748B', fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} />
                 <YAxis type="category" dataKey="name" tick={{ fill: '#94A3B8', fontSize: 11 }} axisLine={false} tickLine={false} width={64} />
-                <Tooltip contentStyle={CHART_STYLE} cursor={{ fill: '#1B254B' }} />
+                <Tooltip contentStyle={CHART_STYLE} cursor={{ fill: '#122040' }} />
                 <Bar dataKey="value" name="Tasks" radius={[0, 4, 4, 0]}>
                   {tagUsageData.map((e, i) => <Cell key={i} fill={e.colour} />)}
                 </Bar>
@@ -434,7 +434,7 @@ export default function AnalyticsPage() {
 
         {/* Due date adherence */}
         {adherenceData.length > 0 && (
-          <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-5">
+          <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-5">
             <h3 className="text-sm font-semibold text-white mb-1">Due Date Adherence</h3>
             <p className="text-xs text-slate-500 mb-4">Completed tasks delivered on time vs late</p>
             <ResponsiveContainer width="100%" height={180}>

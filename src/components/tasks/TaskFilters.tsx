@@ -91,7 +91,7 @@ export function TaskFilters({ filters, onChange, view, onViewChange, showTimelin
   return (
     <div className="flex flex-wrap items-center gap-3 mb-6">
       {/* Search */}
-      <div className="relative flex items-center gap-2 bg-[#111C44] border border-[#1F3461] rounded-xl px-3 py-2">
+      <div className="relative flex items-center gap-2 bg-[#0C1526] border border-[#1C3054] rounded-xl px-3 py-2">
         <Search className="w-3.5 h-3.5 text-slate-500" />
         <input
           value={filters.search}
@@ -116,7 +116,7 @@ export function TaskFilters({ filters, onChange, view, onViewChange, showTimelin
               'px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-all',
               filters.status.includes(s.value)
                 ? 'border-transparent text-white'
-                : 'border-[#1F3461] text-slate-500 hover:text-slate-300 bg-[#111C44]'
+                : 'border-[#1C3054] text-slate-500 hover:text-slate-300 bg-[#0C1526]'
             )}
             style={filters.status.includes(s.value) ? { backgroundColor: s.colour, borderColor: s.colour } : undefined}
           >
@@ -135,7 +135,7 @@ export function TaskFilters({ filters, onChange, view, onViewChange, showTimelin
               'px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-all',
               filters.priority.includes(p.value)
                 ? 'border-transparent text-white'
-                : 'border-[#1F3461] text-slate-500 hover:text-slate-300 bg-[#111C44]'
+                : 'border-[#1C3054] text-slate-500 hover:text-slate-300 bg-[#0C1526]'
             )}
             style={filters.priority.includes(p.value) ? { backgroundColor: p.colour + '33', borderColor: p.colour + '66', color: p.colour } : undefined}
           >
@@ -154,7 +154,7 @@ export function TaskFilters({ filters, onChange, view, onViewChange, showTimelin
               'px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-all',
               filters.tags.includes(tag.id)
                 ? 'border-transparent'
-                : 'border-[#1F3461] text-slate-500 hover:text-slate-300 bg-[#111C44]'
+                : 'border-[#1C3054] text-slate-500 hover:text-slate-300 bg-[#0C1526]'
             )}
             style={filters.tags.includes(tag.id) ? { backgroundColor: tag.colour + '22', borderColor: tag.colour + '44', color: tag.colour } : undefined}
           >
@@ -174,7 +174,7 @@ export function TaskFilters({ filters, onChange, view, onViewChange, showTimelin
               title={user.name}
               className={cn(
                 'w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold text-white transition-all ring-2',
-                active ? 'ring-offset-1 ring-offset-[#0B1437] scale-110' : 'ring-transparent opacity-50 hover:opacity-100'
+                active ? 'ring-offset-1 ring-offset-[#06091A] scale-110' : 'ring-transparent opacity-50 hover:opacity-100'
               )}
               style={{
                 backgroundColor: user.colour,
@@ -188,7 +188,7 @@ export function TaskFilters({ filters, onChange, view, onViewChange, showTimelin
       </div>
 
       {/* Sort */}
-      <div className="flex items-center gap-1 bg-[#111C44] border border-[#1F3461] rounded-xl px-2 py-1.5">
+      <div className="flex items-center gap-1 bg-[#0C1526] border border-[#1C3054] rounded-xl px-2 py-1.5">
         <ArrowUpDown className="w-3 h-3 text-slate-500 flex-shrink-0" />
         <select
           value={filters.sortBy}
@@ -220,7 +220,7 @@ export function TaskFilters({ filters, onChange, view, onViewChange, showTimelin
             'flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs transition-all',
             showViewsPanel
               ? 'bg-blue-500/10 border-blue-500/30 text-blue-400'
-              : 'bg-[#111C44] border-[#1F3461] text-slate-500 hover:text-slate-300'
+              : 'bg-[#0C1526] border-[#1C3054] text-slate-500 hover:text-slate-300'
           )}
           title="Saved views"
         >
@@ -229,8 +229,8 @@ export function TaskFilters({ filters, onChange, view, onViewChange, showTimelin
         </button>
 
         {showViewsPanel && (
-          <div className="absolute top-full mt-2 left-0 w-64 bg-[#111C44] border border-[#1F3461] rounded-2xl shadow-2xl z-50 overflow-hidden">
-            <div className="px-4 py-3 border-b border-[#1F3461]">
+          <div className="absolute top-full mt-2 left-0 w-64 bg-[#0C1526] border border-[#1C3054] rounded-2xl shadow-2xl z-50 overflow-hidden">
+            <div className="px-4 py-3 border-b border-[#1C3054]">
               <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Save current filters as view</p>
               <div className="flex gap-2">
                 <input
@@ -246,7 +246,7 @@ export function TaskFilters({ filters, onChange, view, onViewChange, showTimelin
                   }}
                   placeholder="View name…"
                   maxLength={32}
-                  className="flex-1 bg-[#0B1437] border border-[#1F3461] focus:border-blue-500 rounded-lg px-2 py-1 text-xs text-slate-200 placeholder-slate-600 outline-none transition-colors"
+                  className="flex-1 bg-[#06091A] border border-[#1C3054] focus:border-blue-500 rounded-lg px-2 py-1 text-xs text-slate-200 placeholder-slate-600 outline-none transition-colors"
                 />
                 <button
                   onClick={() => { if (saveViewName.trim()) { saveView(saveViewName.trim(), filters); setSaveViewName(''); } }}
@@ -263,7 +263,7 @@ export function TaskFilters({ filters, onChange, view, onViewChange, showTimelin
             ) : (
               <div className="max-h-48 overflow-y-auto">
                 {savedViews.map(sv => (
-                  <div key={sv.name} className="flex items-center gap-2 px-4 py-2 hover:bg-[#1B254B] transition-colors group">
+                  <div key={sv.name} className="flex items-center gap-2 px-4 py-2 hover:bg-[#122040] transition-colors group">
                     <button
                       onClick={() => { onChange(sv.filters); setShowViewsPanel(false); }}
                       className="flex-1 text-left text-sm text-slate-300 hover:text-white truncate"
@@ -286,7 +286,7 @@ export function TaskFilters({ filters, onChange, view, onViewChange, showTimelin
       </div>
 
       {/* View switcher — pushed to right */}
-      <div className="ml-auto flex items-center gap-1 bg-[#111C44] border border-[#1F3461] rounded-xl p-1">
+      <div className="ml-auto flex items-center gap-1 bg-[#0C1526] border border-[#1C3054] rounded-xl p-1">
         {VIEWS.map(({ value, icon: Icon, title }) => (
           <button
             key={value}

@@ -426,14 +426,14 @@ export function TaskDetail() {
       <div className="fixed inset-0 z-30 bg-black/30" onClick={() => setSelectedTask(null)} />
 
       {/* Panel */}
-      <div className="fixed right-0 top-0 h-full w-full sm:w-96 bg-[#111C44] border-l border-[#1F3461] z-40 flex flex-col overflow-hidden">
+      <div className="fixed right-0 top-0 h-full w-full sm:w-96 bg-[#0C1526] border-l border-[#1C3054] z-40 flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#1F3461]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#1C3054]">
           <div className="flex items-center gap-1">
             {/* Pin toggle — visible to all */}
             <button
               onClick={() => { togglePin(task.id); if (!task.pinned) logActivity(task.id, userId, 'pinned'); }}
-              className={cn('p-1.5 rounded-lg hover:bg-[#1B254B] transition-colors', task.pinned ? 'text-amber-400' : 'text-slate-400 hover:text-amber-400')}
+              className={cn('p-1.5 rounded-lg hover:bg-[#122040] transition-colors', task.pinned ? 'text-amber-400' : 'text-slate-400 hover:text-amber-400')}
               title={task.pinned ? 'Unpin task' : 'Pin task'}
             >
               <Pin className={cn('w-4 h-4', task.pinned && 'fill-amber-400')} />
@@ -441,7 +441,7 @@ export function TaskDetail() {
             <RoleGuard allowed={canEdit}>
               <button
                 onClick={() => { openTaskModal(task.id); setSelectedTask(null); }}
-                className="p-1.5 rounded-lg hover:bg-[#1B254B] text-slate-400 hover:text-blue-400 transition-colors"
+                className="p-1.5 rounded-lg hover:bg-[#122040] text-slate-400 hover:text-blue-400 transition-colors"
                 title="Edit task"
               >
                 <Edit2 className="w-4 h-4" />
@@ -450,7 +450,7 @@ export function TaskDetail() {
             <RoleGuard allowed={canEdit}>
               <button
                 onClick={handleClone}
-                className="p-1.5 rounded-lg hover:bg-[#1B254B] text-slate-400 hover:text-green-400 transition-colors"
+                className="p-1.5 rounded-lg hover:bg-[#122040] text-slate-400 hover:text-green-400 transition-colors"
                 title="Duplicate task"
               >
                 <Copy className="w-4 h-4" />
@@ -458,7 +458,7 @@ export function TaskDetail() {
             </RoleGuard>
             <button
               onClick={handleSaveAsTemplate}
-              className="p-1.5 rounded-lg hover:bg-[#1B254B] text-slate-400 hover:text-amber-400 transition-colors"
+              className="p-1.5 rounded-lg hover:bg-[#122040] text-slate-400 hover:text-amber-400 transition-colors"
               title="Save as template"
             >
               <BookmarkPlus className="w-4 h-4" />
@@ -475,12 +475,12 @@ export function TaskDetail() {
           </div>
           <button
             onClick={openFocusMode}
-            className="p-1.5 rounded-lg hover:bg-[#1B254B] text-slate-400 hover:text-blue-400 transition-colors"
+            className="p-1.5 rounded-lg hover:bg-[#122040] text-slate-400 hover:text-blue-400 transition-colors"
             title="Focus mode (F)"
           >
             <Maximize2 className="w-4 h-4" />
           </button>
-          <button aria-label="Close" onClick={() => setSelectedTask(null)} className="p-1.5 rounded-lg hover:bg-[#1B254B] text-slate-400 hover:text-slate-200 transition-colors">
+          <button aria-label="Close" onClick={() => setSelectedTask(null)} className="p-1.5 rounded-lg hover:bg-[#122040] text-slate-400 hover:text-slate-200 transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -493,7 +493,7 @@ export function TaskDetail() {
               <h2 className={cn('flex-1 text-base font-semibold text-white', task.status === 'done' && 'line-through text-slate-400')}>{task.title}</h2>
               <button
                 onClick={() => { navigator.clipboard.writeText(task.title); toast.success('Copied to clipboard'); }}
-                className="p-1 rounded-lg hover:bg-[#1B254B] text-slate-600 hover:text-slate-400 transition-colors flex-shrink-0"
+                className="p-1 rounded-lg hover:bg-[#122040] text-slate-600 hover:text-slate-400 transition-colors flex-shrink-0"
                 title="Copy title"
               >
                 <Copy className="w-3.5 h-3.5" />
@@ -518,7 +518,7 @@ export function TaskDetail() {
                     }}
                     rows={3}
                     maxLength={4096}
-                    className="w-full bg-[#0B1437] border border-blue-500 rounded-xl px-3 py-2 text-sm text-slate-200 placeholder-slate-600 outline-none resize-none transition-colors"
+                    className="w-full bg-[#06091A] border border-blue-500 rounded-xl px-3 py-2 text-sm text-slate-200 placeholder-slate-600 outline-none resize-none transition-colors"
                     placeholder="Add a description…"
                   />
                   <div className="flex items-center gap-2 mt-1.5">
@@ -537,7 +537,7 @@ export function TaskDetail() {
                   title="Click to edit description"
                 >
                   {task.description ? (
-                    <div className="border border-transparent hover:border-[#1F3461] rounded-lg px-2 py-1 -mx-2 -my-1 transition-colors group-hover/desc:border-[#1F3461]">
+                    <div className="border border-transparent hover:border-[#1C3054] rounded-lg px-2 py-1 -mx-2 -my-1 transition-colors group-hover/desc:border-[#1C3054]">
                       <Markdown>{task.description}</Markdown>
                     </div>
                   ) : (
@@ -656,9 +656,9 @@ export function TaskDetail() {
                   }}
                   className="bg-transparent border-0 outline-none text-sm text-slate-400 cursor-pointer hover:text-slate-200 transition-colors"
                 >
-                  <option value="" className="bg-[#111C44] text-slate-400">Unassigned</option>
+                  <option value="" className="bg-[#0C1526] text-slate-400">Unassigned</option>
                   {SEED_USERS.map(u => (
-                    <option key={u.id} value={u.id} className="bg-[#111C44] text-slate-200">{u.name}</option>
+                    <option key={u.id} value={u.id} className="bg-[#0C1526] text-slate-200">{u.name}</option>
                   ))}
                 </select>
               ) : assignee ? (
@@ -716,7 +716,7 @@ export function TaskDetail() {
                     className="bg-transparent border-0 outline-none text-sm text-slate-400 cursor-pointer hover:text-slate-200 transition-colors"
                   >
                     {RECURRENCE_OPTIONS.map(r => (
-                      <option key={r.value} value={r.value} className="bg-[#111C44]">{r.label}</option>
+                      <option key={r.value} value={r.value} className="bg-[#0C1526]">{r.label}</option>
                     ))}
                   </select>
                 ) : (
@@ -739,12 +739,12 @@ export function TaskDetail() {
                           {task.estimatedHours}h estimated
                         </span>
                       </div>
-                      <div className="h-1.5 bg-[#1B254B] rounded-full overflow-hidden">
+                      <div className="h-1.5 bg-[#122040] rounded-full overflow-hidden">
                         <div
                           className="h-full rounded-full transition-all"
                           style={{
                             width: `${Math.min(100, ((task.loggedHours ?? 0) / task.estimatedHours!) * 100)}%`,
-                            backgroundColor: (task.loggedHours ?? 0) > task.estimatedHours! ? '#EF4444' : '#3B82F6',
+                            backgroundColor: (task.loggedHours ?? 0) > task.estimatedHours! ? '#EF4444' : '#4B8CF7',
                           }}
                         />
                       </div>
@@ -819,7 +819,7 @@ export function TaskDetail() {
                         placeholder="Hours (e.g. 1.5)"
                         min="0.1"
                         step="0.5"
-                        className="flex-1 bg-[#0B1437] border border-[#1F3461] focus:border-blue-500 rounded-lg px-2 py-1 text-xs text-slate-200 placeholder-slate-600 outline-none transition-colors"
+                        className="flex-1 bg-[#06091A] border border-[#1C3054] focus:border-blue-500 rounded-lg px-2 py-1 text-xs text-slate-200 placeholder-slate-600 outline-none transition-colors"
                       />
                       <button onClick={handleLogTime} disabled={!logHours || parseFloat(logHours) <= 0} className="px-2.5 py-1 rounded-lg bg-blue-500 text-white text-xs font-medium hover:bg-blue-600 disabled:opacity-40 transition-colors">Log</button>
                       <button onClick={() => { setShowLogTime(false); setLogHours(''); }} className="text-xs text-slate-500 hover:text-slate-300 transition-colors">✕</button>
@@ -837,7 +837,7 @@ export function TaskDetail() {
                         placeholder="Estimate in hours"
                         min="0.1"
                         step="0.5"
-                        className="flex-1 bg-[#0B1437] border border-[#1F3461] focus:border-amber-500 rounded-lg px-2 py-1 text-xs text-slate-200 placeholder-slate-600 outline-none transition-colors"
+                        className="flex-1 bg-[#06091A] border border-[#1C3054] focus:border-amber-500 rounded-lg px-2 py-1 text-xs text-slate-200 placeholder-slate-600 outline-none transition-colors"
                       />
                       <button onClick={handleSetEstimate} disabled={!estimateInput || parseFloat(estimateInput) <= 0} className="px-2.5 py-1 rounded-lg bg-amber-500 text-white text-xs font-medium hover:bg-amber-600 disabled:opacity-40 transition-colors">Set</button>
                       <button onClick={() => { setShowSetEstimate(false); setEstimateInput(''); }} className="text-xs text-slate-500 hover:text-slate-300 transition-colors">✕</button>
@@ -877,7 +877,7 @@ export function TaskDetail() {
                   {canEdit && (
                     <button
                       onClick={() => setShowDepPicker(v => !v)}
-                      className="p-1 rounded-lg hover:bg-[#1B254B] text-slate-500 hover:text-blue-400 transition-colors"
+                      className="p-1 rounded-lg hover:bg-[#122040] text-slate-500 hover:text-blue-400 transition-colors"
                       title="Add blocker"
                     >
                       <Plus className="w-3.5 h-3.5" />
@@ -887,13 +887,13 @@ export function TaskDetail() {
 
                 {/* Dependency picker */}
                 {showDepPicker && canEdit && (
-                  <div className="mb-2 bg-[#0B1437] border border-[#1F3461] rounded-xl overflow-hidden">
+                  <div className="mb-2 bg-[#06091A] border border-[#1C3054] rounded-xl overflow-hidden">
                     <input
                       autoFocus
                       value={depSearch}
                       onChange={e => setDepSearch(e.target.value)}
                       placeholder="Search tasks to add as blockers…"
-                      className="w-full bg-transparent px-3 py-2 text-xs text-slate-200 placeholder-slate-600 outline-none border-b border-[#1F3461]"
+                      className="w-full bg-transparent px-3 py-2 text-xs text-slate-200 placeholder-slate-600 outline-none border-b border-[#1C3054]"
                     />
                     {eligible.length === 0 ? (
                       <p className="text-xs text-slate-600 px-3 py-2 italic">No tasks found</p>
@@ -908,7 +908,7 @@ export function TaskDetail() {
                             setDepSearch('');
                             setShowDepPicker(false);
                           }}
-                          className="w-full flex items-center gap-2 px-3 py-2 hover:bg-[#1B254B] transition-colors text-left border-t border-[#1F3461] first:border-0"
+                          className="w-full flex items-center gap-2 px-3 py-2 hover:bg-[#122040] transition-colors text-left border-t border-[#1C3054] first:border-0"
                         >
                           <span className={cn('w-1.5 h-1.5 rounded-full flex-shrink-0', t.status === 'done' ? 'bg-green-400' : 'bg-slate-500')} />
                           <span className="text-xs text-slate-300 flex-1 truncate">{t.title}</span>
@@ -923,7 +923,7 @@ export function TaskDetail() {
                 {blockers.length > 0 && (
                   <div className="space-y-1">
                     {blockers.map(blocker => (
-                      <div key={blocker.id} className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-[#0B1437] border border-[#1F3461]">
+                      <div key={blocker.id} className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-[#06091A] border border-[#1C3054]">
                         <span className={cn('w-1.5 h-1.5 rounded-full flex-shrink-0', blocker.status === 'done' ? 'bg-green-400' : 'bg-red-400')} />
                         <button
                           onClick={() => setSelectedTask(blocker.id)}
@@ -965,7 +965,7 @@ export function TaskDetail() {
               {canEdit && (
                 <button
                   onClick={() => { setShowSubtaskInput(v => !v); setTimeout(() => subtaskInputRef.current?.focus(), 50); }}
-                  className="p-1 rounded-lg hover:bg-[#1B254B] text-slate-500 hover:text-blue-400 transition-colors"
+                  className="p-1 rounded-lg hover:bg-[#122040] text-slate-500 hover:text-blue-400 transition-colors"
                   title="Add subtask"
                 >
                   <Plus className="w-3.5 h-3.5" />
@@ -979,7 +979,7 @@ export function TaskDetail() {
                   key={sub.id}
                   className={cn(
                     'flex items-center gap-2.5 p-2 rounded-lg transition-colors group/sub',
-                    canEdit ? 'hover:bg-[#1B254B]' : 'opacity-70'
+                    canEdit ? 'hover:bg-[#122040]' : 'opacity-70'
                   )}
                 >
                   <button
@@ -1029,7 +1029,7 @@ export function TaskDetail() {
                   onKeyDown={e => { if (e.key === 'Enter') handleAddSubtask(); if (e.key === 'Escape') { setShowSubtaskInput(false); setNewSubtask(''); } }}
                   placeholder="New subtask…"
                   maxLength={100}
-                  className="flex-1 bg-[#0B1437] border border-[#1F3461] focus:border-blue-500 rounded-lg px-3 py-1.5 text-xs text-slate-200 placeholder-slate-600 outline-none transition-colors"
+                  className="flex-1 bg-[#06091A] border border-[#1C3054] focus:border-blue-500 rounded-lg px-3 py-1.5 text-xs text-slate-200 placeholder-slate-600 outline-none transition-colors"
                 />
                 <button
                   onClick={handleAddSubtask}
@@ -1054,7 +1054,7 @@ export function TaskDetail() {
               {canEdit && (
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="p-1 rounded-lg hover:bg-[#1B254B] text-slate-500 hover:text-blue-400 transition-colors"
+                  className="p-1 rounded-lg hover:bg-[#122040] text-slate-500 hover:text-blue-400 transition-colors"
                   title="Attach file"
                 >
                   <Plus className="w-3.5 h-3.5" />
@@ -1069,15 +1069,15 @@ export function TaskDetail() {
                   const Icon = getFileIcon(attachment.type);
                   const isImage = attachment.type.startsWith('image/');
                   return (
-                    <div key={attachment.id} className="flex items-center gap-2.5 p-2 rounded-lg bg-[#0B1437] border border-[#1F3461] group/att hover:border-[#2A4080] transition-colors">
+                    <div key={attachment.id} className="flex items-center gap-2.5 p-2 rounded-lg bg-[#06091A] border border-[#1C3054] group/att hover:border-[#2A4080] transition-colors">
                       {isImage ? (
                         <img
                           src={attachment.data}
                           alt={attachment.name}
-                          className="w-8 h-8 rounded object-cover flex-shrink-0 border border-[#1F3461]"
+                          className="w-8 h-8 rounded object-cover flex-shrink-0 border border-[#1C3054]"
                         />
                       ) : (
-                        <div className="w-8 h-8 rounded flex items-center justify-center bg-[#111C44] flex-shrink-0">
+                        <div className="w-8 h-8 rounded flex items-center justify-center bg-[#0C1526] flex-shrink-0">
                           <Icon className="w-4 h-4 text-blue-400" />
                         </div>
                       )}
@@ -1089,7 +1089,7 @@ export function TaskDetail() {
                         <button
                           onClick={() => handleDownloadAttachment(attachment)}
                           title="Download"
-                          className="p-1 rounded-lg hover:bg-[#1B254B] text-slate-500 hover:text-emerald-400 transition-colors"
+                          className="p-1 rounded-lg hover:bg-[#122040] text-slate-500 hover:text-emerald-400 transition-colors"
                         >
                           <Download className="w-3.5 h-3.5" />
                         </button>
@@ -1097,7 +1097,7 @@ export function TaskDetail() {
                           <button
                             onClick={() => handleRemoveAttachment(attachment.id)}
                             title="Remove attachment"
-                            className="p-1 rounded-lg hover:bg-[#1B254B] text-slate-500 hover:text-red-400 transition-colors"
+                            className="p-1 rounded-lg hover:bg-[#122040] text-slate-500 hover:text-red-400 transition-colors"
                           >
                             <X className="w-3.5 h-3.5" />
                           </button>
@@ -1120,7 +1120,7 @@ export function TaskDetail() {
                   'flex items-center justify-center gap-2 border border-dashed rounded-xl py-3 px-4 cursor-pointer transition-colors',
                   dragOver
                     ? 'border-blue-500 bg-blue-500/10 text-blue-400'
-                    : 'border-[#1F3461] hover:border-[#2A4080] text-slate-600 hover:text-slate-400'
+                    : 'border-[#1C3054] hover:border-[#2A4080] text-slate-600 hover:text-slate-400'
                 )}
               >
                 <Paperclip className="w-3.5 h-3.5 flex-shrink-0" />
@@ -1213,7 +1213,7 @@ export function TaskDetail() {
                           {author.name.split(' ').map((n: string) => n[0]).join('')}
                         </div>
                       )}
-                      <div className="flex-1 bg-[#1B254B] rounded-lg p-2.5">
+                      <div className="flex-1 bg-[#122040] rounded-lg p-2.5">
                         <div className="flex items-baseline justify-between mb-1">
                           <div className="flex items-center gap-1.5">
                             <span className="text-xs font-medium text-slate-300">{author?.name}</span>
@@ -1258,7 +1258,7 @@ export function TaskDetail() {
                               autoFocus
                               rows={2}
                               maxLength={500}
-                              className="w-full bg-[#0B1437] border border-blue-500 rounded-lg px-2 py-1.5 text-xs text-slate-200 outline-none resize-none"
+                              className="w-full bg-[#06091A] border border-blue-500 rounded-lg px-2 py-1.5 text-xs text-slate-200 outline-none resize-none"
                             />
                             <div className="flex gap-2 mt-1.5">
                               <button onClick={handleSaveEditComment} className="text-[10px] text-blue-400 hover:text-blue-300 font-medium transition-colors">Save</button>
@@ -1313,7 +1313,7 @@ export function TaskDetail() {
                                     'flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] border transition-all',
                                     reactors.includes(uid)
                                       ? 'bg-blue-500/15 border-blue-500/30 text-blue-300'
-                                      : 'bg-[#0B1437] border-[#1F3461] text-slate-500 hover:border-slate-600'
+                                      : 'bg-[#06091A] border-[#1C3054] text-slate-500 hover:border-slate-600'
                                   )}
                                 >
                                   <span>{emoji}</span>
@@ -1322,15 +1322,15 @@ export function TaskDetail() {
                               ))}
                               {/* Add reaction picker */}
                               <div className="relative group/rxn">
-                                <button className="opacity-0 group-hover:opacity-100 p-0.5 rounded-full text-slate-600 hover:text-slate-400 hover:bg-[#1B254B] transition-all text-[10px]">
+                                <button className="opacity-0 group-hover:opacity-100 p-0.5 rounded-full text-slate-600 hover:text-slate-400 hover:bg-[#122040] transition-all text-[10px]">
                                   +
                                 </button>
-                                <div className="absolute bottom-full left-0 mb-1 hidden group-hover/rxn:flex bg-[#111C44] border border-[#1F3461] rounded-xl p-1.5 gap-1 shadow-lg z-50">
+                                <div className="absolute bottom-full left-0 mb-1 hidden group-hover/rxn:flex bg-[#0C1526] border border-[#1C3054] rounded-xl p-1.5 gap-1 shadow-lg z-50">
                                   {EMOJI_OPTIONS.map(emoji => (
                                     <button
                                       key={emoji}
                                       onClick={() => toggleReaction(emoji)}
-                                      className="text-sm hover:scale-125 transition-transform px-1 py-0.5 rounded hover:bg-[#1B254B]"
+                                      className="text-sm hover:scale-125 transition-transform px-1 py-0.5 rounded hover:bg-[#122040]"
                                     >
                                       {emoji}
                                     </button>
@@ -1359,13 +1359,13 @@ export function TaskDetail() {
                 <div className="flex-1 relative">
                   {/* @mention suggestion dropdown */}
                   {mentionSuggestions.length > 0 && (
-                    <div className="absolute bottom-full left-0 mb-1 w-52 bg-[#111C44] border border-[#1F3461] rounded-xl shadow-lg overflow-hidden z-50">
+                    <div className="absolute bottom-full left-0 mb-1 w-52 bg-[#0C1526] border border-[#1C3054] rounded-xl shadow-lg overflow-hidden z-50">
                       {mentionSuggestions.map(user => (
                         <button
                           key={user.id}
                           type="button"
                           onMouseDown={e => { e.preventDefault(); insertMention(user); }}
-                          className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-[#1B254B] transition-colors text-left"
+                          className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-[#122040] transition-colors text-left"
                         >
                           <div className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white flex-shrink-0" style={{ backgroundColor: user.colour }}>
                             {user.name.split(' ').map(n => n[0]).join('')}
@@ -1387,7 +1387,7 @@ export function TaskDetail() {
                     placeholder="Add a comment… (type @ to mention)"
                     rows={2}
                     maxLength={500}
-                    className="w-full bg-[#0B1437] border border-[#1F3461] focus:border-blue-500 rounded-xl px-3 py-2 text-xs text-slate-200 placeholder-slate-600 outline-none resize-none transition-colors"
+                    className="w-full bg-[#06091A] border border-[#1C3054] focus:border-blue-500 rounded-xl px-3 py-2 text-xs text-slate-200 placeholder-slate-600 outline-none resize-none transition-colors"
                   />
                   <button
                     onClick={handleAddComment}

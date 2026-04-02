@@ -203,7 +203,7 @@ export function TaskModal() {
                   key={tpl.id}
                   type="button"
                   onClick={() => applyTemplate(tpl.id)}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[#0B1437] border border-[#1F3461] hover:border-blue-500/40 hover:bg-[#1B254B] text-xs text-slate-400 hover:text-slate-200 transition-all"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[#06091A] border border-[#1C3054] hover:border-blue-500/40 hover:bg-[#122040] text-xs text-slate-400 hover:text-slate-200 transition-all"
                 >
                   <span>{tpl.icon}</span>
                   {tpl.name}
@@ -248,7 +248,7 @@ export function TaskModal() {
                 <button
                   type="button"
                   onClick={() => setSelectedSprintId('')}
-                  className={cn('text-xs font-medium px-2.5 py-1 rounded-full border transition-all', selectedSprintId === '' ? 'bg-slate-500/15 border-slate-500/40 text-slate-300' : 'border-[#1F3461] text-slate-500 hover:border-slate-600 hover:text-slate-400')}
+                  className={cn('text-xs font-medium px-2.5 py-1 rounded-full border transition-all', selectedSprintId === '' ? 'bg-slate-500/15 border-slate-500/40 text-slate-300' : 'border-[#1C3054] text-slate-500 hover:border-slate-600 hover:text-slate-400')}
                 >
                   Backlog
                 </button>
@@ -257,7 +257,7 @@ export function TaskModal() {
                     key={sp.id}
                     type="button"
                     onClick={() => setSelectedSprintId(sp.id)}
-                    className={cn('text-xs font-medium px-2.5 py-1 rounded-full border transition-all', selectedSprintId === sp.id ? 'bg-blue-500/15 border-blue-500/40 text-blue-300' : 'border-[#1F3461] text-slate-500 hover:border-slate-600 hover:text-slate-400')}
+                    className={cn('text-xs font-medium px-2.5 py-1 rounded-full border transition-all', selectedSprintId === sp.id ? 'bg-blue-500/15 border-blue-500/40 text-blue-300' : 'border-[#1C3054] text-slate-500 hover:border-slate-600 hover:text-slate-400')}
                   >
                     {sp.name}
                     {sp.status === 'active' && <span className="ml-1 text-green-400">●</span>}
@@ -283,7 +283,7 @@ export function TaskModal() {
                     'text-xs font-medium px-2.5 py-1 rounded-full border transition-all',
                     active
                       ? 'border-transparent'
-                      : 'border-[#1F3461] text-slate-400 hover:border-slate-500'
+                      : 'border-[#1C3054] text-slate-400 hover:border-slate-500'
                   )}
                   style={active ? { backgroundColor: `${tag.colour}22`, color: tag.colour, borderColor: `${tag.colour}44` } : {}}
                 >
@@ -303,7 +303,7 @@ export function TaskModal() {
           {subtasks.length > 0 && (
             <div className="space-y-1.5 mb-2">
               {subtasks.map(sub => (
-                <div key={sub.id} className="flex items-center gap-2 bg-[#0B1437] rounded-lg px-3 py-2">
+                <div key={sub.id} className="flex items-center gap-2 bg-[#06091A] rounded-lg px-3 py-2">
                   <span className="flex-1 text-sm text-slate-300 truncate">{sub.title}</span>
                   <button type="button" onClick={() => removeSubtask(sub.id)} className="text-slate-600 hover:text-red-400 transition-colors flex-shrink-0">
                     <X className="w-3.5 h-3.5" />
@@ -321,13 +321,13 @@ export function TaskModal() {
               onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addSubtask(); } }}
               placeholder="Add a subtask…"
               maxLength={256}
-              className="flex-1 bg-[#0B1437] border border-[#1F3461] focus:border-blue-500 rounded-xl px-3 py-2 text-sm text-slate-200 placeholder-slate-600 outline-none transition-colors"
+              className="flex-1 bg-[#06091A] border border-[#1C3054] focus:border-blue-500 rounded-xl px-3 py-2 text-sm text-slate-200 placeholder-slate-600 outline-none transition-colors"
             />
             <button
               type="button"
               onClick={addSubtask}
               disabled={!newSubtask.trim()}
-              className="p-2 rounded-xl bg-[#0B1437] border border-[#1F3461] text-slate-400 hover:text-blue-400 hover:border-blue-500 disabled:opacity-30 transition-all"
+              className="p-2 rounded-xl bg-[#06091A] border border-[#1C3054] text-slate-400 hover:text-blue-400 hover:border-blue-500 disabled:opacity-30 transition-all"
             >
               <Plus className="w-4 h-4" />
             </button>

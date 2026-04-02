@@ -196,8 +196,8 @@ export default function SearchPage() {
     <div className="max-w-3xl mx-auto space-y-5">
       {/* Search input */}
       <div className={cn(
-        'flex items-center gap-3 bg-[#111C44] border rounded-2xl px-4 py-3 transition-colors',
-        q ? 'border-blue-500/50' : 'border-[#1F3461]'
+        'flex items-center gap-3 bg-[#0C1526] border rounded-2xl px-4 py-3 transition-colors',
+        q ? 'border-blue-500/50' : 'border-[#1C3054]'
       )}>
         <Search className="w-5 h-5 text-slate-400 flex-shrink-0" />
         <input
@@ -226,7 +226,7 @@ export default function SearchPage() {
               'px-3 py-1.5 rounded-xl text-xs font-medium border transition-all capitalize',
               scope === s
                 ? 'bg-blue-500/20 border-blue-500/40 text-blue-300'
-                : 'border-[#1F3461] text-slate-500 hover:text-slate-300 bg-[#111C44]'
+                : 'border-[#1C3054] text-slate-500 hover:text-slate-300 bg-[#0C1526]'
             )}
           >
             {s === 'all' ? 'Everything' : s}
@@ -235,13 +235,13 @@ export default function SearchPage() {
           </button>
         ))}
 
-        <div className="w-px h-5 bg-[#1F3461] mx-1" />
+        <div className="w-px h-5 bg-[#1C3054] mx-1" />
 
         {/* Status filter */}
         <select
           value={statusFilter}
           onChange={e => setStatusFilter(e.target.value)}
-          className="bg-[#111C44] border border-[#1F3461] rounded-xl px-2.5 py-1.5 text-xs text-slate-400 outline-none"
+          className="bg-[#0C1526] border border-[#1C3054] rounded-xl px-2.5 py-1.5 text-xs text-slate-400 outline-none"
         >
           <option value="">Any status</option>
           <option value="todo">To Do</option>
@@ -255,7 +255,7 @@ export default function SearchPage() {
         <select
           value={priorityFilter}
           onChange={e => setPriorityFilter(e.target.value)}
-          className="bg-[#111C44] border border-[#1F3461] rounded-xl px-2.5 py-1.5 text-xs text-slate-400 outline-none"
+          className="bg-[#0C1526] border border-[#1C3054] rounded-xl px-2.5 py-1.5 text-xs text-slate-400 outline-none"
         >
           <option value="">Any priority</option>
           <option value="critical">Critical</option>
@@ -271,7 +271,7 @@ export default function SearchPage() {
             'flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ml-auto',
             (showAdvanced || hasAdvancedFilters)
               ? 'bg-purple-500/20 border-purple-500/40 text-purple-300'
-              : 'border-[#1F3461] text-slate-500 hover:text-slate-300 bg-[#111C44]'
+              : 'border-[#1C3054] text-slate-500 hover:text-slate-300 bg-[#0C1526]'
           )}
         >
           Filters
@@ -288,7 +288,7 @@ export default function SearchPage() {
 
       {/* Advanced filters panel */}
       {showAdvanced && (
-        <div className="bg-[#111C44] border border-[#1F3461] rounded-xl p-4 space-y-3">
+        <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-4 space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Assignee */}
             <div>
@@ -296,7 +296,7 @@ export default function SearchPage() {
               <select
                 value={assigneeFilter}
                 onChange={e => setAssigneeFilter(e.target.value)}
-                className="w-full bg-[#0B1437] border border-[#1F3461] rounded-xl px-2.5 py-1.5 text-xs text-slate-400 outline-none"
+                className="w-full bg-[#06091A] border border-[#1C3054] rounded-xl px-2.5 py-1.5 text-xs text-slate-400 outline-none"
               >
                 <option value="">Anyone</option>
                 {SEED_USERS.map(u => (
@@ -313,14 +313,14 @@ export default function SearchPage() {
                   type="date"
                   value={dueDateFrom}
                   onChange={e => setDueDateFrom(e.target.value)}
-                  className="flex-1 bg-[#0B1437] border border-[#1F3461] rounded-xl px-2 py-1.5 text-xs text-slate-400 outline-none [color-scheme:dark]"
+                  className="flex-1 bg-[#06091A] border border-[#1C3054] rounded-xl px-2 py-1.5 text-xs text-slate-400 outline-none [color-scheme:dark]"
                 />
                 <span className="text-slate-600 text-xs">to</span>
                 <input
                   type="date"
                   value={dueDateTo}
                   onChange={e => setDueDateTo(e.target.value)}
-                  className="flex-1 bg-[#0B1437] border border-[#1F3461] rounded-xl px-2 py-1.5 text-xs text-slate-400 outline-none [color-scheme:dark]"
+                  className="flex-1 bg-[#06091A] border border-[#1C3054] rounded-xl px-2 py-1.5 text-xs text-slate-400 outline-none [color-scheme:dark]"
                 />
               </div>
             </div>
@@ -339,7 +339,7 @@ export default function SearchPage() {
                       onClick={() => toggleTag(tag.id)}
                       className={cn(
                         'text-xs font-medium px-2.5 py-1 rounded-full border transition-all',
-                        active ? 'border-transparent' : 'border-[#1F3461] text-slate-500 hover:text-slate-300'
+                        active ? 'border-transparent' : 'border-[#1C3054] text-slate-500 hover:text-slate-300'
                       )}
                       style={active ? { backgroundColor: `${tag.colour}22`, color: tag.colour, borderColor: `${tag.colour}55` } : {}}
                     >
@@ -390,7 +390,7 @@ export default function SearchPage() {
                     <button
                       key={result.id}
                       onClick={() => setSelectedTask(result.id)}
-                      className="w-full text-left bg-[#111C44] border border-[#1F3461] hover:border-blue-500/30 hover:bg-[#1B254B] rounded-xl p-4 transition-all group"
+                      className="w-full text-left bg-[#0C1526] border border-[#1C3054] hover:border-blue-500/30 hover:bg-[#122040] rounded-xl p-4 transition-all group"
                     >
                       {/* Title row */}
                       <div className="flex items-start gap-3 mb-2">
@@ -481,7 +481,7 @@ export default function SearchPage() {
                     <button
                       key={result.id}
                       onClick={() => navigate(`/projects/${result.id}`)}
-                      className="w-full text-left bg-[#111C44] border border-[#1F3461] hover:border-blue-500/30 hover:bg-[#1B254B] rounded-xl p-4 transition-all group"
+                      className="w-full text-left bg-[#0C1526] border border-[#1C3054] hover:border-blue-500/30 hover:bg-[#122040] rounded-xl p-4 transition-all group"
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-xl flex-shrink-0" style={{ backgroundColor: result.colour + '33', border: `1px solid ${result.colour}44` }}>

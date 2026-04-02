@@ -14,7 +14,7 @@ import type { ActivityVerb } from '../types';
 /* ── Verb metadata ─────────────────────────────────────── */
 const VERB_META: Record<ActivityVerb, { label: string; colour: string; Icon: typeof CheckCircle2 }> = {
   created:           { label: 'Created',           colour: '#10B981', Icon: CheckCircle2    },
-  status_changed:    { label: 'Status changed',    colour: '#3B82F6', Icon: ArrowRightLeft  },
+  status_changed:    { label: 'Status changed',    colour: '#4B8CF7', Icon: ArrowRightLeft  },
   priority_changed:  { label: 'Priority changed',  colour: '#F59E0B', Icon: AlertTriangle   },
   assigned:          { label: 'Assigned',          colour: '#8B5CF6', Icon: UserCheck       },
   commented:         { label: 'Commented',         colour: '#64748B', Icon: MessageSquare   },
@@ -51,7 +51,7 @@ function FilterPill({
         'flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-medium border transition-all',
         active
           ? 'border-transparent text-white'
-          : 'border-[#1F3461] text-slate-500 hover:text-slate-300 bg-[#111C44]'
+          : 'border-[#1C3054] text-slate-500 hover:text-slate-300 bg-[#0C1526]'
       )}
       style={active && colour ? { backgroundColor: colour + '22', borderColor: colour + '55', color: colour } : undefined}
     >
@@ -128,7 +128,7 @@ export default function ActivityPage() {
       </div>
 
       {/* Filter bar */}
-      <div className="bg-[#111C44] border border-[#1F3461] rounded-2xl p-4 space-y-3">
+      <div className="bg-[#0C1526] border border-[#1C3054] rounded-2xl p-4 space-y-3">
         {/* Event type filters */}
         <div>
           <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Event type</p>
@@ -166,7 +166,7 @@ export default function ActivityPage() {
                     'flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-medium border transition-all',
                     active
                       ? 'border-transparent text-white'
-                      : 'border-[#1F3461] text-slate-500 hover:text-slate-300 bg-[#0B1437]'
+                      : 'border-[#1C3054] text-slate-500 hover:text-slate-300 bg-[#06091A]'
                   )}
                   style={active ? { backgroundColor: user.colour + '22', borderColor: user.colour + '55', color: user.colour } : undefined}
                 >
@@ -200,7 +200,7 @@ export default function ActivityPage() {
                     'flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-medium border transition-all',
                     active
                       ? 'border-transparent text-white'
-                      : 'border-[#1F3461] text-slate-500 hover:text-slate-300 bg-[#0B1437]'
+                      : 'border-[#1C3054] text-slate-500 hover:text-slate-300 bg-[#06091A]'
                   )}
                   style={active ? { backgroundColor: p.colour + '22', borderColor: p.colour + '55', color: p.colour } : undefined}
                 >
@@ -222,7 +222,7 @@ export default function ActivityPage() {
       ) : (
         <div className="relative">
           {/* Vertical timeline line */}
-          <div className="absolute left-5 top-0 bottom-0 w-px bg-[#1F3461]" />
+          <div className="absolute left-5 top-0 bottom-0 w-px bg-[#1C3054]" />
 
           <div className="space-y-1">
             {visible.map((event, i) => {
@@ -250,7 +250,7 @@ export default function ActivityPage() {
                     </div>
                   )}
 
-                  <div className="flex items-start gap-4 py-2.5 px-2 rounded-xl hover:bg-[#111C44]/60 transition-colors group">
+                  <div className="flex items-start gap-4 py-2.5 px-2 rounded-xl hover:bg-[#0C1526]/60 transition-colors group">
                     {/* Timeline dot with verb icon */}
                     <div
                       className="relative z-10 w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
@@ -314,7 +314,7 @@ export default function ActivityPage() {
             <div className="flex justify-center pt-4">
               <button
                 onClick={() => setPage(p => p + 1)}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#111C44] border border-[#1F3461] text-xs text-slate-400 hover:text-slate-200 hover:border-slate-500 transition-all"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0C1526] border border-[#1C3054] text-xs text-slate-400 hover:text-slate-200 hover:border-slate-500 transition-all"
               >
                 <ChevronDown className="w-3.5 h-3.5" />
                 Load more ({filtered.length - visible.length} remaining)

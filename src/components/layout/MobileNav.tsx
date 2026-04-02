@@ -22,7 +22,7 @@ export function MobileNav() {
   const myTaskCount = tasks.filter(t => t.assigneeId === currentUser?.id && t.status !== 'done').length;
 
   return (
-    <nav className="md:hidden fixed bottom-0 inset-x-0 bg-[#111C44] border-t border-[#1F3461] flex items-center justify-around px-2 py-2 z-40">
+    <nav className="md:hidden fixed bottom-0 inset-x-0 bg-[#0C1526] border-t border-[#1C3054] flex items-center justify-around px-2 py-2 z-40">
       {NAV.slice(0, 2).map(({ to, icon: Icon, label }) => (
         <NavLink key={to} to={to} end={to === '/'} className={({ isActive }) =>
           cn('flex flex-col items-center gap-0.5 px-4 py-1 rounded-xl text-xs font-medium transition-colors relative',

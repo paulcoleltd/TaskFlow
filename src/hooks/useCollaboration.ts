@@ -24,9 +24,9 @@ import type { Task, Project, Status, Comment } from '../types';
 
 const TOAST_STYLE = {
   style: {
-    background: '#111C44',
+    background: '#0C1526',
     color: '#E2E8F0',
-    border: '1px solid #1F3461',
+    border: '1px solid #1C3054',
     fontSize: 13,
   },
 };

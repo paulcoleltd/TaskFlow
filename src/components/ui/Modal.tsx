@@ -27,12 +27,12 @@ export function Modal({ open, onClose, title, children, size = 'md' }: ModalProp
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <div
         ref={ref}
-        className={cn('relative w-full rounded-2xl bg-[#111C44] border border-[#1F3461] shadow-card overflow-hidden', sizes[size])}
+        className={cn('relative w-full rounded-2xl bg-[#0C1526] border border-[#1C3054] shadow-card overflow-hidden', sizes[size])}
       >
         {title && (
-          <div className="flex items-center justify-between px-6 py-4 border-b border-[#1F3461]">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-[#1C3054]">
             <h2 className="text-base font-semibold text-white">{title}</h2>
-            <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#1B254B] text-slate-400 hover:text-slate-200 transition-colors">
+            <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#122040] text-slate-400 hover:text-slate-200 transition-colors">
               <X className="w-4 h-4" />
             </button>
           </div>

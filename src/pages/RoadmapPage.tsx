@@ -67,7 +67,7 @@ function MilestoneMarker({
       />
       {/* Tooltip on hover */}
       <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover/ms:block z-30 pointer-events-none">
-        <div className="bg-[#0B1437] border border-[#1F3461] rounded-lg px-2 py-1.5 text-[10px] whitespace-nowrap shadow-xl">
+        <div className="bg-[#06091A] border border-[#1C3054] rounded-lg px-2 py-1.5 text-[10px] whitespace-nowrap shadow-xl">
           <p className="text-white font-medium">{milestone.title}</p>
           <p style={{ color: colour }}>{format(new Date(milestone.dueDate), 'd MMM yyyy')}</p>
         </div>
@@ -94,9 +94,9 @@ function ProjectRow({ project, viewStart, totalDays, tasksDone, tasksTotal, isOv
   const bar = computeBarSegment(projectStart, projectEnd, viewStart, totalDays);
 
   return (
-    <div className="flex items-center border-b border-[#1F3461] last:border-0 group/row hover:bg-[#1B254B]/30 transition-colors">
+    <div className="flex items-center border-b border-[#1C3054] last:border-0 group/row hover:bg-[#122040]/30 transition-colors">
       {/* Project label column */}
-      <div className="flex-shrink-0 w-44 px-3 py-3 flex items-center gap-2 border-r border-[#1F3461]">
+      <div className="flex-shrink-0 w-44 px-3 py-3 flex items-center gap-2 border-r border-[#1C3054]">
         <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: project.colour }} />
         <div className="min-w-0">
           <button
@@ -242,19 +242,19 @@ export default function RoadmapPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setAnchorMonth(m => subMonths(m, 1))}
-            className="p-1.5 rounded-lg border border-[#1F3461] text-slate-400 hover:text-slate-200 hover:border-slate-600 transition-colors"
+            className="p-1.5 rounded-lg border border-[#1C3054] text-slate-400 hover:text-slate-200 hover:border-slate-600 transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
           <button
             onClick={() => setAnchorMonth(startOfMonth(new Date()))}
-            className="px-3 py-1.5 rounded-lg border border-[#1F3461] text-xs text-slate-400 hover:text-slate-200 hover:border-slate-600 transition-colors"
+            className="px-3 py-1.5 rounded-lg border border-[#1C3054] text-xs text-slate-400 hover:text-slate-200 hover:border-slate-600 transition-colors"
           >
             Today
           </button>
           <button
             onClick={() => setAnchorMonth(m => addMonths(m, 1))}
-            className="p-1.5 rounded-lg border border-[#1F3461] text-slate-400 hover:text-slate-200 hover:border-slate-600 transition-colors"
+            className="p-1.5 rounded-lg border border-[#1C3054] text-slate-400 hover:text-slate-200 hover:border-slate-600 transition-colors"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -298,17 +298,17 @@ export default function RoadmapPage() {
           </button>
         </div>
       ) : (
-        <div className="bg-[#111C44] border border-[#1F3461] rounded-xl overflow-hidden">
+        <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl overflow-hidden">
           {/* Month header row */}
-          <div className="flex border-b border-[#1F3461]">
-            <div className="flex-shrink-0 w-44 border-r border-[#1F3461] px-3 py-2">
+          <div className="flex border-b border-[#1C3054]">
+            <div className="flex-shrink-0 w-44 border-r border-[#1C3054] px-3 py-2">
               <span className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Project</span>
             </div>
             <div className="flex-1 relative h-9">
               {months.map((m, i) => (
                 <div
                   key={i}
-                  className="absolute inset-y-0 flex items-center px-2 border-r border-[#1F3461] last:border-0"
+                  className="absolute inset-y-0 flex items-center px-2 border-r border-[#1C3054] last:border-0"
                   style={{ left: `${m.left}%`, width: `${m.width}%` }}
                 >
                   <span className="text-[10px] font-semibold text-slate-400 truncate">{m.label}</span>
@@ -330,7 +330,7 @@ export default function RoadmapPage() {
             {months.slice(1).map((m, i) => (
               <div
                 key={i}
-                className="absolute inset-y-0 w-px bg-[#1F3461]/60 pointer-events-none z-0"
+                className="absolute inset-y-0 w-px bg-[#1C3054]/60 pointer-events-none z-0"
                 style={{ left: `calc(176px + ${m.left / 100} * (100% - 176px))` }}
               />
             ))}
@@ -360,7 +360,7 @@ export default function RoadmapPage() {
           </div>
 
           {/* Legend */}
-          <div className="flex items-center gap-6 px-4 py-3 border-t border-[#1F3461] bg-[#0B1437]">
+          <div className="flex items-center gap-6 px-4 py-3 border-t border-[#1C3054] bg-[#06091A]">
             <span className="text-[10px] text-slate-600 uppercase tracking-wider font-semibold">Legend</span>
             <span className="flex items-center gap-1.5 text-[10px] text-slate-400">
               <div className="w-6 h-2 rounded bg-blue-500/70" />
@@ -403,11 +403,11 @@ export default function RoadmapPage() {
         if (allMilestones.length === 0) return null;
 
         return (
-          <div className="mt-6 bg-[#111C44] border border-[#1F3461] rounded-xl p-5">
+          <div className="mt-6 bg-[#0C1526] border border-[#1C3054] rounded-xl p-5">
             <div className="flex items-center gap-2 mb-4">
               <Flag className="w-4 h-4 text-amber-400" />
               <h3 className="text-sm font-semibold text-white">Milestones in View</h3>
-              <span className="text-[10px] text-slate-500 bg-[#1B254B] px-1.5 py-0.5 rounded-full">
+              <span className="text-[10px] text-slate-500 bg-[#122040] px-1.5 py-0.5 rounded-full">
                 {allMilestones.length}
               </span>
             </div>
@@ -417,7 +417,7 @@ export default function RoadmapPage() {
                 const overdue = !m.completed && isBefore(due, startOfDay(new Date()));
                 const colour = m.completed ? '#10B981' : overdue ? '#EF4444' : '#F59E0B';
                 return (
-                  <div key={m.id} className="flex items-center gap-3 p-2.5 bg-[#0B1437] rounded-xl">
+                  <div key={m.id} className="flex items-center gap-3 p-2.5 bg-[#06091A] rounded-xl">
                     {m.completed
                       ? <CheckCircle2 className="w-4 h-4 text-green-400 flex-shrink-0" />
                       : overdue

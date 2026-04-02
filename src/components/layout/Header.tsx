@@ -114,20 +114,20 @@ export function Header({ title }: { title?: string }) {
   };
 
   return (
-    <header className="h-14 flex items-center justify-between px-6 bg-[#0B1437] border-b border-[#1F3461] flex-shrink-0">
-      <h1 className="text-base font-semibold text-white">{title}</h1>
+    <header className="h-14 flex items-center justify-between px-6 glass border-b border-[#1C3054]/60 flex-shrink-0 sticky top-0 z-30">
+      <h1 className="text-base font-semibold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">{title}</h1>
 
       <div className="flex items-center gap-3">
         {/* Command palette trigger */}
         <button
           onClick={openCommandPalette}
-          className="hidden sm:flex items-center gap-2 rounded-xl bg-[#111C44] border border-[#1F3461] px-3 py-1.5 text-slate-500 hover:text-slate-300 hover:border-[#2A4080] transition-all"
+          className="hidden sm:flex items-center gap-2 rounded-xl bg-[#0C1526]/60 border border-[#1C3054] px-3 py-1.5 text-slate-500 hover:text-slate-300 hover:border-[#4B8CF7]/40 hover:bg-[#122040]/60 transition-all duration-200"
         >
           <Command className="w-3.5 h-3.5" />
           <span className="text-xs">Search…</span>
           <div className="flex items-center gap-0.5 ml-1">
-            <kbd className="text-[10px] font-mono bg-[#0B1437] border border-[#1F3461] px-1 py-0.5 rounded">⌘</kbd>
-            <kbd className="text-[10px] font-mono bg-[#0B1437] border border-[#1F3461] px-1 py-0.5 rounded">K</kbd>
+            <kbd className="text-[10px] font-mono bg-[#06091A] border border-[#1C3054] px-1 py-0.5 rounded">⌘</kbd>
+            <kbd className="text-[10px] font-mono bg-[#06091A] border border-[#1C3054] px-1 py-0.5 rounded">K</kbd>
           </div>
         </button>
 
@@ -158,7 +158,7 @@ export function Header({ title }: { title?: string }) {
 
         {/* Global search with live results */}
         <div className="relative hidden sm:block" ref={searchRef}>
-          <div className={`flex items-center gap-2 rounded-xl bg-[#111C44] border px-3 py-1.5 transition-colors ${searchFocused ? 'border-blue-500' : 'border-[#1F3461]'}`}>
+          <div className={`flex items-center gap-2 rounded-xl bg-[#0C1526]/60 border px-3 py-1.5 transition-all duration-200 ${searchFocused ? 'border-[#4B8CF7]/60 shadow-glow bg-[#0C1526]' : 'border-[#1C3054]'}`}>
             <Search className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
             <input
               value={searchQuery}
@@ -176,7 +176,7 @@ export function Header({ title }: { title?: string }) {
 
           {/* Results dropdown */}
           {showResults && (
-            <div className="absolute top-full mt-2 left-0 w-80 bg-[#111C44] border border-[#1F3461] rounded-2xl shadow-2xl z-50 overflow-hidden">
+            <div className="absolute top-full mt-2 left-0 w-80 bg-[#0C1526] border border-[#1C3054] rounded-2xl shadow-2xl z-50 overflow-hidden">
               {searchResults.length === 0 ? (
                 <p className="text-xs text-slate-500 text-center py-4">No tasks match "{searchQuery}"</p>
               ) : (
@@ -192,7 +192,7 @@ export function Header({ title }: { title?: string }) {
                       <button
                         key={task.id}
                         onClick={() => handleSelectResult(task.id)}
-                        className="w-full flex items-start gap-3 px-4 py-2.5 hover:bg-[#1B254B] transition-colors text-left border-t border-[#1F3461] first:border-0"
+                        className="w-full flex items-start gap-3 px-4 py-2.5 hover:bg-[#122040] transition-colors text-left border-t border-[#1C3054] first:border-0"
                       >
                         <div className="flex-1 min-w-0">
                           <p className="text-sm text-slate-200 truncate">{task.title}</p>
@@ -221,7 +221,7 @@ export function Header({ title }: { title?: string }) {
         <div className="relative" ref={notifRef}>
           <button
             onClick={() => setNotifOpen(v => !v)}
-            className="p-2 rounded-xl hover:bg-[#111C44] text-slate-400 hover:text-slate-200 transition-colors"
+            className="p-2 rounded-xl hover:bg-[#0C1526] text-slate-400 hover:text-slate-200 transition-colors"
           >
             <Bell className="w-4 h-4" />
           </button>
@@ -232,8 +232,8 @@ export function Header({ title }: { title?: string }) {
           )}
 
           {notifOpen && (
-            <div className="absolute right-0 top-full mt-2 w-80 bg-[#111C44] border border-[#1F3461] rounded-2xl shadow-2xl z-50 overflow-hidden">
-              <div className="px-4 py-3 border-b border-[#1F3461] flex items-center justify-between">
+            <div className="absolute right-0 top-full mt-2 w-80 bg-[#0C1526] border border-[#1C3054] rounded-2xl shadow-2xl z-50 overflow-hidden">
+              <div className="px-4 py-3 border-b border-[#1C3054] flex items-center justify-between">
                 <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Notifications</span>
                 <div className="flex items-center gap-1.5">
                   {dueTodayTasks.length > 0 && (
@@ -257,13 +257,13 @@ export function Header({ title }: { title?: string }) {
                   <>
                     {dueTodayTasks.length > 0 && (
                       <>
-                        <div className="px-4 py-2 bg-[#0B1437]">
+                        <div className="px-4 py-2 bg-[#06091A]">
                           <span className="text-[10px] font-semibold text-amber-400 uppercase tracking-wider">Due Today</span>
                         </div>
                         {dueTodayTasks.map(task => (
                           <div
                             key={task.id}
-                            className="flex items-start gap-3 px-4 py-3 hover:bg-[#1B254B] transition-colors border-b border-[#1F3461] last:border-0 group/notif"
+                            className="flex items-start gap-3 px-4 py-3 hover:bg-[#122040] transition-colors border-b border-[#1C3054] last:border-0 group/notif"
                           >
                             <Clock className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
                             <button
@@ -301,13 +301,13 @@ export function Header({ title }: { title?: string }) {
                     )}
                     {overdueCount > 0 && (
                       <>
-                        <div className="px-4 py-2 bg-[#0B1437]">
+                        <div className="px-4 py-2 bg-[#06091A]">
                           <span className="text-[10px] font-semibold text-red-400 uppercase tracking-wider">Overdue</span>
                         </div>
                         {overdueTasks.map(task => (
                           <div
                             key={task.id}
-                            className="flex items-start gap-3 px-4 py-3 hover:bg-[#1B254B] transition-colors border-b border-[#1F3461] last:border-0 group/notif"
+                            className="flex items-start gap-3 px-4 py-3 hover:bg-[#122040] transition-colors border-b border-[#1C3054] last:border-0 group/notif"
                           >
                             <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
                             <button
@@ -349,7 +349,7 @@ export function Header({ title }: { title?: string }) {
 
               {/* Browser notifications CTA */}
               {!notificationsEnabled && getNotificationPermission() !== 'denied' && getNotificationPermission() !== 'unsupported' && (
-                <div className="px-4 py-3 border-t border-[#1F3461] flex items-center justify-between bg-[#0B1437]">
+                <div className="px-4 py-3 border-t border-[#1C3054] flex items-center justify-between bg-[#06091A]">
                   <p className="text-xs text-slate-500">Get alerted 15 min before due tasks</p>
                   <button
                     onClick={async () => {
@@ -381,7 +381,7 @@ export function Header({ title }: { title?: string }) {
 
         {/* Current user + role */}
         {currentUser && (
-          <div className="hidden sm:flex items-center gap-2 pl-3 border-l border-[#1F3461]">
+          <div className="hidden sm:flex items-center gap-2 pl-3 border-l border-[#1C3054]">
             <div
               className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0"
               style={{ backgroundColor: currentUser.colour }}
@@ -394,7 +394,7 @@ export function Header({ title }: { title?: string }) {
             <button
               onClick={handleLogout}
               title="Sign out"
-              className="p-1.5 rounded-lg hover:bg-[#111C44] text-slate-500 hover:text-red-400 transition-colors"
+              className="p-1.5 rounded-lg hover:bg-[#0C1526] text-slate-500 hover:text-red-400 transition-colors"
             >
               <LogOut className="w-3.5 h-3.5" />
             </button>

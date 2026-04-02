@@ -13,7 +13,7 @@ function parseInline(text: string): React.ReactNode[] {
   while ((match = pattern.exec(text)) !== null) {
     if (match.index > last) tokens.push(text.slice(last, match.index));
     const m = match[0];
-    if (m.startsWith('`'))     tokens.push(<code key={match.index} className="font-mono text-[0.85em] px-1 py-0.5 rounded bg-[#0B1437] text-cyan-300 border border-[#1F3461]">{m.slice(1, -1)}</code>);
+    if (m.startsWith('`'))     tokens.push(<code key={match.index} className="font-mono text-[0.85em] px-1 py-0.5 rounded bg-[#06091A] text-cyan-300 border border-[#1C3054]">{m.slice(1, -1)}</code>);
     else if (m.startsWith('**') || m.startsWith('__')) tokens.push(<strong key={match.index} className="font-semibold text-slate-100">{m.slice(2, -2)}</strong>);
     else if (m.startsWith('*') || m.startsWith('_'))   tokens.push(<em key={match.index} className="italic text-slate-300">{m.slice(1, -1)}</em>);
     else if (m.startsWith('[')) {
@@ -58,7 +58,7 @@ function parseBlocks(markdown: string): React.ReactNode[] {
 
     // Horizontal rule
     if (/^(-{3,}|\*{3,}|_{3,})$/.test(line.trim())) {
-      nodes.push(<hr key={key++} className="border-[#1F3461] my-3" />);
+      nodes.push(<hr key={key++} className="border-[#1C3054] my-3" />);
       i++; continue;
     }
 
@@ -88,7 +88,7 @@ function parseBlocks(markdown: string): React.ReactNode[] {
       }
       i++; // skip closing ```
       nodes.push(
-        <pre key={key++} className="bg-[#0B1437] border border-[#1F3461] rounded-xl px-3 py-2.5 overflow-x-auto my-2">
+        <pre key={key++} className="bg-[#06091A] border border-[#1C3054] rounded-xl px-3 py-2.5 overflow-x-auto my-2">
           <code className="text-xs font-mono text-cyan-300 leading-relaxed">{codeLines.join('\n')}</code>
         </pre>
       );
@@ -148,7 +148,7 @@ function parseBlocks(markdown: string): React.ReactNode[] {
         <ul key={key++} className="space-y-0.5 my-1.5">
           {items.map((item, j) => (
             <li key={j} className={cn('flex items-start gap-2 text-xs', item.done ? 'text-slate-500' : 'text-slate-400')}>
-              <span className={cn('w-3.5 h-3.5 rounded border flex-shrink-0 flex items-center justify-center mt-0.5 text-[8px]', item.done ? 'border-green-500 bg-green-500/20 text-green-400' : 'border-[#1F3461]')}>
+              <span className={cn('w-3.5 h-3.5 rounded border flex-shrink-0 flex items-center justify-center mt-0.5 text-[8px]', item.done ? 'border-green-500 bg-green-500/20 text-green-400' : 'border-[#1C3054]')}>
                 {item.done && '✓'}
               </span>
               <span className={item.done ? 'line-through' : ''}>{parseInline(item.text)}</span>

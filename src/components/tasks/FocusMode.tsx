@@ -27,10 +27,10 @@ function Ring({ pct, phase }: { pct: number; phase: 'work' | 'break' }) {
   const r = 54;
   const circ = 2 * Math.PI * r;
   const offset = circ * (1 - pct);
-  const colour = phase === 'work' ? '#3B82F6' : '#10B981';
+  const colour = phase === 'work' ? '#4B8CF7' : '#10B981';
   return (
     <svg className="w-40 h-40 -rotate-90" viewBox="0 0 120 120">
-      <circle cx="60" cy="60" r={r} fill="none" stroke="#1F3461" strokeWidth="8" />
+      <circle cx="60" cy="60" r={r} fill="none" stroke="#1C3054" strokeWidth="8" />
       <circle
         cx="60" cy="60" r={r} fill="none"
         stroke={colour} strokeWidth="8"
@@ -147,13 +147,13 @@ export function FocusMode({ taskId, onClose }: { taskId: string; onClose: () => 
   if (!task) { onClose(); return null; }
 
   return (
-    <div className="fixed inset-0 z-60 bg-[#0B1437] flex flex-col">
+    <div className="fixed inset-0 z-60 bg-[#06091A] flex flex-col">
       {/* Header bar */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-[#1F3461]">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-[#1C3054]">
         <div className="flex items-center gap-4">
           <button
             onClick={onClose}
-            className="p-2 rounded-xl hover:bg-[#111C44] text-slate-500 hover:text-slate-300 transition-colors"
+            className="p-2 rounded-xl hover:bg-[#0C1526] text-slate-500 hover:text-slate-300 transition-colors"
             title="Exit focus mode (Esc)"
           >
             <X className="w-5 h-5" />
@@ -172,7 +172,7 @@ export function FocusMode({ taskId, onClose }: { taskId: string; onClose: () => 
           <button
             onClick={() => prevTask && navigateTo(prevTask.id)}
             disabled={!prevTask}
-            className="p-1.5 rounded-lg hover:bg-[#111C44] text-slate-500 hover:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            className="p-1.5 rounded-lg hover:bg-[#0C1526] text-slate-500 hover:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             title="Previous task (K)"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -181,7 +181,7 @@ export function FocusMode({ taskId, onClose }: { taskId: string; onClose: () => 
           <button
             onClick={() => nextTask && navigateTo(nextTask.id)}
             disabled={!nextTask}
-            className="p-1.5 rounded-lg hover:bg-[#111C44] text-slate-500 hover:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            className="p-1.5 rounded-lg hover:bg-[#0C1526] text-slate-500 hover:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             title="Next task (J)"
           >
             <ChevronRight className="w-4 h-4" />
@@ -223,7 +223,7 @@ export function FocusMode({ taskId, onClose }: { taskId: string; onClose: () => 
           {/* Pomodoro timer */}
           <div className="flex flex-col items-center gap-6">
             {/* Phase toggle */}
-            <div className="flex gap-1 bg-[#111C44] border border-[#1F3461] rounded-xl p-1">
+            <div className="flex gap-1 bg-[#0C1526] border border-[#1C3054] rounded-xl p-1">
               {(['work', 'break'] as const).map(p => (
                 <button
                   key={p}
@@ -256,7 +256,7 @@ export function FocusMode({ taskId, onClose }: { taskId: string; onClose: () => 
             <div className="flex items-center gap-3">
               <button
                 onClick={reset}
-                className="p-2.5 rounded-xl bg-[#111C44] border border-[#1F3461] text-slate-500 hover:text-slate-300 hover:border-[#2A4080] transition-all"
+                className="p-2.5 rounded-xl bg-[#0C1526] border border-[#1C3054] text-slate-500 hover:text-slate-300 hover:border-[#2A4080] transition-all"
                 title="Reset"
               >
                 <RotateCcw className="w-4 h-4" />
@@ -266,7 +266,7 @@ export function FocusMode({ taskId, onClose }: { taskId: string; onClose: () => 
                 className={cn(
                   'flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-lg',
                   running
-                    ? 'bg-[#111C44] border border-[#1F3461] text-slate-300 hover:border-red-500/50 hover:text-red-400'
+                    ? 'bg-[#0C1526] border border-[#1C3054] text-slate-300 hover:border-red-500/50 hover:text-red-400'
                     : 'bg-blue-500 hover:bg-blue-600 text-white shadow-blue-500/25'
                 )}
               >
@@ -278,7 +278,7 @@ export function FocusMode({ taskId, onClose }: { taskId: string; onClose: () => 
 
           {/* Subtasks */}
           {task.subtasks.length > 0 && (
-            <div className="bg-[#111C44] border border-[#1F3461] rounded-2xl p-6">
+            <div className="bg-[#0C1526] border border-[#1C3054] rounded-2xl p-6">
               <div className="flex items-center justify-between mb-4">
                 <span className="text-sm font-semibold text-slate-300">
                   Subtasks — {completedSubs}/{task.subtasks.length}
@@ -294,7 +294,7 @@ export function FocusMode({ taskId, onClose }: { taskId: string; onClose: () => 
                     disabled={!canEdit}
                     className={cn(
                       'w-full flex items-center gap-3 p-2.5 rounded-xl text-left transition-colors',
-                      canEdit ? 'hover:bg-[#1B254B]' : 'cursor-default'
+                      canEdit ? 'hover:bg-[#122040]' : 'cursor-default'
                     )}
                   >
                     <CheckSquare2 className={cn('w-5 h-5 flex-shrink-0', sub.completed ? 'text-green-400' : 'text-slate-600')} />
@@ -315,7 +315,7 @@ export function FocusMode({ taskId, onClose }: { taskId: string; onClose: () => 
                 className={cn(
                   'flex items-center gap-2 px-8 py-3 rounded-2xl font-semibold text-sm transition-all border',
                   task.status === 'done'
-                    ? 'border-[#1F3461] text-slate-400 hover:border-slate-500 hover:text-slate-200'
+                    ? 'border-[#1C3054] text-slate-400 hover:border-slate-500 hover:text-slate-200'
                     : 'bg-green-500/10 border-green-500/30 text-green-400 hover:bg-green-500/20'
                 )}
               >

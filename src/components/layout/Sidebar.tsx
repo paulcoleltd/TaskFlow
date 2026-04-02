@@ -52,34 +52,38 @@ export function Sidebar() {
 
   return (
     <aside className={cn(
-      'hidden md:flex flex-col h-screen bg-[#111C44] border-r border-[#1F3461] transition-all duration-300 flex-shrink-0',
+      'hidden md:flex flex-col h-screen bg-gradient-sidebar border-r border-[#1C3054] transition-all duration-300 flex-shrink-0',
       sidebarCollapsed ? 'w-16' : 'w-60'
     )}>
       {/* Logo */}
-      <div className={cn('flex items-center gap-3 px-4 py-5 border-b border-[#1F3461]', sidebarCollapsed && 'justify-center px-0')}>
-        <div className="w-8 h-8 rounded-xl bg-blue-500 flex items-center justify-center flex-shrink-0">
+      <div className={cn('flex items-center gap-3 px-4 py-5 border-b border-[#1C3054]/60', sidebarCollapsed && 'justify-center px-0')}>
+        <div className="w-8 h-8 rounded-xl bg-gradient-accent flex items-center justify-center flex-shrink-0 shadow-glow">
           <Zap className="w-4 h-4 text-white" />
         </div>
-        {!sidebarCollapsed && <span className="text-base font-bold text-white">TaskFlow</span>}
+        {!sidebarCollapsed && (
+          <span className="text-base font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
+            TaskFlow
+          </span>
+        )}
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
+      <nav className="flex-1 px-2 py-4 space-y-0.5 overflow-y-auto">
         {NAV.map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
             to={to}
             end={to === '/'}
             className={({ isActive }) => cn(
-              'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150',
+              'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 relative',
               sidebarCollapsed ? 'justify-center px-0 w-10 mx-auto' : '',
               isActive
-                ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-[#1B254B]'
+                ? 'bg-gradient-active text-white border border-blue-500/20 shadow-inner'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-[#122040]/80'
             )}
             title={sidebarCollapsed ? label : undefined}
           >
-            <Icon className="w-4 h-4 flex-shrink-0" />
+            <Icon className="w-4 h-4 flex-shrink-0 transition-transform duration-200 group-hover:scale-110" />
             {!sidebarCollapsed && <span className="flex-1">{label}</span>}
             {!sidebarCollapsed && label === 'Today' && myOverdueCount > 0 && (
               <span className="ml-auto min-w-[18px] h-[18px] px-1 bg-red-500 rounded-full text-[10px] text-white font-bold flex items-center justify-center" title="Overdue">
@@ -94,7 +98,7 @@ export function Sidebar() {
                   </span>
                 )}
                 {myActiveCount > 0 && (
-                  <span className="min-w-[18px] h-[18px] px-1 bg-blue-500 rounded-full text-[10px] text-white font-bold flex items-center justify-center">
+                  <span className="min-w-[18px] h-[18px] px-1 bg-gradient-accent rounded-full text-[10px] text-white font-bold flex items-center justify-center shadow-glow">
                     {myActiveCount > 99 ? '99+' : myActiveCount}
                   </span>
                 )}
@@ -111,7 +115,7 @@ export function Sidebar() {
               {canCreateProject(role) && (
                 <button
                   onClick={openProjectModal}
-                  className="p-0.5 rounded hover:bg-[#1B254B] text-slate-500 hover:text-slate-300 transition-colors"
+                  className="p-0.5 rounded hover:bg-[#122040] text-slate-500 hover:text-slate-300 transition-colors"
                   title="New Project"
                 >
                   <Plus className="w-3.5 h-3.5" />
@@ -125,7 +129,7 @@ export function Sidebar() {
                 <button
                   key={p.id}
                   onClick={() => navigate(`/projects/${p.id}`)}
-                  className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-sm text-slate-400 hover:text-slate-200 hover:bg-[#1B254B] transition-colors"
+                  className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-sm text-slate-400 hover:text-slate-200 hover:bg-[#122040] transition-colors"
                 >
                   <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: p.colour }} />
                   <span className="flex-1 truncate text-left">{p.name}</span>
@@ -145,7 +149,7 @@ export function Sidebar() {
       </nav>
 
       {/* User info + collapse toggle */}
-      <div className="border-t border-[#1F3461]">
+      <div className="border-t border-[#1C3054]/60">
         {/* User row */}
         {currentUser && !sidebarCollapsed && (
           <div className="flex items-center gap-2.5 px-4 py-3">
@@ -162,7 +166,7 @@ export function Sidebar() {
             <button
               onClick={handleLogout}
               title="Sign out"
-              className="p-1 rounded-lg hover:bg-[#0B1437] text-slate-500 hover:text-red-400 transition-colors flex-shrink-0"
+              className="p-1 rounded-lg hover:bg-[#06091A] text-slate-500 hover:text-red-400 transition-colors flex-shrink-0"
             >
               <LogOut className="w-3.5 h-3.5" />
             </button>
@@ -173,7 +177,7 @@ export function Sidebar() {
         <div className="px-3 pb-3">
           <button
             onClick={toggleSidebar}
-            className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-[#1B254B] text-slate-400 hover:text-slate-200 transition-colors"
+            className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-[#122040] text-slate-400 hover:text-slate-200 transition-colors"
             title={sidebarCollapsed ? 'Expand' : 'Collapse'}
           >
             {sidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}

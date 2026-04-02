@@ -2,7 +2,7 @@ import type { Priority, Status, Recurrence } from '../types';
 
 export const STATUS_OPTIONS: { value: Status; label: string; colour: string }[] = [
   { value: 'todo', label: 'To Do', colour: '#64748B' },
-  { value: 'in-progress', label: 'In Progress', colour: '#3B82F6' },
+  { value: 'in-progress', label: 'In Progress', colour: '#4B8CF7' },
   { value: 'review', label: 'Review', colour: '#F59E0B' },
   { value: 'done', label: 'Done', colour: '#10B981' },
   { value: 'blocked', label: 'Blocked', colour: '#EF4444' },
@@ -16,7 +16,7 @@ export const PRIORITY_OPTIONS: { value: Priority; label: string; colour: string 
 ];
 
 export const TAG_OPTIONS = [
-  { id: 'tag-1', name: 'Frontend', colour: '#3B82F6' },
+  { id: 'tag-1', name: 'Frontend', colour: '#4B8CF7' },
   { id: 'tag-2', name: 'Backend', colour: '#8B5CF6' },
   { id: 'tag-3', name: 'Design', colour: '#EC4899' },
   { id: 'tag-4', name: 'Bug', colour: '#EF4444' },
@@ -32,7 +32,7 @@ export const RECURRENCE_OPTIONS: { value: Recurrence; label: string; interval: s
 ];
 
 export const PROJECT_COLOURS = [
-  '#3B82F6', '#8B5CF6', '#10B981', '#F59E0B',
+  '#4B8CF7', '#8B5CF6', '#10B981', '#F59E0B',
   '#EF4444', '#EC4899', '#06B6D4', '#84CC16',
 ];
 

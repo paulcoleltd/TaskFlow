@@ -36,7 +36,7 @@ export function AppShell() {
   useKeyboardShortcuts();
   useNotifications(notificationsEnabled);
   return (
-    <div className="flex h-screen bg-[#0B1437] overflow-hidden">
+    <div className="flex h-screen bg-[#06091A] overflow-hidden">
       <Sidebar />
       <div className="flex flex-col flex-1 overflow-hidden">
         <Header title={title} />

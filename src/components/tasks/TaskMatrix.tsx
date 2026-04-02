@@ -55,9 +55,9 @@ const QUADRANTS: Quadrant[] = [
     description: 'Plan time for these — they drive long-term results.',
     urgent: false,
     important: true,
-    borderColour: '#3B82F640',
-    headerBg: '#3B82F615',
-    badgeColour: '#3B82F6',
+    borderColour: '#4B8CF740',
+    headerBg: '#4B8CF715',
+    badgeColour: '#4B8CF7',
     emptyText: 'Add strategic tasks here.',
   },
   {
@@ -79,8 +79,8 @@ const QUADRANTS: Quadrant[] = [
     description: 'Low value — consider deferring or removing these.',
     urgent: false,
     important: false,
-    borderColour: '#1F346160',
-    headerBg: '#0B143720',
+    borderColour: '#1C305460',
+    headerBg: '#06091A20',
     badgeColour: '#64748B',
     emptyText: 'No low-priority backlog tasks.',
   },
@@ -99,7 +99,7 @@ function MatrixCard({ task }: { task: Task }) {
   return (
     <div
       onClick={() => setSelectedTask(task.id)}
-      className="group bg-[#0B1437] border border-[#1F3461] rounded-xl p-3 cursor-pointer hover:border-blue-500/30 hover:bg-[#111C44] transition-all"
+      className="group bg-[#06091A] border border-[#1C3054] rounded-xl p-3 cursor-pointer hover:border-blue-500/30 hover:bg-[#0C1526] transition-all"
     >
       {/* Priority dot + title */}
       <div className="flex items-start gap-2 mb-2">
@@ -186,7 +186,7 @@ function QuadrantCell({ quadrant, tasks }: { quadrant: Quadrant; tasks: Task[] }
       </div>
 
       {/* Task list */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-2 bg-[#111C44]/40 min-h-[160px] max-h-[calc(50vh-100px)]">
+      <div className="flex-1 overflow-y-auto p-3 space-y-2 bg-[#0C1526]/40 min-h-[160px] max-h-[calc(50vh-100px)]">
         {tasks.length === 0 ? (
           <p className="text-[11px] text-slate-600 italic text-center pt-6">{quadrant.emptyText}</p>
         ) : (

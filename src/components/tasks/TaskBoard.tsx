@@ -158,7 +158,7 @@ export function TaskBoard({ tasks, projectId }: TaskBoardProps) {
           isOver ? 'border-blue-500/50 bg-blue-500/5'
             : wipOver ? 'border-red-500/40 bg-red-500/5'
             : wipNear ? 'border-amber-500/40'
-            : 'border-[#1F3461] bg-[#0D1B4B]/40'
+            : 'border-[#1C3054] bg-[#0D1B4B]/40'
         )}
         onDragOver={e => { e.preventDefault(); if (!dropTarget) setOverColumn(status); }}
         onDragLeave={e => {
@@ -166,10 +166,10 @@ export function TaskBoard({ tasks, projectId }: TaskBoardProps) {
         }}
         onDrop={e => handleColumnDrop(e, status)}
       >
-        <div className="flex items-center gap-2 px-3 py-2 border-b border-[#1F3461]">
+        <div className="flex items-center gap-2 px-3 py-2 border-b border-[#1C3054]">
           <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: colour }} />
           <span className="text-xs font-semibold text-slate-300">{label}</span>
-          <span className="text-[10px] bg-[#1B254B] text-slate-400 px-1 py-0.5 rounded-full ml-auto">{colTasks.length}</span>
+          <span className="text-[10px] bg-[#122040] text-slate-400 px-1 py-0.5 rounded-full ml-auto">{colTasks.length}</span>
         </div>
         <div className="flex-1 overflow-y-auto p-2 space-y-0">
           {colTasks.map(task => {
@@ -260,7 +260,7 @@ export function TaskBoard({ tasks, projectId }: TaskBoardProps) {
       <div className="flex items-center gap-2 mb-3">
         <button
           onClick={() => setBoardSwimlane(true)}
-          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs text-slate-500 border border-[#1F3461] hover:text-slate-300 hover:border-slate-600 transition-colors"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs text-slate-500 border border-[#1C3054] hover:text-slate-300 hover:border-slate-600 transition-colors"
         >
           <Rows3 className="w-3.5 h-3.5" />
           Swimlanes
@@ -281,7 +281,7 @@ export function TaskBoard({ tasks, projectId }: TaskBoardProps) {
               isOver ? 'border-blue-500/50 bg-blue-500/5'
                 : wipOver ? 'border-red-500/40 bg-red-500/5'
                 : wipNear ? 'border-amber-500/40'
-                : 'border-[#1F3461] bg-[#0D1B4B]/40'
+                : 'border-[#1C3054] bg-[#0D1B4B]/40'
             )}
             onDragOver={e => { e.preventDefault(); if (!dropTarget) setOverColumn(status); }}
             onDragLeave={e => {
@@ -292,7 +292,7 @@ export function TaskBoard({ tasks, projectId }: TaskBoardProps) {
             onDrop={e => handleColumnDrop(e, status)}
           >
             {/* Column header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-[#1F3461]">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[#1C3054]">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full" style={{ backgroundColor: colour }} />
                 <span className="text-sm font-semibold text-slate-200">{label}</span>
@@ -303,12 +303,12 @@ export function TaskBoard({ tasks, projectId }: TaskBoardProps) {
                       ? 'bg-red-500/15 text-red-400 border-red-500/30'
                       : wipNear
                         ? 'bg-amber-500/15 text-amber-400 border-amber-500/30'
-                        : 'bg-[#1B254B] text-slate-400 border-transparent'
+                        : 'bg-[#122040] text-slate-400 border-transparent'
                   )}>
                     {colTasks.length}/{wip}
                   </span>
                 ) : (
-                  <span className="text-xs bg-[#1B254B] text-slate-400 px-1.5 py-0.5 rounded-full">{colTasks.length}</span>
+                  <span className="text-xs bg-[#122040] text-slate-400 px-1.5 py-0.5 rounded-full">{colTasks.length}</span>
                 )}
                 {wipOver && <span className="text-[10px] text-red-400 font-semibold">WIP exceeded</span>}
               </div>
@@ -316,7 +316,7 @@ export function TaskBoard({ tasks, projectId }: TaskBoardProps) {
                 {role === 'admin' && (
                   <button
                     onClick={() => { setWipEditCol(wipEditCol === status ? null : status); setWipInput(wip?.toString() ?? ''); }}
-                    className={cn('p-1 rounded-lg transition-colors', wipEditCol === status ? 'bg-[#1B254B] text-blue-400' : 'hover:bg-[#1B254B] text-slate-600 hover:text-slate-400')}
+                    className={cn('p-1 rounded-lg transition-colors', wipEditCol === status ? 'bg-[#122040] text-blue-400' : 'hover:bg-[#122040] text-slate-600 hover:text-slate-400')}
                     title="Set WIP limit"
                   >
                     <Settings2 className="w-3 h-3" />
@@ -325,7 +325,7 @@ export function TaskBoard({ tasks, projectId }: TaskBoardProps) {
                 {canCreateTask(role) && (
                   <button
                     onClick={() => openQuickAdd(status)}
-                    className="p-1 rounded-lg hover:bg-[#1B254B] text-slate-500 hover:text-slate-300 transition-colors"
+                    className="p-1 rounded-lg hover:bg-[#122040] text-slate-500 hover:text-slate-300 transition-colors"
                     title="Quick add task"
                   >
                     <Plus className="w-3.5 h-3.5" />
@@ -336,7 +336,7 @@ export function TaskBoard({ tasks, projectId }: TaskBoardProps) {
 
             {/* WIP limit editor */}
             {wipEditCol === status && role === 'admin' && (
-              <div className="px-4 py-2 bg-[#0B1437] border-b border-[#1F3461] flex items-center gap-2">
+              <div className="px-4 py-2 bg-[#06091A] border-b border-[#1C3054] flex items-center gap-2">
                 <span className="text-[10px] text-slate-500 flex-shrink-0">WIP limit:</span>
                 <input
                   autoFocus
@@ -353,7 +353,7 @@ export function TaskBoard({ tasks, projectId }: TaskBoardProps) {
                   }}
                   placeholder="e.g. 5"
                   min="1"
-                  className="w-16 bg-transparent border border-[#1F3461] focus:border-blue-500 rounded px-2 py-0.5 text-xs text-slate-200 outline-none transition-colors"
+                  className="w-16 bg-transparent border border-[#1C3054] focus:border-blue-500 rounded px-2 py-0.5 text-xs text-slate-200 outline-none transition-colors"
                 />
                 <button
                   onClick={() => { const n = parseInt(wipInput, 10); setWipLimit(status, isNaN(n) || n <= 0 ? null : n); setWipEditCol(null); }}
@@ -362,7 +362,7 @@ export function TaskBoard({ tasks, projectId }: TaskBoardProps) {
                 {wip != null && (
                   <button
                     onClick={() => { setWipLimit(status, null); setWipEditCol(null); }}
-                    className="px-2 py-0.5 rounded bg-[#1B254B] text-slate-400 text-[10px] hover:text-red-400 transition-colors"
+                    className="px-2 py-0.5 rounded bg-[#122040] text-slate-400 text-[10px] hover:text-red-400 transition-colors"
                   >Clear</button>
                 )}
               </div>
@@ -418,7 +418,7 @@ export function TaskBoard({ tasks, projectId }: TaskBoardProps) {
                       onBlur={() => { if (!quickAddTitle.trim()) setQuickAddCol(null); }}
                       placeholder="Task title… (Enter to add)"
                       maxLength={256}
-                      className="flex-1 bg-[#0B1437] border border-[#1F3461] focus:border-blue-500 rounded-lg px-3 py-1.5 text-xs text-slate-200 placeholder-slate-600 outline-none transition-colors"
+                      className="flex-1 bg-[#06091A] border border-[#1C3054] focus:border-blue-500 rounded-lg px-3 py-1.5 text-xs text-slate-200 placeholder-slate-600 outline-none transition-colors"
                     />
                     <button
                       onClick={() => handleQuickAdd(status)}
@@ -431,7 +431,7 @@ export function TaskBoard({ tasks, projectId }: TaskBoardProps) {
                 ) : (
                   <button
                     onClick={() => openQuickAdd(status)}
-                    className="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-600 hover:text-slate-400 hover:bg-[#1B254B] transition-colors"
+                    className="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-600 hover:text-slate-400 hover:bg-[#122040] transition-colors"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     Add task

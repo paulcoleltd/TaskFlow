@@ -123,7 +123,7 @@ export default function TodayPage() {
     const project = showProject ? getProjectById(task.projectId) : null;
     const isFocused = todayFocus.includes(task.id);
     return (
-      <div className="flex items-center gap-3 px-4 py-3 bg-[#111C44] border border-[#1F3461] rounded-xl hover:border-blue-500/30 hover:bg-[#1B254B] transition-all group cursor-pointer"
+      <div className="flex items-center gap-3 px-4 py-3 bg-[#0C1526] border border-[#1C3054] rounded-xl hover:border-blue-500/30 hover:bg-[#122040] transition-all group cursor-pointer"
         onClick={() => setSelectedTask(task.id)}>
         <button
           onClick={e => { e.stopPropagation(); const s = task.status === 'done' ? 'todo' : 'done'; updateTask(task.id, { status: s }); emitTaskUpdate(task.id, { status: s }); }}
@@ -176,12 +176,12 @@ export default function TodayPage() {
       </div>
 
       {/* Today's Focus — up to 3 tasks */}
-      <div className="bg-[#111C44] border border-[#1F3461] rounded-2xl p-5">
+      <div className="bg-[#0C1526] border border-[#1C3054] rounded-2xl p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Target className="w-4 h-4 text-blue-400" />
             <span className="text-sm font-semibold text-white">Today's Focus</span>
-            <span className="text-[10px] text-slate-500 bg-[#1B254B] px-1.5 py-0.5 rounded-full">max {MAX_FOCUS}</span>
+            <span className="text-[10px] text-slate-500 bg-[#122040] px-1.5 py-0.5 rounded-full">max {MAX_FOCUS}</span>
           </div>
           {focusTasks.length > 0 && (
             <span className="text-xs text-slate-500">{focusDone}/{focusTasks.length} done</span>
@@ -189,7 +189,7 @@ export default function TodayPage() {
         </div>
 
         {focusTasks.length > 0 && (
-          <div className="h-1.5 bg-[#1B254B] rounded-full overflow-hidden mb-4">
+          <div className="h-1.5 bg-[#122040] rounded-full overflow-hidden mb-4">
             <div
               className="h-full bg-blue-500 rounded-full transition-all"
               style={{ width: `${focusPct}%` }}
@@ -199,7 +199,7 @@ export default function TodayPage() {
 
         <div className="space-y-2">
           {focusTasks.map(task => (
-            <div key={task.id} className="flex items-center gap-3 px-4 py-3 bg-[#0B1437] border border-blue-500/20 rounded-xl cursor-pointer hover:border-blue-500/40 transition-all group"
+            <div key={task.id} className="flex items-center gap-3 px-4 py-3 bg-[#06091A] border border-blue-500/20 rounded-xl cursor-pointer hover:border-blue-500/40 transition-all group"
               onClick={() => setSelectedTask(task.id)}>
               <button
                 onClick={e => { e.stopPropagation(); const s = task.status === 'done' ? 'todo' : 'done'; updateTask(task.id, { status: s }); emitTaskUpdate(task.id, { status: s }); }}
@@ -222,14 +222,14 @@ export default function TodayPage() {
           ))}
 
           {focusTasks.length < MAX_FOCUS && focusCandidates.length > 0 && (
-            <div className="border border-dashed border-[#1F3461] rounded-xl p-3">
+            <div className="border border-dashed border-[#1C3054] rounded-xl p-3">
               <p className="text-[10px] text-slate-600 mb-2">Add to focus ({MAX_FOCUS - focusTasks.length} slot{MAX_FOCUS - focusTasks.length !== 1 ? 's' : ''} left)</p>
               <div className="flex flex-wrap gap-2">
                 {focusCandidates.slice(0, 5).map(t => (
                   <button
                     key={t.id}
                     onClick={() => toggleTodayFocus(t.id)}
-                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#0B1437] border border-[#1F3461] hover:border-blue-500/30 text-xs text-slate-400 hover:text-slate-200 transition-all"
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#06091A] border border-[#1C3054] hover:border-blue-500/30 text-xs text-slate-400 hover:text-slate-200 transition-all"
                   >
                     <Plus className="w-3 h-3" />
                     <span className="truncate max-w-[160px]">{t.title}</span>
@@ -296,7 +296,7 @@ export default function TodayPage() {
           <div className="flex items-center gap-2 mb-3">
             <CheckCircle2 className="w-4 h-4 text-slate-500" />
             <span className="text-sm font-semibold text-slate-400">Coming This Week</span>
-            <span className="text-xs text-slate-600 bg-[#1B254B] px-1.5 py-0.5 rounded-full">{thisWeek.length}</span>
+            <span className="text-xs text-slate-600 bg-[#122040] px-1.5 py-0.5 rounded-full">{thisWeek.length}</span>
           </div>
           <div className="space-y-2">
             {thisWeek.slice(0, 5).map(t => <TaskRow key={t.id} task={t} />)}
@@ -331,22 +331,22 @@ export default function TodayPage() {
       )}
 
       {/* Standup Report */}
-      <div className="bg-[#111C44] border border-[#1F3461] rounded-xl overflow-hidden">
+      <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl overflow-hidden">
         <button
           onClick={() => setShowStandup(v => !v)}
-          className="w-full flex items-center justify-between px-5 py-4 hover:bg-[#1B254B] transition-colors"
+          className="w-full flex items-center justify-between px-5 py-4 hover:bg-[#122040] transition-colors"
         >
           <div className="flex items-center gap-2">
             <ClipboardCopy className="w-4 h-4 text-slate-400" />
             <span className="text-sm font-semibold text-white">Standup Report</span>
-            <span className="text-[10px] text-slate-600 bg-[#0B1437] px-2 py-0.5 rounded-full border border-[#1F3461]">auto-generated</span>
+            <span className="text-[10px] text-slate-600 bg-[#06091A] px-2 py-0.5 rounded-full border border-[#1C3054]">auto-generated</span>
           </div>
           <ChevronDown className={cn('w-4 h-4 text-slate-500 transition-transform', showStandup && 'rotate-180')} />
         </button>
 
         {showStandup && (
-          <div className="px-5 pb-5 border-t border-[#1F3461]">
-            <pre className="mt-4 bg-[#0B1437] border border-[#1F3461] rounded-xl p-4 text-xs text-slate-300 font-mono whitespace-pre-wrap leading-relaxed overflow-x-auto">
+          <div className="px-5 pb-5 border-t border-[#1C3054]">
+            <pre className="mt-4 bg-[#06091A] border border-[#1C3054] rounded-xl p-4 text-xs text-slate-300 font-mono whitespace-pre-wrap leading-relaxed overflow-x-auto">
               {buildStandup()}
             </pre>
             <div className="flex items-center justify-between mt-3">

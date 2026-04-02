@@ -47,12 +47,12 @@ export function ContextMenu({ x, y, items, onClose }: ContextMenuProps) {
   return (
     <div
       ref={ref}
-      className="fixed z-[200] w-[220px] bg-[#111C44] border border-[#1F3461] rounded-xl shadow-2xl py-1.5 overflow-hidden select-none"
+      className="fixed z-[200] w-[220px] bg-[#0C1526] border border-[#1C3054] rounded-xl shadow-2xl py-1.5 overflow-hidden select-none"
       style={{ left: adjustedX, top: adjustedY }}
     >
       {items.map(item => (
         <div key={item.id}>
-          {item.separator && <div className="my-1 border-t border-[#1F3461]" />}
+          {item.separator && <div className="my-1 border-t border-[#1C3054]" />}
           <button
             disabled={item.disabled}
             onClick={() => { item.onSelect(); onClose(); }}
@@ -60,7 +60,7 @@ export function ContextMenu({ x, y, items, onClose }: ContextMenuProps) {
               'w-full flex items-center gap-3 px-3 py-2 text-left text-xs transition-colors',
               item.danger
                 ? 'text-red-400 hover:bg-red-500/10'
-                : 'text-slate-300 hover:bg-[#1B254B]',
+                : 'text-slate-300 hover:bg-[#122040]',
               item.disabled && 'opacity-40 cursor-not-allowed'
             )}
           >
