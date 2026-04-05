@@ -6,6 +6,7 @@ import {
   isRateLimited, addViewer, removeViewer,
   removeSocketFromAllRooms, getAllPresence, getViewersForRoom,
 } from './state.js';
+import { sendPushToUser } from './push.js';
 import {
   taskSchema, projectSchema, taskUpdateSchema, taskDeleteSchema,
   taskMoveSchema, commentPayloadSchema, projectUpdateSchema,
@@ -173,6 +174,16 @@ export function registerHandlers(io: Server, socket: Socket): void {
     tasks.set(task.id, task);
     audit('task:create', senderId, role, { taskId: task.id, title: task.title });
     socket.broadcast.emit('task:created', { task, senderId, senderName });
+
+    // Push notification: alert the assignee if it's not the creator
+    if (task.assigneeId && task.assigneeId !== senderId) {
+      void sendPushToUser(task.assigneeId, {
+        title: 'New task assigned to you',
+        body:  task.title,
+        tag:   `task-assigned-${task.id}`,
+        url:   `/tasks`,
+      });
+    }
   });
 
   // ── TASK: update ──────────────────────────────────────────────────────────────
@@ -254,6 +265,17 @@ export function registerHandlers(io: Server, socket: Socket): void {
     }
     audit('comment:add', senderId, role, { taskId, commentId: comment.id });
     socket.broadcast.emit('comment:added', { taskId, comment, senderId, senderName });
+
+    // Push notification: alert the task assignee if they didn't write the comment
+    const commentedTask = tasks.get(taskId);
+    if (commentedTask?.assigneeId && commentedTask.assigneeId !== senderId) {
+      void sendPushToUser(commentedTask.assigneeId, {
+        title: `${senderName} commented`,
+        body:  commentedTask.title,
+        tag:   `comment-${taskId}`,
+        url:   `/tasks`,
+      });
+    }
   });
 
   // ── PROJECT: create ───────────────────────────────────────────────────────────

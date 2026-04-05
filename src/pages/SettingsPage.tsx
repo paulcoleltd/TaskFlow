@@ -10,7 +10,7 @@ import { useTemplateStore } from '../store/templateStore';
 import { RoleGuard } from '../components/auth/RoleGuard';
 import { canClearData, canExportData, canManageTags, ROLE_META } from '../lib/permissions';
 import { sanitiseTasks, sanitiseProjects } from '../lib/storageValidation';
-import { requestNotificationPermission, getNotificationPermission } from '../hooks/useNotifications';
+import { requestNotificationPermission, getNotificationPermission, usePushNotifications } from '../hooks/useNotifications';
 import { Button } from '../components/ui/Button';
 import { Avatar } from '../components/ui/Avatar';
 import { SEED_USERS } from '../lib/sampleData';
@@ -101,14 +101,20 @@ function exportCSV() {
 }
 
 // ── Notifications panel ───────────────────────────────────────────────────────
-function NotificationsPanel({ enabled, setEnabled }: { enabled: boolean; setEnabled: (v: boolean) => void }) {
+function NotificationsPanel({
+  enabled, setEnabled, userId,
+}: {
+  enabled: boolean;
+  setEnabled: (v: boolean) => void;
+  userId: string;
+}) {
   const permission = getNotificationPermission();
   const unsupported = permission === 'unsupported';
   const denied = permission === 'denied';
+  const push = usePushNotifications(userId);
 
-  const handleToggle = async () => {
+  const handleDueDateToggle = async () => {
     if (!enabled) {
-      // Turning on — may need to ask for permission
       if (permission === 'default') {
         const result = await requestNotificationPermission();
         if (result !== 'granted') {
@@ -121,15 +127,42 @@ function NotificationsPanel({ enabled, setEnabled }: { enabled: boolean; setEnab
         return;
       }
       setEnabled(true);
-      toast.success('Browser notifications enabled — you\'ll be alerted 15 min before tasks are due.');
+      toast.success('Due-date alerts enabled — you\'ll be alerted 15 min before tasks are due.');
     } else {
       setEnabled(false);
-      toast.success('Browser notifications disabled.');
+      toast.success('Due-date alerts disabled.');
+    }
+  };
+
+  const handlePushToggle = async () => {
+    if (push.subscribed) {
+      await push.unsubscribe();
+      toast.success('Push notifications disabled.');
+    } else {
+      // Ensure permission is granted first
+      if (permission === 'default') {
+        const result = await requestNotificationPermission();
+        if (result !== 'granted') {
+          toast.error('Permission denied. Enable notifications in your browser settings.');
+          return;
+        }
+      }
+      if (permission === 'denied') {
+        toast.error('Notifications are blocked. Allow them in your browser site settings.');
+        return;
+      }
+      const ok = await push.subscribe();
+      if (ok) {
+        toast.success('Push notifications enabled — you\'ll be notified when tasks are assigned or commented on.');
+      } else {
+        toast.error('Could not enable push notifications. Make sure the collaboration server is running.');
+      }
     }
   };
 
   return (
     <div className="space-y-3">
+      {/* Due-date alerts row */}
       <div className="flex items-center justify-between p-3 bg-[#06091A] rounded-xl">
         <div className="flex items-center gap-3">
           {enabled ? (
@@ -138,7 +171,7 @@ function NotificationsPanel({ enabled, setEnabled }: { enabled: boolean; setEnab
             <BellOff className="w-4 h-4 text-slate-500 flex-shrink-0" />
           )}
           <div>
-            <p className="text-sm text-slate-200">Browser notifications</p>
+            <p className="text-sm text-slate-200">Due-date alerts</p>
             <p className="text-xs text-slate-400">
               {unsupported
                 ? 'Not supported in this browser'
@@ -149,7 +182,7 @@ function NotificationsPanel({ enabled, setEnabled }: { enabled: boolean; setEnab
           </div>
         </div>
         <button
-          onClick={handleToggle}
+          onClick={handleDueDateToggle}
           disabled={unsupported || denied}
           className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed ${
             enabled ? 'bg-blue-500' : 'bg-[#1C3054]'
@@ -165,9 +198,45 @@ function NotificationsPanel({ enabled, setEnabled }: { enabled: boolean; setEnab
         </button>
       </div>
 
+      {/* Push notifications row */}
+      {push.supported && (
+        <div className="flex items-center justify-between p-3 bg-[#06091A] rounded-xl">
+          <div className="flex items-center gap-3">
+            {push.subscribed ? (
+              <Bell className="w-4 h-4 text-violet-400 flex-shrink-0" />
+            ) : (
+              <BellOff className="w-4 h-4 text-slate-500 flex-shrink-0" />
+            )}
+            <div>
+              <p className="text-sm text-slate-200">Push notifications</p>
+              <p className="text-xs text-slate-400">
+                {push.subscribed
+                  ? 'Active — alerts for task assignments & comments'
+                  : 'Get notified when tasks are assigned or commented on'}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={handlePushToggle}
+            disabled={push.subscribing || denied || unsupported}
+            className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed ${
+              push.subscribed ? 'bg-violet-500' : 'bg-[#1C3054]'
+            }`}
+            role="switch"
+            aria-checked={push.subscribed}
+          >
+            <span
+              className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform transition-transform duration-200 ${
+                push.subscribed ? 'translate-x-5' : 'translate-x-0'
+              }`}
+            />
+          </button>
+        </div>
+      )}
+
       {enabled && permission === 'granted' && (
         <p className="text-xs text-slate-500 px-1">
-          Notifications fire once per task per session. Completing or rescheduling a task resets its alert.
+          Due-date alerts fire once per task per session. Completing or rescheduling resets the alert.
         </p>
       )}
 
@@ -452,7 +521,7 @@ export default function SettingsPage() {
       {/* Notifications */}
       <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-6">
         <h3 className="text-sm font-semibold text-white mb-4">Notifications</h3>
-        <NotificationsPanel enabled={notificationsEnabled} setEnabled={setNotificationsEnabled} />
+        <NotificationsPanel enabled={notificationsEnabled} setEnabled={setNotificationsEnabled} userId={currentUser?._id ?? ''} />
       </div>
 
       {/* Tags */}

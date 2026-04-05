@@ -1,5 +1,6 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useTaskStore } from '../store/taskStore';
+import { isPushSupported, isPushSubscribed, subscribeToPush, unsubscribeFromPush } from '../lib/pushSubscription';
 
 /** How far ahead to notify before a task is due (15 minutes). */
 const NOTIFY_WINDOW_MS = 15 * 60 * 1000;
@@ -77,4 +78,61 @@ export async function requestNotificationPermission(): Promise<NotificationPermi
 export function getNotificationPermission(): NotificationPermission | 'unsupported' {
   if (!('Notification' in window)) return 'unsupported';
   return Notification.permission;
+}
+
+// ── Web Push ──────────────────────────────────────────────────────────────────
+
+export interface PushNotificationState {
+  supported: boolean;
+  subscribed: boolean;
+  subscribing: boolean;
+  subscribe:   () => Promise<boolean>;
+  unsubscribe: () => Promise<void>;
+}
+
+/**
+ * Manages the Web Push subscription lifecycle.
+ * `userId` must be a non-empty string identifying the current user on the server.
+ *
+ * Security notes (MITRE T1566):
+ * - subscribeToPush validates Notification.permission before calling PushManager.
+ * - userId is used server-side to key the subscription — it's not treated as a secret.
+ */
+export function usePushNotifications(userId: string): PushNotificationState {
+  const supported = isPushSupported();
+  const [subscribed, setSubscribed] = useState(false);
+  const [subscribing, setSubscribing] = useState(false);
+
+  // Check current subscription state on mount
+  useEffect(() => {
+    if (!supported || !userId) return;
+    isPushSubscribed().then(setSubscribed).catch(() => setSubscribed(false));
+  }, [supported, userId]);
+
+  const subscribe = useCallback(async (): Promise<boolean> => {
+    if (!supported || !userId) return false;
+    // Must have notification permission first
+    if (Notification.permission !== 'granted') return false;
+    setSubscribing(true);
+    try {
+      const ok = await subscribeToPush(userId);
+      if (ok) setSubscribed(true);
+      return ok;
+    } finally {
+      setSubscribing(false);
+    }
+  }, [supported, userId]);
+
+  const unsubscribe = useCallback(async (): Promise<void> => {
+    if (!supported || !userId) return;
+    setSubscribing(true);
+    try {
+      await unsubscribeFromPush(userId);
+      setSubscribed(false);
+    } finally {
+      setSubscribing(false);
+    }
+  }, [supported, userId]);
+
+  return { supported, subscribed, subscribing, subscribe, unsubscribe };
 }

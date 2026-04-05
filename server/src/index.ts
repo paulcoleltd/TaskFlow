@@ -3,6 +3,9 @@ import type { IncomingMessage, ServerResponse } from 'http';
 import { createHmac, timingSafeEqual } from 'crypto';
 import { Server } from 'socket.io';
 import { registerHandlers } from './eventHandlers.js';
+import { getVapidPublicKey } from './push.js';
+import { pushSubscriptions } from './state.js';
+import type { PushSubscription } from 'web-push';
 
 const PORT = 3002;
 
@@ -71,7 +74,7 @@ function setCorsHeaders(req: IncomingMessage, res: ServerResponse): boolean {
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Vary', 'Origin');
   }
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Access-Control-Max-Age', '86400');
   if (req.method === 'OPTIONS') {
@@ -149,6 +152,56 @@ const httpServer = createServer(async (req, res) => {
 
   if (req.method === 'POST' && req.url === '/api/auth/login') {
     await handleLogin(req, res);
+    return;
+  }
+
+  // ── Push: return VAPID public key ─────────────────────────────────────────
+  if (req.method === 'GET' && req.url === '/api/push/vapid-key') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ publicKey: getVapidPublicKey() }));
+    return;
+  }
+
+  // ── Push: save subscription ───────────────────────────────────────────────
+  if (req.method === 'POST' && req.url === '/api/push/subscribe') {
+    let body: { userId?: unknown; subscription?: unknown };
+    try {
+      body = JSON.parse(await readBody(req, 4096));
+    } catch {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Invalid body.' }));
+      return;
+    }
+    const userId = typeof body.userId === 'string' ? body.userId.slice(0, 64) : '';
+    if (!userId || !body.subscription || typeof body.subscription !== 'object') {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'userId and subscription required.' }));
+      return;
+    }
+    pushSubscriptions.set(userId, body.subscription as PushSubscription);
+    console.log(JSON.stringify({ ts: new Date().toISOString(), event: 'push:subscribed', userId }));
+    res.writeHead(201, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true }));
+    return;
+  }
+
+  // ── Push: remove subscription ─────────────────────────────────────────────
+  if (req.method === 'DELETE' && req.url === '/api/push/subscribe') {
+    let body: { userId?: unknown };
+    try {
+      body = JSON.parse(await readBody(req, 256));
+    } catch {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Invalid body.' }));
+      return;
+    }
+    const userId = typeof body.userId === 'string' ? body.userId.slice(0, 64) : '';
+    if (userId) {
+      pushSubscriptions.delete(userId);
+      console.log(JSON.stringify({ ts: new Date().toISOString(), event: 'push:unsubscribed', userId }));
+    }
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true }));
     return;
   }
 

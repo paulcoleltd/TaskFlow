@@ -144,3 +144,21 @@
 - [ ] Push notifications (Web Push API)
 - [ ] Mobile app (React Native / Expo)
 - [ ] E2E tests for real-time collaboration (multi-browser Playwright)
+
+---
+
+## Phase 6 — Push Notifications ✅
+
+- [x] `public/sw.js` — Service Worker: handles `push` events, `notificationclick`, `activate`
+- [x] `server/src/push.ts` — VAPID key setup, `sendPushToUser()` helper using `web-push`
+- [x] `server/src/state.ts` — `pushSubscriptions` map (userId → PushSubscription)
+- [x] `server/src/index.ts` — `GET /api/push/vapid-key`, `POST /api/push/subscribe`, `DELETE /api/push/subscribe`
+- [x] `server/src/eventHandlers.ts` — push trigger on task:create (assignee ≠ creator) and comment:add
+- [x] `src/lib/pushSubscription.ts` — client-side subscribe/unsubscribe helpers, VAPID key fetch
+- [x] `src/hooks/useNotifications.ts` — added `usePushNotifications` hook
+- [x] `src/pages/SettingsPage.tsx` — NotificationsPanel now shows due-date alerts + push notifications rows
+- [x] TypeScript: 0 errors (client + server)
+
+### Phase 6 — Remaining
+- [ ] Multi-browser E2E tests (Playwright: two browsers, verify real-time sync)
+- [ ] Mobile App (React Native / Expo)

@@ -22,7 +22,7 @@ export default defineConfig(({ mode }) => {
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: blob:",
-      "connect-src 'self' ws: wss: http://localhost:3002",  // WS for HMR + Socket.io
+      "connect-src 'self' ws: wss: http://localhost:3002",  // WS for HMR + Socket.io + push API
       "frame-ancestors 'none'",
       "object-src 'none'",
       "base-uri 'self'",

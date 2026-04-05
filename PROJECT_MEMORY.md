@@ -16,10 +16,10 @@
 | 3 | Auth + Feature Expansion | ✅ Complete |
 | 4 | Test Coverage (125/125 E2E) | ✅ Complete |
 | 5 | Convex Backend Migration | 🔄 ~90% done |
-| 6 | Push Notifications + Mobile App + Multi-browser E2E | 📋 Planned |
+| 6 | Push Notifications (Web Push API) | ✅ Complete |
+| 6b | Multi-browser E2E + Mobile App | 📋 Planned |
 
-**4 phases fully complete. 1 in progress. 1 planned.**
-Phase 5 is blocked only on `npx convex dev` (requires interactive browser login by the user).
+**5 phases fully complete. 1 in progress (Phase 5 blocked on `npx convex dev`). Phase 6b planned.**
 
 ---
 
@@ -188,11 +188,27 @@ useIsAuthenticated()   // → useConvexAuth().isAuthenticated OR authStore.isAut
 
 ---
 
-## Phase 6 — Planned (Not Started)
+## Phase 6 — Push Notifications ✅ (Complete)
 
-1. **Push Notifications** — Web Push API, task assignment + comment alerts
-2. **Mobile App** — React Native / Expo
-3. **Multi-browser E2E** — Playwright tests verifying real-time sync across two browser windows
+**Built 2026-04-05:**
+- `public/sw.js` — Service Worker: handles `push` + `notificationclick` + `activate`
+- `server/src/push.ts` — VAPID keys, `sendPushToUser()` using `web-push` npm package
+- `server/src/state.ts` — `pushSubscriptions` map (userId → PushSubscription)
+- `server/src/index.ts` — 3 new HTTP endpoints: `GET /api/push/vapid-key`, `POST /api/push/subscribe`, `DELETE /api/push/subscribe`
+- `server/src/eventHandlers.ts` — push triggers on `task:create` (when assignee ≠ creator) and `comment:add`
+- `src/lib/pushSubscription.ts` — client helpers: `subscribeToPush`, `unsubscribeFromPush`, `isPushSubscribed`, `isPushSupported`
+- `src/hooks/useNotifications.ts` — added `usePushNotifications(userId)` hook
+- `src/pages/SettingsPage.tsx` — Settings > Notifications now has two toggles: Due-date alerts + Push notifications
+
+**How push notifications work:**
+1. User enables push in Settings → browser requests permission → service worker registered
+2. Client fetches VAPID public key from `/api/push/vapid-key`, creates PushManager subscription, POSTs to `/api/push/subscribe`
+3. When any user creates a task with an assignee (not themselves) or adds a comment, the server calls `sendPushToUser()` → delivers push via Web Push protocol
+4. Service worker receives the push event, shows browser notification even if app is in background
+
+**Phase 6b — Remaining:**
+- Multi-browser E2E tests (Playwright with two browser windows)
+- Mobile App (React Native / Expo)
 
 ---
 
@@ -408,4 +424,4 @@ When resuming a session, do this in order:
 
 ---
 
-*Last updated: 2026-04-05 — Fixed dual-mode architecture, locked port 5175, committed and pushed.*
+*Last updated: 2026-04-05 — Phase 6 (Web Push Notifications) complete. Phase 5 still awaits `npx convex dev`.*

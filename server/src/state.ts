@@ -1,4 +1,5 @@
 import type { Task, Project, PresenceEntry } from './types.js';
+import type { PushSubscription } from 'web-push';
 
 // In-memory shared state — no database
 // Server restart clears all state; clients re-sync via sync:request on reconnect
@@ -17,6 +18,13 @@ export const roomViewers = new Map<string, Set<string>>();
 
 /** Rate limiter: socketId → { count, resetAt } */
 export const rateLimits = new Map<string, { count: number; resetAt: number }>();
+
+/**
+ * Push subscriptions: userId → PushSubscription
+ * Keyed by userId so we can look up a user's subscription to send targeted pushes.
+ * Max 1 subscription per user (last-write-wins).
+ */
+export const pushSubscriptions = new Map<string, PushSubscription>();
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
