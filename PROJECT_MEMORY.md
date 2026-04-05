@@ -2,7 +2,8 @@
 
 > **Purpose:** This file is the single source of truth for resuming development.
 > Every session that makes a change, fixes a bug, or learns a lesson MUST update this file.
-> Never start a new session without reading this file first.
+>
+> **SESSION START RULE:** Always read the `.claude` memory file first — it records exactly where development stopped. Then read this file for full detail. Continue from that exact point. Never restart from scratch.
 
 ---
 
