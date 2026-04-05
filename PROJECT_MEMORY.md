@@ -6,6 +6,22 @@
 
 ---
 
+## Phase Overview (Quick Reference)
+
+| Phase | Name | Status |
+|-------|------|--------|
+| 1 | Core SPA | ✅ Complete |
+| 2 | Real-Time Collaboration (Socket.io) | ✅ Complete |
+| 3 | Auth + Feature Expansion | ✅ Complete |
+| 4 | Test Coverage (125/125 E2E) | ✅ Complete |
+| 5 | Convex Backend Migration | 🔄 ~90% done |
+| 6 | Push Notifications + Mobile App + Multi-browser E2E | 📋 Planned |
+
+**4 phases fully complete. 1 in progress. 1 planned.**
+Phase 5 is blocked only on `npx convex dev` (requires interactive browser login by the user).
+
+---
+
 ## Project Identity
 
 | Field | Value |
