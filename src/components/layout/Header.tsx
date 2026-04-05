@@ -3,7 +3,7 @@ import { Search, Bell, Plus, LogOut, AlertCircle, Clock, X, Command, Timer, Squa
 import { isToday, isBefore, startOfDay, addDays, format } from 'date-fns';
 import { useUIStore } from '../../store/uiStore';
 import { useTaskStore } from '../../store/taskStore';
-import { useAuthActions } from '@convex-dev/auth/react';
+import { useConvexAuth } from '../../hooks/useConvexUser';
 import { useCurrentUser } from '../../hooks/useConvexUser';
 import { useProjectStore } from '../../store/projectStore';
 import { Button } from '../ui/Button';
@@ -23,7 +23,7 @@ export function Header({ title }: { title?: string }) {
   const { tasks, getOverdueTasks, updateTask } = useTaskStore();
   const { getProjectById } = useProjectStore();
   const currentUser = useCurrentUser();
-  const { signOut } = useAuthActions();
+  const { signOut } = useConvexAuth();
 
   const [searchFocused, setSearchFocused] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);

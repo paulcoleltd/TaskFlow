@@ -6,7 +6,7 @@ import {
 import { useUIStore } from '../../store/uiStore';
 import { useProjectStore } from '../../store/projectStore';
 import { useTaskStore } from '../../store/taskStore';
-import { useAuthActions } from '@convex-dev/auth/react';
+import { useConvexAuth } from '../../hooks/useConvexUser';
 import { useCurrentUser } from '../../hooks/useConvexUser';
 import { canCreateProject, ROLE_META } from '../../lib/permissions';
 import { cn, getInitials } from '../../lib/utils';
@@ -32,7 +32,7 @@ export function Sidebar() {
   const { projects } = useProjectStore();
   const { tasks } = useTaskStore();
   const currentUser = useCurrentUser();
-  const { signOut } = useAuthActions();
+  const { signOut } = useConvexAuth();
   const navigate = useNavigate();
 
   const role = (currentUser?.role ?? 'viewer') as import('../../store/authStore').Role;

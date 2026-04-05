@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TaskFlow — E2E Test Dashboard</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0B1437;
+    color: #E2E8F0;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    background: #111C44;
+    border-bottom: 1px solid #1F3461;
+    padding: 0 24px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    z-index: 10;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 12px; }
+  .logo {
+    width: 32px; height: 32px; border-radius: 10px;
+    background: #3B82F6;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 900; color: white;
+  }
+  .topbar h1 { font-size: 15px; font-weight: 700; color: white; }
+  .topbar .sub { font-size: 12px; color: #64748B; }
+
+  .summary-chips { display: flex; align-items: center; gap: 8px; }
+  .chip {
+    display: flex; align-items: center; gap: 6px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px; font-weight: 600;
+    border: 1px solid;
+  }
+  .chip-green  { background: #10B98115; border-color: #10B98140; color: #10B981; }
+  .chip-blue   { background: #3B82F615; border-color: #3B82F640; color: #3B82F6; }
+  .chip-purple { background: #8B5CF615; border-color: #8B5CF640; color: #8B5CF6; }
+  .chip-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+
+  /* ── Main layout ── */
+  .main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ── Left preview pane ── */
+  .preview-pane {
+    width: 380px;
+    flex-shrink: 0;
+    background: #080F2F;
+    border-right: 1px solid #1F3461;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .preview-tabs {
+    display: flex;
+    border-bottom: 1px solid #1F3461;
+    padding: 0 12px;
+    background: #111C44;
+    flex-shrink: 0;
+    overflow-x: auto;
+  }
+  .preview-tabs::-webkit-scrollbar { height: 0; }
+  .preview-tab {
+    padding: 10px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748B;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all .15s;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+  .preview-tab:hover { color: #94A3B8; }
+  .preview-tab.active { color: #3B82F6; border-bottom-color: #3B82F6; }
+
+  .preview-content {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+  }
+  .preview-slide {
+    display: none;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 16px;
+    gap: 12px;
+  }
+  .preview-slide.active { display: flex; }
+
+  .screenshot-box {
+    background: #111C44;
+    border: 1px solid #1F3461;
+    border-radius: 12px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .screenshot-box img {
+    width: 100%;
+    display: block;
+    border-bottom: 1px solid #1F3461;
+  }
+  .screenshot-label {
+    padding: 8px 12px;
+    font-size: 11px;
+    color: #64748B;
+    font-weight: 500;
+  }
+
+  .feature-section { flex-shrink: 0; }
+  .feature-section h4 {
+    font-size: 10px;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin-bottom: 8px;
+  }
+  .feature-list { display: flex; flex-direction: column; gap: 4px; }
+  .feature-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 10px;
+    background: #111C44;
+    border: 1px solid #1F3461;
+    border-radius: 8px;
+    font-size: 12px;
+    color: #94A3B8;
+  }
+  .feature-icon { font-size: 14px; flex-shrink: 0; }
+  .feature-badge {
+    margin-left: auto;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .badge-new  { background: #3B82F620; color: #3B82F6; }
+  .badge-core { background: #10B98120; color: #10B981; }
+
+  /* ── Right results pane ── */
+  .results-pane {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px;
+  }
+  .results-pane::-webkit-scrollbar { width: 6px; }
+  .results-pane::-webkit-scrollbar-track { background: transparent; }
+  .results-pane::-webkit-scrollbar-thumb { background: #1F3461; border-radius: 3px; }
+
+  .suite {
+    background: #111C44;
+    border: 1px solid #1F3461;
+    border-radius: 14px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .suite-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid transparent;
+    transition: background .1s;
+  }
+  .suite-header:hover { background: #1B254B; }
+  .suite-header.open { border-bottom-color: #1F3461; }
+  .suite-title-group { display: flex; align-items: center; gap: 10px; }
+  .suite-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; flex-shrink: 0;
+  }
+  .suite-title { font-size: 13px; font-weight: 700; color: white; }
+  .suite-meta { font-size: 11px; color: #64748B; margin-top: 1px; }
+  .suite-right { display: flex; align-items: center; gap: 10px; }
+  .suite-count {
+    font-size: 11px; font-weight: 700;
+    padding: 3px 10px;
+    background: #10B98115;
+    border: 1px solid #10B98130;
+    border-radius: 20px;
+    color: #10B981;
+  }
+  .chevron {
+    width: 18px; height: 18px;
+    color: #475569;
+    transition: transform .2s;
+    flex-shrink: 0;
+  }
+  .suite-header.open .chevron { transform: rotate(90deg); }
+
+  .suite-body { display: none; }
+  .suite-body.open { display: block; }
+
+  .test-list { padding: 8px 12px 12px; display: flex; flex-direction: column; gap: 3px; }
+  .test-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 7px 10px;
+    border-radius: 8px;
+    cursor: default;
+    transition: background .1s;
+  }
+  .test-row:hover { background: #1B254B; }
+  .test-status {
+    width: 16px; height: 16px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-size: 9px;
+  }
+  .pass { background: #10B98120; border: 1.5px solid #10B981; color: #10B981; }
+  .test-name { font-size: 12px; color: #CBD5E1; flex: 1; }
+  .test-type {
+    font-size: 9px; font-weight: 700; padding: 2px 6px;
+    border-radius: 4px; flex-shrink: 0;
+  }
+  .type-nav   { background: #3B82F620; color: #3B82F6; }
+  .type-ui    { background: #8B5CF620; color: #8B5CF6; }
+  .type-crud  { background: #F59E0B20; color: #F59E0B; }
+  .type-data  { background: #10B98120; color: #10B981; }
+  .type-flow  { background: #EC489920; color: #EC4899; }
+  .type-chart { background: #06B6D420; color: #06B6D4; }
+
+  /* ── Scrollbar ── */
+  .preview-slide::-webkit-scrollbar { width: 4px; }
+  .preview-slide::-webkit-scrollbar-thumb { background: #1F3461; border-radius: 2px; }
+
+  /* ── Stats row ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .stat-card {
+    background: #111C44;
+    border: 1px solid #1F3461;
+    border-radius: 12px;
+    padding: 14px 16px;
+  }
+  .stat-value { font-size: 26px; font-weight: 800; color: white; }
+  .stat-label { font-size: 10px; color: #64748B; margin-top: 2px; text-transform: uppercase; letter-spacing: .05em; font-weight: 600; }
+  .stat-card.green .stat-value { color: #10B981; }
+  .stat-card.blue  .stat-value { color: #3B82F6; }
+</style>
+</head>
+<body>
+
+<!-- ── Top bar ── -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo">⚡</div>
+    <div>
+      <h1>TaskFlow — E2E Test Dashboard</h1>
+      <div class="sub">Playwright · Chromium · Last run: 78/78 passed</div>
+    </div>
+  </div>
+  <div class="summary-chips">
+    <span class="chip chip-green"><span class="chip-dot"></span>78 Passed</span>
+    <span class="chip chip-blue"><span class="chip-dot"></span>6 Suites</span>
+    <span class="chip chip-purple"><span class="chip-dot"></span>~3.5 min</span>
+  </div>
+</div>
+
+<!-- ── Main ── -->
+<div class="main">
+
+  <!-- ── Left: App Preview ── -->
+  <div class="preview-pane">
+    <div class="preview-tabs">
+      <button class="preview-tab active" onclick="switchTab(this,'tab-dashboard')">Dashboard</button>
+      <button class="preview-tab" onclick="switchTab(this,'tab-tasks')">Tasks</button>
+      <button class="preview-tab" onclick="switchTab(this,'tab-projects')">Projects</button>
+      <button class="preview-tab" onclick="switchTab(this,'tab-analytics')">Analytics</button>
+      <button class="preview-tab" onclick="switchTab(this,'tab-features')">Features</button>
+    </div>
+
+    <div class="preview-content">
+
+      <!-- Dashboard -->
+      <div class="preview-slide active" id="tab-dashboard">
+        <div class="screenshot-box">
+          <img src="app-dashboard.png" alt="Dashboard screenshot" onerror="this.parentElement.style.display='none'" />
+          <div class="screenshot-label">Dashboard — stat cards, charts, active tasks</div>
+        </div>
+        <div class="feature-section">
+          <h4>Dashboard features</h4>
+          <div class="feature-list">
+            <div class="feature-item"><span class="feature-icon">📊</span>4 KPI stat cards (total / in-progress / completed / overdue)<span class="feature-badge badge-core">Core</span></div>
+            <div class="feature-item"><span class="feature-icon">📈</span>Bar chart: Tasks Created — Last 7 Days</div>
+            <div class="feature-item"><span class="feature-icon">🥧</span>Pie chart: By Status distribution</div>
+            <div class="feature-item"><span class="feature-icon">✅</span>My Active Tasks — clickable list</div>
+            <div class="feature-item"><span class="feature-icon">📁</span>Project progress bars — right column</div>
+            <div class="feature-item"><span class="feature-icon">⌘</span>Command Palette (⌘K) trigger in header<span class="feature-badge badge-new">New</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tasks -->
+      <div class="preview-slide" id="tab-tasks">
+        <div class="screenshot-box">
+          <img src="app-tasks.png" alt="Tasks screenshot" onerror="this.parentElement.style.display='none'" />
+          <div class="screenshot-label">My Tasks — Kanban board with drag-and-drop</div>
+        </div>
+        <div class="feature-section">
+          <h4>Task Management features</h4>
+          <div class="feature-list">
+            <div class="feature-item"><span class="feature-icon">🗂️</span>Kanban board — 5 status columns</div>
+            <div class="feature-item"><span class="feature-icon">📋</span>List view — grouped by status/priority/project</div>
+            <div class="feature-item"><span class="feature-icon">📊</span>Table view — sortable columns</div>
+            <div class="feature-item"><span class="feature-icon">📅</span>Timeline / Gantt chart view<span class="feature-badge badge-new">New</span></div>
+            <div class="feature-item"><span class="feature-icon">🔍</span>Filter by status, priority, tag, assignee</div>
+            <div class="feature-item"><span class="feature-icon">🔁</span>Recurring tasks (daily/weekly/monthly)<span class="feature-badge badge-new">New</span></div>
+            <div class="feature-item"><span class="feature-icon">🔗</span>Task dependencies — "Blocked By" links<span class="feature-badge badge-new">New</span></div>
+            <div class="feature-item"><span class="feature-icon">⏱️</span>Focus Mode + Pomodoro timer<span class="feature-badge badge-new">New</span></div>
+            <div class="feature-item"><span class="feature-icon">📌</span>Pin tasks, subtasks, tags, comments</div>
+            <div class="feature-item"><span class="feature-icon">🕐</span>Time tracking — estimated vs logged hours</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Projects -->
+      <div class="preview-slide" id="tab-projects">
+        <div class="screenshot-box">
+          <img src="app-projects.png" alt="Projects screenshot" onerror="this.parentElement.style.display='none'" />
+          <div class="screenshot-label">All Projects — grid with progress and status</div>
+        </div>
+        <div class="feature-section">
+          <h4>Project Management features</h4>
+          <div class="feature-list">
+            <div class="feature-item"><span class="feature-icon">🗃️</span>Project grid with colour, icon, progress</div>
+            <div class="feature-item"><span class="feature-icon">🔖</span>Filter tabs: All / Active / Completed / Archived</div>
+            <div class="feature-item"><span class="feature-icon">📄</span>Project detail — stats, board, timeline views</div>
+            <div class="feature-item"><span class="feature-icon">📅</span>Per-project Gantt timeline<span class="feature-badge badge-new">New</span></div>
+            <div class="feature-item"><span class="feature-icon">👥</span>Member avatars + task assignment</div>
+            <div class="feature-item"><span class="feature-icon">📝</span>Project notes (markdown-style)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analytics -->
+      <div class="preview-slide" id="tab-analytics">
+        <div class="screenshot-box">
+          <img src="app-analytics.png" alt="Analytics screenshot" onerror="this.parentElement.style.display='none'" />
+          <div class="screenshot-label">Analytics — Recharts-powered insight charts</div>
+        </div>
+        <div class="feature-section">
+          <h4>Analytics features</h4>
+          <div class="feature-list">
+            <div class="feature-item"><span class="feature-icon">📊</span>Completion Rate, Total Tasks, Overdue KPIs</div>
+            <div class="feature-item"><span class="feature-icon">📈</span>Completed Per Week — bar chart (13w)</div>
+            <div class="feature-item"><span class="feature-icon">🥧</span>Status Distribution — pie chart</div>
+            <div class="feature-item"><span class="feature-icon">🔴</span>Priority Breakdown — bar chart</div>
+            <div class="feature-item"><span class="feature-icon">📉</span>Completion Trend — area chart</div>
+            <div class="feature-item"><span class="feature-icon">👤</span>Team Workload page<span class="feature-badge badge-new">New</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Features -->
+      <div class="preview-slide" id="tab-features">
+        <div class="feature-section">
+          <h4>App Architecture</h4>
+          <div class="feature-list">
+            <div class="feature-item"><span class="feature-icon">⚛️</span>React 18 + TypeScript (strict)</div>
+            <div class="feature-item"><span class="feature-icon">🏪</span>Zustand + localStorage persist</div>
+            <div class="feature-item"><span class="feature-icon">🎨</span>Tailwind CSS — dark navy design system</div>
+            <div class="feature-item"><span class="feature-icon">🔒</span>Role-based access (Admin / Member / Viewer)</div>
+            <div class="feature-item"><span class="feature-icon">🔐</span>Auth flow — Login page + protected routes</div>
+            <div class="feature-item"><span class="feature-icon">🧩</span>Zod validation on all forms</div>
+            <div class="feature-item"><span class="feature-icon">🎭</span>Playwright E2E — 78 tests, 6 suites</div>
+            <div class="feature-item"><span class="feature-icon">🛡️</span>MITRE ATT&CK security hardening applied</div>
+          </div>
+        </div>
+        <div class="feature-section">
+          <h4>New in Phase 2</h4>
+          <div class="feature-list">
+            <div class="feature-item"><span class="feature-icon">⌘</span>Command Palette — fuzzy search + actions<span class="feature-badge badge-new">New</span></div>
+            <div class="feature-item"><span class="feature-icon">⏱️</span>Focus Mode with Pomodoro timer<span class="feature-badge badge-new">New</span></div>
+            <div class="feature-item"><span class="feature-icon">📋</span>Activity Log per task<span class="feature-badge badge-new">New</span></div>
+            <div class="feature-item"><span class="feature-icon">📅</span>Gantt / Timeline view per project<span class="feature-badge badge-new">New</span></div>
+            <div class="feature-item"><span class="feature-icon">👥</span>Team Workload Dashboard<span class="feature-badge badge-new">New</span></div>
+            <div class="feature-item"><span class="feature-icon">🔁</span>Recurring Tasks — auto-spawn on completion<span class="feature-badge badge-new">New</span></div>
+            <div class="feature-item"><span class="feature-icon">🔗</span>Task Dependencies (Blocked By)<span class="feature-badge badge-new">New</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /preview-pane -->
+
+  <!-- ── Right: Test Results ── -->
+  <div class="results-pane">
+
+    <!-- Stats row -->
+    <div class="stats-row">
+      <div class="stat-card green">
+        <div class="stat-value">78</div>
+        <div class="stat-label">Tests Passed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:#EF4444">0</div>
+        <div class="stat-label">Tests Failed</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-value">6</div>
+        <div class="stat-label">Test Suites</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:#F59E0B">~3.5m</div>
+        <div class="stat-label">Total Duration</div>
+      </div>
+    </div>
+
+    <!-- ── Suite 1: Navigation ── -->
+    <div class="suite">
+      <div class="suite-header open" onclick="toggleSuite(this)">
+        <div class="suite-title-group">
+          <div class="suite-icon" style="background:#3B82F620">🧭</div>
+          <div>
+            <div class="suite-title">Navigation &amp; Layout</div>
+            <div class="suite-meta">01-navigation.spec.ts · Routing, sidebar, header elements</div>
+          </div>
+        </div>
+        <div class="suite-right">
+          <span class="suite-count">12 / 12</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+      <div class="suite-body open">
+        <div class="test-list">
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">App loads with correct title ("TaskFlow — Task Management")</span><span class="test-type type-nav">nav</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Sidebar is visible on desktop</span><span class="test-type type-ui">ui</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Sidebar shows TaskFlow logo</span><span class="test-type type-ui">ui</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Navigate to My Tasks page → URL /my-tasks</span><span class="test-type type-nav">nav</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Navigate to All Projects page → URL /projects</span><span class="test-type type-nav">nav</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Navigate to Calendar page → URL /calendar</span><span class="test-type type-nav">nav</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Navigate to Analytics page → URL /analytics</span><span class="test-type type-nav">nav</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Navigate to Settings page → URL /settings</span><span class="test-type type-nav">nav</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Sidebar collapses (w-60 → w-16) and expands on button click</span><span class="test-type type-ui">ui</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Header shows "New Task" button</span><span class="test-type type-ui">ui</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Header shows search input with placeholder "Search tasks..."</span><span class="test-type type-ui">ui</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Dashboard is the default route (URL is "/")</span><span class="test-type type-nav">nav</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Suite 2: Dashboard ── -->
+    <div class="suite">
+      <div class="suite-header open" onclick="toggleSuite(this)">
+        <div class="suite-title-group">
+          <div class="suite-icon" style="background:#8B5CF620">📊</div>
+          <div>
+            <div class="suite-title">Dashboard Page</div>
+            <div class="suite-meta">02-dashboard.spec.ts · KPI cards, charts, task list, seeded data</div>
+          </div>
+        </div>
+        <div class="suite-right">
+          <span class="suite-count">11 / 11</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+      <div class="suite-body open">
+        <div class="test-list">
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Shows 4 stat cards in first grid</span><span class="test-type type-ui">ui</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Stat card "Total Tasks" shows a numeric value</span><span class="test-type type-data">data</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Stat card "In Progress" is visible</span><span class="test-type type-ui">ui</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Stat card "Completed" is visible in the grid</span><span class="test-type type-ui">ui</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">"My Active Tasks" section heading visible</span><span class="test-type type-ui">ui</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">"Tasks Created — Last 7 Days" chart heading visible</span><span class="test-type type-chart">chart</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">"By Status" pie chart heading visible</span><span class="test-type type-chart">chart</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">"Projects" section visible in right column</span><span class="test-type type-ui">ui</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Recharts SVG wrapper renders in first chart</span><span class="test-type type-chart">chart</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Sidebar shows seeded project "Product Redesign"</span><span class="test-type type-data">data</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Clicking active task opens TaskDetail slide-in panel</span><span class="test-type type-flow">flow</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Suite 3: Tasks ── -->
+    <div class="suite">
+      <div class="suite-header open" onclick="toggleSuite(this)">
+        <div class="suite-title-group">
+          <div class="suite-icon" style="background:#F59E0B20">✅</div>
+          <div>
+            <div class="suite-title">Task CRUD Operations</div>
+            <div class="suite-meta">03-tasks.spec.ts · Create, filter, view, detail panel, modal validation</div>
+          </div>
+        </div>
+        <div class="suite-right">
+          <span class="suite-count">14 / 14</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+      <div class="suite-body open">
+        <div class="test-list">
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">My Tasks page loads with correct h1 heading</span><span class="test-type type-nav">nav</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Board view shows Kanban columns: To Do, In Progress, Done</span><span class="test-type type-ui">ui</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Task cards visible as draggable elements in board view</span><span class="test-type type-ui">ui</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Clicking "New Task" in header opens modal overlay</span><span class="test-type type-flow">flow</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Task modal contains title, status, priority fields</span><span class="test-type type-ui">ui</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Submitting empty title shows "Title is required" validation error</span><span class="test-type type-crud">crud</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Create task end-to-end: fill title + status + priority → appears in board</span><span class="test-type type-crud">crud</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Switch to list view via view switcher (2nd button)</span><span class="test-type type-ui">ui</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Filter tasks by search query "onboarding" — shows match or empty state</span><span class="test-type type-flow">flow</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">No-match search "xyzabcdef-no-match-999" shows "No tasks found"</span><span class="test-type type-flow">flow</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Clicking a task card opens TaskDetail slide-in panel</span><span class="test-type type-flow">flow</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">TaskDetail "Close" button (aria-label) dismisses the panel</span><span class="test-type type-flow">flow</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Edit task button (title="Edit task") opens pre-filled modal</span><span class="test-type type-crud">crud</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Pressing Escape key closes the task modal overlay</span><span class="test-type type-flow">flow</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Suite 4: Projects ── -->
+    <div class="suite">
+      <div class="suite-header open" onclick="toggleSuite(this)">
+        <div class="suite-title-group">
+          <div class="suite-icon" style="background:#10B98120">📁</div>
+          <div>
+            <div class="suite-title">Projects</div>
+            <div class="suite-meta">04-projects.spec.ts · Grid, filter tabs, project detail, task board</div>
+          </div>
+        </div>
+        <div class="suite-right">
+          <span class="suite-count">13 / 13</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+      <div class="suite-body open">
+        <div class="test-list">
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">All Projects page loads with correct h1 heading</span><span class="test-type type-nav">nav</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Shows ≥4 seeded project cards in main grid</span><span class="test-type type-data">data</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Seeded project names visible: "Product Redesign", "Bug Backlog"</span><span class="test-type type-data">data</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Project cards have progress bar elements</span><span class="test-type type-ui">ui</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Filter tabs: all / active / completed visible as buttons</span><span class="test-type type-ui">ui</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">"New Project" button in main area opens project modal</span><span class="test-type type-flow">flow</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Create project end-to-end: fill name + description → appears in grid</span><span class="test-type type-crud">crud</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Click project card navigates to /projects/proj-1 detail</span><span class="test-type type-nav">nav</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Project detail shows "Total" and "Members" stats</span><span class="test-type type-data">data</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Project detail shows Kanban "To Do" column for Engineering Sprint</span><span class="test-type type-ui">ui</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Project detail has "Add Task" button (exact match)</span><span class="test-type type-ui">ui</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">"All Projects" back button navigates to /projects</span><span class="test-type type-nav">nav</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">"completed" filter tab shows "No projects" empty state</span><span class="test-type type-flow">flow</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Suite 5: Calendar ── -->
+    <div class="suite">
+      <div class="suite-header open" onclick="toggleSuite(this)">
+        <div class="suite-title-group">
+          <div class="suite-icon" style="background:#EC489920">📅</div>
+          <div>
+            <div class="suite-title">Calendar Page</div>
+            <div class="suite-meta">05-calendar.spec.ts · Month grid, navigation, day cells, task pills</div>
+          </div>
+        </div>
+        <div class="suite-right">
+          <span class="suite-count">9 / 9</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+      <div class="suite-body open">
+        <div class="test-list">
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Calendar page loads with correct h1 heading</span><span class="test-type type-nav">nav</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Shows current month name and year in header</span><span class="test-type type-data">data</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Day-of-week headers: "Sun", "Mon" (exact), "Sat" visible</span><span class="test-type type-ui">ui</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">"Today" button is visible in navigation row</span><span class="test-type type-ui">ui</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Header row has exactly 6 buttons (month/week/done toggles + prev/today/next)</span><span class="test-type type-ui">ui</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Next month nav (aria-label="Next") shows next month name</span><span class="test-type type-flow">flow</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Previous month nav (aria-label="Previous") shows prev month name</span><span class="test-type type-flow">flow</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">"Today" button after 2× Next resets to current month</span><span class="test-type type-flow">flow</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Calendar grid has ≥28 day cell elements (min-h-[80px])</span><span class="test-type type-ui">ui</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Suite 6: Analytics + Settings ── -->
+    <div class="suite">
+      <div class="suite-header open" onclick="toggleSuite(this)">
+        <div class="suite-title-group">
+          <div class="suite-icon" style="background:#06B6D420">📉</div>
+          <div>
+            <div class="suite-title">Analytics &amp; Settings</div>
+            <div class="suite-meta">06-analytics-settings.spec.ts · Charts, KPIs, profile, team, export</div>
+          </div>
+        </div>
+        <div class="suite-right">
+          <span class="suite-count">19 / 19</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+      <div class="suite-body open">
+        <div class="test-list">
+          <!-- Analytics -->
+          <div class="test-row" style="background:#06B6D408; border-radius:6px; margin-bottom:2px">
+            <span style="font-size:10px; font-weight:700; color:#06B6D4; padding: 0 4px; text-transform:uppercase; letter-spacing:.06em">Analytics</span>
+          </div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Analytics page loads with correct h1 heading</span><span class="test-type type-nav">nav</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">"Total Tasks" metric card visible in main</span><span class="test-type type-ui">ui</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">"Overdue" metric card visible in main</span><span class="test-type type-ui">ui</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">"Completion Rate" metric card (exact match) visible</span><span class="test-type type-ui">ui</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">"Completed" metric visible in first stat grid</span><span class="test-type type-data">data</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">"Completed Per Week" heading + Recharts wrapper visible</span><span class="test-type type-chart">chart</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">"Status Distribution" chart heading visible</span><span class="test-type type-chart">chart</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">"Priority Breakdown" chart heading visible</span><span class="test-type type-chart">chart</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">"Completion Trend" chart heading visible</span><span class="test-type type-chart">chart</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">First percentage element (/%/) visible in main</span><span class="test-type type-data">data</span></div>
+          <!-- Settings -->
+          <div class="test-row" style="background:#8B5CF608; border-radius:6px; margin: 6px 0 2px">
+            <span style="font-size:10px; font-weight:700; color:#8B5CF6; padding: 0 4px; text-transform:uppercase; letter-spacing:.06em">Settings</span>
+          </div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Settings page loads with correct h1 heading</span><span class="test-type type-nav">nav</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">h3 "Profile" section heading visible</span><span class="test-type type-ui">ui</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Current user name "Alex Johnson" visible in profile</span><span class="test-type type-data">data</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">h3 "Appearance" section + "Dark" theme option visible</span><span class="test-type type-ui">ui</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">h3 "Data Management" + JSON export + Clear buttons visible</span><span class="test-type type-ui">ui</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">h3 "Team Members" section heading visible</span><span class="test-type type-ui">ui</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">All 3 team members listed: Alex Johnson, Sarah Chen, Marcus Williams</span><span class="test-type type-data">data</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">"You" badge (exact) shown for current user Alex Johnson</span><span class="test-type type-ui">ui</span></div>
+          <div class="test-row"><div class="test-status pass">✓</div><span class="test-name">Clicking "JSON" export button triggers "JSON exported!" toast</span><span class="test-type type-flow">flow</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /results-pane -->
+</div><!-- /main -->
+
+<script>
+  function toggleSuite(header) {
+    header.classList.toggle('open');
+    header.nextElementSibling.classList.toggle('open');
+  }
+
+  function switchTab(btn, tabId) {
+    document.querySelectorAll('.preview-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.preview-slide').forEach(s => s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(tabId).classList.add('active');
+  }
+</script>
+</body>
+</html>

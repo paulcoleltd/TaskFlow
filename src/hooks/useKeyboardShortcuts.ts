@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { useUIStore } from '../store/uiStore';
-import { useConvexAuth } from 'convex/react';
-import { useCurrentUser } from './useConvexUser';
+import { useCurrentUser, useIsAuthenticated } from './useConvexUser';
 import { useTaskStore } from '../store/taskStore';
 import { canCreateTask, canEditTask } from '../lib/permissions';
 import toast from 'react-hot-toast';
@@ -24,7 +23,7 @@ export function useKeyboardShortcuts() {
     openTaskModal, setSearchQuery,
     activeTimer, startTimer, stopTimer,
   } = useUIStore();
-  const { isAuthenticated } = useConvexAuth();
+  const isAuthenticated = useIsAuthenticated();
   const currentUser = useCurrentUser();
   const { tasks, moveTask, togglePin } = useTaskStore();
 

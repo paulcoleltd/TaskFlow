@@ -1,7 +1,6 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { useConvexAuth } from 'convex/react';
 import { AppShell } from './components/layout/AppShell';
 import { MobileNav } from './components/layout/MobileNav';
 import { TaskModal } from './components/tasks/TaskModal';
@@ -12,8 +11,15 @@ import { FocusMode } from './components/tasks/FocusMode';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { useUIStore } from './store/uiStore';
+import { useAuthStore } from './store/authStore';
+import { useCurrentUser } from './hooks/useConvexUser';
+import { useTaskStore } from './store/taskStore';
+import { useProjectStore } from './store/projectStore';
 import { useConvexSync } from './hooks/useConvexSync';
 import { usePresenceHeartbeat } from './hooks/usePresenceHeartbeat';
+import { SEED_TASKS, SEED_PROJECTS } from './lib/sampleData';
+
+const CONVEX_MODE = !!import.meta.env.VITE_CONVEX_URL;
 
 // Lazy-load all pages — each becomes its own JS chunk
 const LoginPage       = lazy(() => import('./pages/LoginPage'));
@@ -32,23 +38,40 @@ const TimePage        = lazy(() => import('./pages/TimePage'));
 const RoadmapPage     = lazy(() => import('./pages/RoadmapPage'));
 
 function App() {
-  const { isAuthenticated } = useConvexAuth();
   const { selectedTaskId, isFocusModeOpen, closeFocusMode, theme } = useUIStore();
 
-  // Sync Convex real-time data → Zustand stores
+  // Auth state — currentUser is null/undefined when not logged in (both modes)
+  const currentUser = useCurrentUser();
+  const localAuth   = useAuthStore();
+  const isAuthenticated = CONVEX_MODE ? !!currentUser : localAuth.isAuthenticated;
+
+  // Sync Convex real-time data → Zustand stores (no-op in local mode)
   useConvexSync();
 
-  // Global presence heartbeat — marks user as online
+  // Global presence heartbeat (no-op in local mode)
   usePresenceHeartbeat('global');
 
-  // Apply theme class to <html> so CSS variables switch
+  // Local mode — seed sample data on first launch
+  const { tasks, seedTasks } = useTaskStore();
+  const { projects, seedProjects } = useProjectStore();
+  useEffect(() => {
+    if (!CONVEX_MODE) {
+      // Restore session from localStorage
+      try {
+        const saved = JSON.parse(localStorage.getItem('taskflow-local-auth') ?? 'null');
+        if (saved) useAuthStore.setState({ currentUser: saved, token: 'local', isAuthenticated: true });
+      } catch {}
+      // Seed data
+      if (tasks.length === 0) seedTasks(SEED_TASKS);
+      if (projects.length === 0) seedProjects(SEED_PROJECTS);
+    }
+  }, []);
+
+  // Apply theme
   useEffect(() => {
     const root = document.documentElement;
-    if (theme === 'light') {
-      root.setAttribute('data-theme', 'light');
-    } else {
-      root.removeAttribute('data-theme');
-    }
+    if (theme === 'light') root.setAttribute('data-theme', 'light');
+    else root.removeAttribute('data-theme');
   }, [theme]);
 
   return (
@@ -62,17 +85,8 @@ function App() {
         />
         <Suspense fallback={null}>
           <Routes>
-            {/* ── Public route ── */}
             <Route path="/login" element={<LoginPage />} />
-
-            {/* ── Protected routes — require Convex authentication ── */}
-            <Route
-              element={
-                <ProtectedRoute>
-                  <AppShell />
-                </ProtectedRoute>
-              }
-            >
+            <Route element={<ProtectedRoute><AppShell /></ProtectedRoute>}>
               <Route index element={<DashboardPage />} />
               <Route path="my-tasks" element={<MyTasksPage />} />
               <Route path="projects" element={<AllProjectsPage />} />
@@ -89,7 +103,6 @@ function App() {
             </Route>
           </Routes>
 
-          {/* Global overlays — gated on authentication */}
           {isAuthenticated && <MobileNav />}
           {isAuthenticated && <TaskModal />}
           {isAuthenticated && selectedTaskId && <TaskDetail />}

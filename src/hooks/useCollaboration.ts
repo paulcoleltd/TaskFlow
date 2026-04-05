@@ -14,8 +14,7 @@
 import { useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { connectSocket, disconnectSocket, getSocket } from '../lib/socket';
-import { useConvexAuth } from 'convex/react';
-import { useCurrentUser } from './useConvexUser';
+import { useCurrentUser, useIsAuthenticated } from './useConvexUser';
 import { useTaskStore } from '../store/taskStore';
 import { useProjectStore } from '../store/projectStore';
 import { useCollaborationStore } from '../store/collaborationStore';
@@ -33,7 +32,7 @@ const TOAST_STYLE = {
 };
 
 export function useCollaboration() {
-  const { isAuthenticated } = useConvexAuth();
+  const isAuthenticated = useIsAuthenticated();
   const currentUser = useCurrentUser();
   const taskStore = useTaskStore();
   const projectStore = useProjectStore();

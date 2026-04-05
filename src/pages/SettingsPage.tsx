@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTaskStore } from '../store/taskStore';
 import { useProjectStore } from '../store/projectStore';
-import { useAuthActions } from '@convex-dev/auth/react';
+import { useConvexAuth } from '../hooks/useConvexUser';
 import { useCurrentUser } from '../hooks/useConvexUser';
 import { useTagStore } from '../store/tagStore';
 import { useUIStore } from '../store/uiStore';
@@ -182,7 +182,7 @@ function NotificationsPanel({ enabled, setEnabled }: { enabled: boolean; setEnab
 
 export default function SettingsPage() {
   const currentUser = useCurrentUser();
-  const { signOut } = useAuthActions();
+  const { signOut } = useConvexAuth();
   const navigate = useNavigate();
   const importRef = useRef<HTMLInputElement>(null);
   const csvImportRef = useRef<HTMLInputElement>(null);

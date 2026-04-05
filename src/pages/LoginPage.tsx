@@ -4,8 +4,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Zap, Eye, EyeOff, Lock, Mail } from 'lucide-react';
-import { useAuthActions } from '@convex-dev/auth/react';
+import { useConvexAuth as useLocalConvexAuth } from '../hooks/useConvexUser';
+import { useAuthStore } from '../store/authStore';
 import { Button } from '../components/ui/Button';
+
+const CONVEX_MODE = !!import.meta.env.VITE_CONVEX_URL;
 
 const schema = z.object({
   email: z.string().email('Enter a valid email address'),
@@ -19,8 +22,15 @@ const DEMO_ACCOUNTS = [
   { email: 'marcus@taskflow.io', password: 'Viewer1234!', role: 'Viewer', desc: 'Read-only access' },
 ];
 
+// Local demo accounts — validated client-side when Convex is not configured
+const LOCAL_ACCOUNTS: Record<string, { id: string; name: string; email: string; colour: string; role: 'admin' | 'member' | 'viewer'; password: string }> = {
+  'alex@taskflow.io':   { id: 'user-1', name: 'Alex Morgan',     email: 'alex@taskflow.io',   colour: '#4B8CF7', role: 'admin',  password: 'Admin1234!'  },
+  'sarah@taskflow.io':  { id: 'user-2', name: 'Sarah Chen',      email: 'sarah@taskflow.io',  colour: '#8B5CF6', role: 'member', password: 'Member1234!' },
+  'marcus@taskflow.io': { id: 'user-3', name: 'Marcus Williams', email: 'marcus@taskflow.io', colour: '#10B981', role: 'viewer', password: 'Viewer1234!' },
+};
+
 export default function LoginPage() {
-  const { signIn } = useAuthActions();
+  const { signIn } = useLocalConvexAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const from = (location.state as any)?.from?.pathname ?? '/';
@@ -34,11 +44,23 @@ export default function LoginPage() {
 
   const onSubmit = async (data: FormData) => {
     setServerError('');
+    if (!CONVEX_MODE) {
+      // Local mode — validate against demo accounts directly (no server needed)
+      const u = LOCAL_ACCOUNTS[data.email.trim().toLowerCase()];
+      if (!u || u.password !== data.password) {
+        setServerError('Invalid email or password. Please try again.');
+        return;
+      }
+      const { password: _pw, ...user } = u;
+      localStorage.setItem('taskflow-local-auth', JSON.stringify(user));
+      useAuthStore.setState({ currentUser: user, token: 'local', isAuthenticated: true });
+      navigate(from, { replace: true });
+      return;
+    }
     try {
       await signIn('password', { email: data.email, password: data.password, flow: 'signIn' });
       navigate(from, { replace: true });
     } catch {
-      // @convex-dev/auth throws on bad credentials — use a generic message to prevent user enumeration
       setServerError('Invalid email or password. Please try again.');
     }
   };
