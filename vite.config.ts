@@ -32,6 +32,8 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     server: {
+      port: 5175,
+      strictPort: true,
       headers: securityHeaders,
       proxy: {
         // Forward /socket.io WebSocket connections to the Socket.io server on :3001
