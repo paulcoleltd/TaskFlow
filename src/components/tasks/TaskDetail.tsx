@@ -7,7 +7,9 @@ import type { Task, ActivityVerb, Attachment } from '../../types';
 import { useTaskStore } from '../../store/taskStore';
 import { useProjectStore } from '../../store/projectStore';
 import { useUIStore } from '../../store/uiStore';
-import { useAuthStore } from '../../store/authStore';
+import { useCurrentUser } from '../../hooks/useConvexUser';
+import { useDeleteTask, useUpdateTask } from '../../hooks/useConvexTasks';
+import { usePresenceHeartbeat } from '../../hooks/usePresenceHeartbeat';
 import { RoleGuard } from '../auth/RoleGuard';
 import { canEditTask, canDeleteTask } from '../../lib/permissions';
 import { StatusBadge } from '../ui/StatusBadge';
@@ -28,7 +30,12 @@ export function TaskDetail() {
   const { selectedTaskId, setSelectedTask, openTaskModal, openFocusMode, activeTimer, startTimer, startPomodoro, stopTimer } = useUIStore();
   const { tasks, updateTask, deleteTask, togglePin, duplicateTask, logActivity, getTaskActivity, addTask } = useTaskStore();
   const { getProjectById } = useProjectStore();
-  const { currentUser } = useAuthStore();
+  const currentUser = useCurrentUser();
+  const convexDelete = useDeleteTask();
+  const convexUpdate = useUpdateTask();
+
+  // Task-level presence — shows who's viewing this task
+  usePresenceHeartbeat(selectedTaskId ? `task:${selectedTaskId}` : '');
   const tags = useTagStore(s => s.tags);
   const addTemplate = useTemplateStore(s => s.addTemplate);
   const [commentText, setCommentText] = useState('');
@@ -63,13 +70,24 @@ export function TaskDetail() {
     try { getSocket().emit('task:update', { taskId: task.id, updates: safe }); } catch {}
   };
 
+  /**
+   * Dual-write helper: updates Zustand store immediately (optimistic UI)
+   * and also persists the change to Convex (best-effort, no-op if not connected).
+   */
+  const patchTask = (updates: Partial<Task>) => {
+    updateTask(task.id, updates);
+    emitUpdate(updates);
+    const { comments: _c, attachments: _a, ...convexSafe } = updates as any;
+    convexUpdate({ id: task.id as any, ...convexSafe }).catch(() => {});
+  };
+
   const project = getProjectById(task.projectId);
   const assignee = SEED_USERS.find(u => u.id === task.assigneeId);
   const completedSubs = task.subtasks.filter(s => s.completed).length;
   const subProgress = task.subtasks.length ? (completedSubs / task.subtasks.length) * 100 : 0;
 
   const role = currentUser?.role ?? 'viewer';
-  const userId = currentUser?.id ?? '';
+  const userId = currentUser?._id ?? '';
   const canEdit = canEditTask(role, task.assigneeId, userId);
   const canDelete = canDeleteTask(role);
 
@@ -77,6 +95,7 @@ export function TaskDetail() {
     const snapshot = { ...task };
     deleteTask(task.id);
     emitTaskDelete(task.id);
+    convexDelete({ id: task.id as any }).catch(() => {});
     setSelectedTask(null);
     toast(
       (t) => (
@@ -198,8 +217,7 @@ export function TaskDetail() {
     if (!canEdit) return;
     const ORDER = STATUS_OPTIONS.map(s => s.value);
     const next = ORDER[(ORDER.indexOf(task.status) + 1) % ORDER.length];
-    updateTask(task.id, { status: next });
-    emitUpdate({ status: next as Task['status'] });
+    patchTask({ status: next as Task['status'] });
     logActivity(task.id, userId, 'status_changed', { from: task.status, to: next });
     const label = STATUS_OPTIONS.find(s => s.value === next)?.label ?? next;
     toast.success(`Status → ${label}`);
@@ -277,7 +295,7 @@ export function TaskDetail() {
 
   const mentionSuggestions = mentionState
     ? allUsers.filter(u =>
-        u.id !== currentUser?.id &&
+        u.id !== currentUser?._id &&
         (mentionState.query === '' || u.name.toLowerCase().startsWith(mentionState.query))
       ).slice(0, 5)
     : [];
@@ -294,13 +312,13 @@ export function TaskDetail() {
     const comment = {
       id: generateId(),
       taskId: task.id,
-      userId: currentUser.id,
+      userId: currentUser._id,
       content,
       createdAt: now(),
       mentions: mentionedIds.length > 0 ? mentionedIds : undefined,
     };
     updateTask(task.id, { comments: [...task.comments, comment] });
-    logActivity(task.id, currentUser.id, 'commented');
+    logActivity(task.id, currentUser._id, 'commented');
     try { getSocket().emit('comment:add', { taskId: task.id, comment }); } catch {}
     if (mentionedIds.length > 0) {
       const names = allUsers.filter(u => mentionedIds.includes(u.id)).map(u => u.name.split(' ')[0]);
@@ -1168,7 +1186,7 @@ export function TaskDetail() {
                 <div className="space-y-2">
                   {events.slice(0, 8).map(event => {
                     const actor = SEED_USERS.find(u => u.id === event.userId)
-                      ?? (currentUser?.id === event.userId ? { name: currentUser.name, colour: currentUser.colour } : null);
+                      ?? (currentUser?._id === event.userId ? { name: currentUser.name, colour: currentUser.colour } : null);
                     return (
                       <div key={event.id} className="flex items-start gap-2">
                         {actor && (
@@ -1205,7 +1223,7 @@ export function TaskDetail() {
               <div className="space-y-3 mb-3">
                 {task.comments.map(comment => {
                   const author = SEED_USERS.find(u => u.id === comment.userId)
-                    ?? (currentUser?.id === comment.userId ? { name: currentUser.name, colour: currentUser.colour } : null);
+                    ?? (currentUser?._id === comment.userId ? { name: currentUser.name, colour: currentUser.colour } : null);
                   return (
                     <div key={comment.id} className="flex gap-2.5 group/comment">
                       {author && (
@@ -1226,7 +1244,7 @@ export function TaskDetail() {
                               {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
                             </span>
                             {/* Edit/delete — own comments only */}
-                            {comment.userId === currentUser?.id && editingCommentId !== comment.id && (
+                            {comment.userId === currentUser?._id && editingCommentId !== comment.id && (
                               <div className="flex items-center gap-1 opacity-0 group-hover/comment:opacity-100 transition-opacity">
                                 <button
                                   onClick={() => handleEditComment(comment.id)}
@@ -1286,7 +1304,7 @@ export function TaskDetail() {
                         {/* Emoji reactions — only shown when not editing */}
                         {editingCommentId !== comment.id && (() => {
                           const EMOJI_OPTIONS = ['👍', '✅', '🚀', '❤️'];
-                          const uid = currentUser?.id ?? '';
+                          const uid = currentUser?._id ?? '';
                           const toggleReaction = (emoji: string) => {
                             const current = comment.reactions ?? {};
                             const reactors = current[emoji] ?? [];

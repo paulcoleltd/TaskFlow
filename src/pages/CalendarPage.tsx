@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, Repeat2 } from 'lucide-react';
 import { useTaskStore } from '../store/taskStore';
 import { useUIStore } from '../store/uiStore';
-import { useAuthStore } from '../store/authStore';
+import { useCurrentUser } from '../hooks/useConvexUser';
 import { canCreateTask, canEditTask } from '../lib/permissions';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, isSameDay, startOfWeek, endOfWeek, addWeeks, subWeeks, isWithinInterval } from 'date-fns';
 import { PRIORITY_OPTIONS } from '../lib/constants';
@@ -23,10 +23,10 @@ export default function CalendarPage() {
 
   const { tasks, updateTask } = useTaskStore();
   const { setSelectedTask, openTaskModal } = useUIStore();
-  const { currentUser } = useAuthStore();
+  const currentUser = useCurrentUser();
 
   const role = currentUser?.role ?? 'viewer';
-  const userId = currentUser?.id ?? '';
+  const userId = currentUser?._id ?? '';
   const canCreate = canCreateTask(role);
 
   const days = eachDayOfInterval({ start: startOfMonth(current), end: endOfMonth(current) });

@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Zap, Eye, EyeOff, Lock, Mail } from 'lucide-react';
-import { useAuthStore } from '../store/authStore';
+import { useAuthActions } from '@convex-dev/auth/react';
 import { Button } from '../components/ui/Button';
 
 const schema = z.object({
@@ -20,7 +20,7 @@ const DEMO_ACCOUNTS = [
 ];
 
 export default function LoginPage() {
-  const { login } = useAuthStore();
+  const { signIn } = useAuthActions();
   const navigate = useNavigate();
   const location = useLocation();
   const from = (location.state as any)?.from?.pathname ?? '/';
@@ -34,12 +34,13 @@ export default function LoginPage() {
 
   const onSubmit = async (data: FormData) => {
     setServerError('');
-    const result = await login(data.email, data.password);
-    if (!result.success) {
-      setServerError(result.error ?? 'Login failed.');
-      return;
+    try {
+      await signIn('password', { email: data.email, password: data.password, flow: 'signIn' });
+      navigate(from, { replace: true });
+    } catch {
+      // @convex-dev/auth throws on bad credentials — use a generic message to prevent user enumeration
+      setServerError('Invalid email or password. Please try again.');
     }
-    navigate(from, { replace: true });
   };
 
   const fillDemo = (email: string, password: string) => {

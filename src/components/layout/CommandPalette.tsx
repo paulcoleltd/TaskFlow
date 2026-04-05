@@ -4,7 +4,7 @@ import { Search, CheckSquare, FolderOpen, LayoutDashboard, ListTodo, Calendar, B
 import { useUIStore } from '../../store/uiStore';
 import { useTaskStore } from '../../store/taskStore';
 import { useProjectStore } from '../../store/projectStore';
-import { useAuthStore } from '../../store/authStore';
+import { useCurrentUser } from '../../hooks/useConvexUser';
 import { canCreateTask } from '../../lib/permissions';
 import { cn } from '../../lib/utils';
 import { STATUS_OPTIONS, PRIORITY_OPTIONS } from '../../lib/constants';
@@ -117,7 +117,7 @@ export function CommandPalette() {
   const { isCommandPaletteOpen, closeCommandPalette, setSelectedTask, openTaskModal, openProjectModal, recentTaskIds } = useUIStore();
   const { tasks } = useTaskStore();
   const { projects } = useProjectStore();
-  const { currentUser } = useAuthStore();
+  const currentUser = useCurrentUser();
   const [query, setQuery] = useState('');
   const [activeIdx, setActiveIdx] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);

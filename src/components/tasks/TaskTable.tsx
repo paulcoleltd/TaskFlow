@@ -3,7 +3,7 @@ import type { Task } from '../../types';
 import { useUIStore } from '../../store/uiStore';
 import { useProjectStore } from '../../store/projectStore';
 import { useTaskStore } from '../../store/taskStore';
-import { useAuthStore } from '../../store/authStore';
+import { useCurrentUser } from '../../hooks/useConvexUser';
 import { canEditTask, canDeleteTask } from '../../lib/permissions';
 import { StatusBadge } from '../ui/StatusBadge';
 import { PriorityBadge } from '../ui/PriorityBadge';
@@ -24,7 +24,7 @@ export function TaskTable({ tasks }: TaskTableProps) {
   const { setSelectedTask, openTaskModal } = useUIStore();
   const { getProjectById } = useProjectStore();
   const { deleteTask, updateTask, togglePin } = useTaskStore();
-  const { currentUser } = useAuthStore();
+  const currentUser = useCurrentUser();
   const allTags = useTagStore(s => s.tags);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkStatus, setBulkStatus] = useState('');
@@ -32,7 +32,7 @@ export function TaskTable({ tasks }: TaskTableProps) {
   const [bulkPriority, setBulkPriority] = useState('');
 
   const role = currentUser?.role ?? 'viewer';
-  const userId = currentUser?.id ?? '';
+  const userId = currentUser?._id ?? '';
   const canDel = canDeleteTask(role);
 
   if (tasks.length === 0) {

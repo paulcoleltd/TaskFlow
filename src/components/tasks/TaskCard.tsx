@@ -4,7 +4,7 @@ import type { Task } from '../../types';
 import { useProjectStore } from '../../store/projectStore';
 import { useTaskStore } from '../../store/taskStore';
 import { useUIStore } from '../../store/uiStore';
-import { useAuthStore } from '../../store/authStore';
+import { useCurrentUser } from '../../hooks/useConvexUser';
 import { PriorityBadge } from '../ui/PriorityBadge';
 import { ContextMenu } from '../ui/ContextMenu';
 import type { ContextMenuItem } from '../ui/ContextMenu';
@@ -40,7 +40,7 @@ export function TaskCard({ task, dragging }: TaskCardProps) {
   const assigneeMenuRef = useRef<HTMLDivElement>(null);
   const priorityMenuRef = useRef<HTMLDivElement>(null);
   const dueDateMenuRef = useRef<HTMLDivElement>(null);
-  const { currentUser } = useAuthStore();
+  const currentUser = useCurrentUser();
   const tags = useTagStore(s => s.tags);
   const project = getProjectById(task.projectId);
   const assignee = SEED_USERS.find(u => u.id === task.assigneeId);
@@ -48,7 +48,7 @@ export function TaskCard({ task, dragging }: TaskCardProps) {
   const overdue = isOverdue(task.dueDate) && task.status !== 'done';
 
   const role = currentUser?.role ?? 'viewer';
-  const userId = currentUser?.id ?? '';
+  const userId = currentUser?._id ?? '';
   const canAdvance = canMoveTask(role, task.assigneeId, userId);
   const canEdit = canEditTask(role, task.assigneeId, userId);
   const canDel = canDeleteTask(role);

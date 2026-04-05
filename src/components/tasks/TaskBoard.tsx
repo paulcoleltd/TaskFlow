@@ -6,7 +6,8 @@ import { TaskCard } from './TaskCard';
 import { useTaskStore } from '../../store/taskStore';
 import { useProjectStore } from '../../store/projectStore';
 import { useUIStore } from '../../store/uiStore';
-import { useAuthStore } from '../../store/authStore';
+import { useCurrentUser } from '../../hooks/useConvexUser';
+import { useUpdateTaskStatus, useCreateTask } from '../../hooks/useConvexTasks';
 import { SEED_USERS } from '../../lib/sampleData';
 import { canCreateTask, canMoveTask } from '../../lib/permissions';
 import { cn } from '../../lib/utils';
@@ -20,9 +21,11 @@ interface TaskBoardProps {
 
 export function TaskBoard({ tasks, projectId }: TaskBoardProps) {
   const { moveTask, reorderTask, addTask } = useTaskStore();
+  const convexUpdateStatus = useUpdateTaskStatus();
+  const convexCreate = useCreateTask();
   const { projects } = useProjectStore();
   const { wipLimits, setWipLimit, boardSwimlane, setBoardSwimlane } = useUIStore();
-  const { currentUser } = useAuthStore();
+  const currentUser = useCurrentUser();
 
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [overColumn, setOverColumn] = useState<Status | null>(null);
@@ -34,7 +37,7 @@ export function TaskBoard({ tasks, projectId }: TaskBoardProps) {
   const [wipInput, setWipInput] = useState('');
 
   const role = currentUser?.role ?? 'viewer';
-  const userId = currentUser?.id ?? '';
+  const userId = currentUser?._id ?? '';
 
   const getDragTask = () => tasks.find(t => t.id === draggingId);
 
@@ -66,6 +69,7 @@ export function TaskBoard({ tasks, projectId }: TaskBoardProps) {
     const crossColumn = drag.status !== targetTask.status;
     reorderTask(dragId, targetTask.id, position, targetTask.status);
     if (crossColumn) {
+      convexUpdateStatus({ id: dragId as any, status: targetTask.status }).catch(() => {});
       const label = STATUS_OPTIONS.find(s => s.value === targetTask.status)?.label ?? targetTask.status;
       toast.success(`Moved to ${label}`);
     }
@@ -82,6 +86,7 @@ export function TaskBoard({ tasks, projectId }: TaskBoardProps) {
       if (drag.status !== status) {
         moveTask(dragId, status);
         emitTaskMove(dragId, status);
+        convexUpdateStatus({ id: dragId as any, status }).catch(() => {});
         const label = STATUS_OPTIONS.find(s => s.value === status)?.label ?? status;
         toast.success(`Moved to ${label}`);
       }
@@ -112,7 +117,7 @@ export function TaskBoard({ tasks, projectId }: TaskBoardProps) {
       status,
       priority: 'medium',
       projectId: pid,
-      assigneeId: currentUser?.id,
+      assigneeId: currentUser?._id,
       tags: [],
       subtasks: [],
       comments: [],
@@ -122,6 +127,16 @@ export function TaskBoard({ tasks, projectId }: TaskBoardProps) {
     // Emit the newly-created task to other connected clients
     const created = useTaskStore.getState().tasks.at(-1);
     if (created) emitTaskCreate(created);
+    // Persist to Convex
+    convexCreate({
+      title,
+      status,
+      priority: 'medium',
+      projectId: pid as any,
+      assigneeId: currentUser?._id as any,
+      tags: [],
+      subtasks: [],
+    }).catch(() => {});
     toast.success('Task created');
     setQuickAddCol(null);
     setQuickAddTitle('');
@@ -136,8 +151,8 @@ export function TaskBoard({ tasks, projectId }: TaskBoardProps) {
       return { uid, user, rowTasks };
     }).sort((a, b) => {
       // Current user first, then alphabetically, unassigned last
-      if (a.uid === currentUser?.id) return -1;
-      if (b.uid === currentUser?.id) return 1;
+      if (a.uid === currentUser?._id) return -1;
+      if (b.uid === currentUser?._id) return 1;
       if (!a.uid) return 1;
       if (!b.uid) return -1;
       return (a.user?.name ?? '').localeCompare(b.user?.name ?? '');

@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, CheckSquare, Sun, CalendarDays, Plus } from 'lucide-react';
 import { useUIStore } from '../../store/uiStore';
-import { useAuthStore } from '../../store/authStore';
+import { useCurrentUser } from '../../hooks/useConvexUser';
 import { useTaskStore } from '../../store/taskStore';
 import { canCreateTask } from '../../lib/permissions';
 import { cn } from '../../lib/utils';
@@ -15,11 +15,11 @@ const NAV = [
 
 export function MobileNav() {
   const { openTaskModal } = useUIStore();
-  const { currentUser } = useAuthStore();
+  const currentUser = useCurrentUser();
   const { tasks } = useTaskStore();
   const role = currentUser?.role ?? 'viewer';
   const showAdd = canCreateTask(role);
-  const myTaskCount = tasks.filter(t => t.assigneeId === currentUser?.id && t.status !== 'done').length;
+  const myTaskCount = tasks.filter(t => t.assigneeId === currentUser?._id && t.status !== 'done').length;
 
   return (
     <nav className="md:hidden fixed bottom-0 inset-x-0 bg-[#0C1526] border-t border-[#1C3054] flex items-center justify-around px-2 py-2 z-40">

@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useTaskStore } from '../store/taskStore';
 import { useUIStore } from '../store/uiStore';
-import { useAuthStore } from '../store/authStore';
+import { useCurrentUser } from '../hooks/useConvexUser';
 import { TaskBoard } from '../components/tasks/TaskBoard';
 import { TaskList } from '../components/tasks/TaskList';
 import { TaskTable } from '../components/tasks/TaskTable';
@@ -27,12 +27,12 @@ const GROUP_OPTIONS: { value: GroupBy; label: string }[] = [
 export default function MyTasksPage() {
   const { tasks } = useTaskStore();
   const { currentView, setView, openTaskModal } = useUIStore();
-  const { currentUser } = useAuthStore();
+  const currentUser = useCurrentUser();
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [groupBy, setGroupBy] = useState<GroupBy>('status');
   const [quickFilter, setQuickFilter] = useState<'none' | 'today' | 'overdue' | 'high' | 'this-week'>('none');
 
-  const myTasks = useMemo(() => tasks.filter(t => t.assigneeId === currentUser?.id), [tasks, currentUser]);
+  const myTasks = useMemo(() => tasks.filter(t => t.assigneeId === currentUser?._id), [tasks, currentUser]);
 
   // Stats — over all my tasks (not just filtered)
   const stats = useMemo(() =>

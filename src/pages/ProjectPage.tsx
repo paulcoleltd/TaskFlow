@@ -4,7 +4,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useProjectStore } from '../store/projectStore';
 import { useTaskStore } from '../store/taskStore';
 import { useUIStore } from '../store/uiStore';
-import { useAuthStore } from '../store/authStore';
+import { useCurrentUser } from '../hooks/useConvexUser';
+import { usePresenceHeartbeat } from '../hooks/usePresenceHeartbeat';
 import { useSprintStore } from '../store/sprintStore';
 import { RoleGuard } from '../components/auth/RoleGuard';
 import { canCreateTask, canDeleteProject, canEditTask } from '../lib/permissions';
@@ -39,8 +40,11 @@ export default function ProjectPage() {
   const { getProjectById, updateProject, deleteProject } = useProjectStore();
   const { tasks, updateTask } = useTaskStore();
   const { openTaskModal, currentView, setView } = useUIStore();
-  const { currentUser } = useAuthStore();
+  const currentUser = useCurrentUser();
   const navigate = useNavigate();
+
+  // Presence: let others see who's viewing this project in real time
+  usePresenceHeartbeat(id ? `project:${id}` : '');
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [assigneeFilter, setAssigneeFilter] = useState<string | null>(null);
   const [editingNotes, setEditingNotes] = useState(false);
@@ -67,7 +71,7 @@ export default function ProjectPage() {
 
   // IDOR guard — admin sees all; members/viewers only see their projects
   const isMember = currentUser
-    ? role === 'admin' || project?.memberIds.includes(currentUser.id)
+    ? role === 'admin' || project?.memberIds.includes(currentUser._id)
     : false;
 
   if (!project || !isMember) {
@@ -182,7 +186,7 @@ export default function ProjectPage() {
     if (activeTasks.length === 0) return;
     if (!window.confirm(`Mark all ${activeTasks.length} active tasks as done?`)) return;
     activeTasks.forEach(t => {
-      if (canEditTask(role, t.assigneeId, currentUser?.id ?? '')) {
+      if (canEditTask(role, t.assigneeId, currentUser?._id ?? '')) {
         updateTask(t.id, { status: 'done' });
         emitTaskUpdate(t.id, { status: 'done' });
       }

@@ -3,7 +3,8 @@ import { Search, Bell, Plus, LogOut, AlertCircle, Clock, X, Command, Timer, Squa
 import { isToday, isBefore, startOfDay, addDays, format } from 'date-fns';
 import { useUIStore } from '../../store/uiStore';
 import { useTaskStore } from '../../store/taskStore';
-import { useAuthStore } from '../../store/authStore';
+import { useAuthActions } from '@convex-dev/auth/react';
+import { useCurrentUser } from '../../hooks/useConvexUser';
 import { useProjectStore } from '../../store/projectStore';
 import { Button } from '../ui/Button';
 import { RoleGuard } from '../auth/RoleGuard';
@@ -21,7 +22,8 @@ export function Header({ title }: { title?: string }) {
   const { openTaskModal, setSearchQuery, searchQuery, setSelectedTask, openCommandPalette, activeTimer, stopTimer, notificationsEnabled, setNotificationsEnabled } = useUIStore();
   const { tasks, getOverdueTasks, updateTask } = useTaskStore();
   const { getProjectById } = useProjectStore();
-  const { currentUser, logout } = useAuthStore();
+  const currentUser = useCurrentUser();
+  const { signOut } = useAuthActions();
 
   const [searchFocused, setSearchFocused] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -66,7 +68,7 @@ export function Header({ title }: { title?: string }) {
   }), [tasks]);
   const overdueCount = overdueTasks.length;
   const totalNotifCount = overdueCount + dueTodayTasks.length;
-  const role = currentUser?.role ?? 'viewer';
+  const role = (currentUser?.role ?? 'viewer') as import('../../store/authStore').Role;
   const roleMeta = ROLE_META[role];
 
   // Live search — up to 6 matching tasks across the whole workspace
@@ -102,8 +104,8 @@ export function Header({ title }: { title?: string }) {
     }
   };
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await signOut();
     toast.success('Signed out successfully.');
   };
 

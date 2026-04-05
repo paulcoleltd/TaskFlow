@@ -3,7 +3,7 @@ import { CheckSquare, Clock, AlertCircle, TrendingUp, ArrowUp, ArrowDown, Activi
 import { formatDistanceToNow, isToday, isTomorrow, addDays, startOfDay, subDays, format } from 'date-fns';
 import { useTaskStore } from '../store/taskStore';
 import { useProjectStore } from '../store/projectStore';
-import { useAuthStore } from '../store/authStore';
+import { useCurrentUser } from '../hooks/useConvexUser';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { PriorityBadge } from '../components/ui/PriorityBadge';
@@ -55,10 +55,10 @@ export default function DashboardPage() {
   const { tasks } = useTaskStore();
   const { projects } = useProjectStore();
   const { setSelectedTask, recentTaskIds } = useUIStore();
-  const { currentUser } = useAuthStore();
+  const currentUser = useCurrentUser();
 
   const myTasks = useMemo(
-    () => tasks.filter(t => t.assigneeId === currentUser?.id),
+    () => tasks.filter(t => t.assigneeId === currentUser?._id),
     [tasks, currentUser]
   );
   const inProgress = useMemo(() => tasks.filter(t => t.status === 'in-progress'), [tasks]);

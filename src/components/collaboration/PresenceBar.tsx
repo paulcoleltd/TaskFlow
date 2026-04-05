@@ -1,5 +1,5 @@
 import { useCollaborationStore } from '../../store/collaborationStore';
-import { useAuthStore } from '../../store/authStore';
+import { useCurrentUser } from '../../hooks/useConvexUser';
 import { getInitials } from '../../lib/utils';
 import { Tooltip } from '../ui/Tooltip';
 
@@ -7,10 +7,10 @@ const MAX_SHOWN = 4;
 
 export function PresenceBar() {
   const onlineUsers = useCollaborationStore(s => s.onlineUsers);
-  const { currentUser } = useAuthStore();
+  const currentUser = useCurrentUser();
 
   // Filter out ourselves
-  const others = onlineUsers.filter(u => u.userId !== currentUser?.id);
+  const others = onlineUsers.filter(u => u.userId !== currentUser?._id);
 
   if (others.length === 0) return null;
 

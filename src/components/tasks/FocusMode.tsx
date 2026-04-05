@@ -3,7 +3,7 @@ import { X, Play, Pause, RotateCcw, CheckSquare2, Timer, Coffee, AlertCircle, Ch
 import { formatDistanceToNow } from 'date-fns';
 import { useTaskStore } from '../../store/taskStore';
 import { useUIStore } from '../../store/uiStore';
-import { useAuthStore } from '../../store/authStore';
+import { useCurrentUser } from '../../hooks/useConvexUser';
 import { canEditTask } from '../../lib/permissions';
 import { StatusBadge } from '../ui/StatusBadge';
 import { PriorityBadge } from '../ui/PriorityBadge';
@@ -47,7 +47,7 @@ function Ring({ pct, phase }: { pct: number; phase: 'work' | 'break' }) {
 export function FocusMode({ taskId, onClose }: { taskId: string; onClose: () => void }) {
   const { tasks, updateTask, logActivity } = useTaskStore();
   const { setSelectedTask } = useUIStore();
-  const { currentUser } = useAuthStore();
+  const currentUser = useCurrentUser();
 
   const task = tasks.find(t => t.id === taskId);
 
@@ -60,7 +60,7 @@ export function FocusMode({ taskId, onClose }: { taskId: string; onClose: () => 
 
   const total = phase === 'work' ? WORK_SECS : BREAK_SECS;
   const pct   = secs / total;
-  const uid   = currentUser?.id ?? '';
+  const uid   = currentUser?._id ?? '';
   const role  = currentUser?.role ?? 'viewer';
   const canEdit = task ? canEditTask(role, task.assigneeId, uid) : false;
 

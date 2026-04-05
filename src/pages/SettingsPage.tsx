@@ -2,7 +2,8 @@ import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTaskStore } from '../store/taskStore';
 import { useProjectStore } from '../store/projectStore';
-import { useAuthStore } from '../store/authStore';
+import { useAuthActions } from '@convex-dev/auth/react';
+import { useCurrentUser } from '../hooks/useConvexUser';
 import { useTagStore } from '../store/tagStore';
 import { useUIStore } from '../store/uiStore';
 import { useTemplateStore } from '../store/templateStore';
@@ -180,14 +181,15 @@ function NotificationsPanel({ enabled, setEnabled }: { enabled: boolean; setEnab
 }
 
 export default function SettingsPage() {
-  const { currentUser, logout } = useAuthStore();
+  const currentUser = useCurrentUser();
+  const { signOut } = useAuthActions();
   const navigate = useNavigate();
   const importRef = useRef<HTMLInputElement>(null);
   const csvImportRef = useRef<HTMLInputElement>(null);
   const { tags, addTag, updateTag, deleteTag } = useTagStore();
   const { notificationsEnabled, setNotificationsEnabled, theme, setTheme } = useUIStore();
   const { templates: userTemplates, deleteTemplate, updateTemplate } = useTemplateStore();
-  const role = currentUser?.role ?? 'viewer';
+  const role = (currentUser?.role ?? 'viewer') as import('../store/authStore').Role;
   const [csvPreview, setCsvPreview] = useState<{
     headers: string[];
     rows: string[][];
@@ -245,8 +247,8 @@ export default function SettingsPage() {
     toast.success(`Tag "${name}" deleted`);
   };
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await signOut();
     toast.success('Signed out.');
     navigate('/login', { replace: true });
   };
@@ -756,7 +758,7 @@ export default function SettingsPage() {
                 <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${uMeta.colour} ${uMeta.bg}`}>
                   {uMeta.label}
                 </span>
-                {u.id === currentUser?.id && (
+                {u.id === currentUser?._id && (
                   <span className="text-xs text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded-full border border-blue-400/20">You</span>
                 )}
               </div>

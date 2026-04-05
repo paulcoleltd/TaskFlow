@@ -5,7 +5,7 @@ import { StatusBadge } from '../ui/StatusBadge';
 import { PriorityBadge } from '../ui/PriorityBadge';
 import { useTaskStore } from '../../store/taskStore';
 import { useUIStore } from '../../store/uiStore';
-import { useAuthStore } from '../../store/authStore';
+import { useCurrentUser } from '../../hooks/useConvexUser';
 import { useProjectStore } from '../../store/projectStore';
 import { canEditTask, canCreateTask, canDeleteTask, canMoveTask } from '../../lib/permissions';
 import { formatDate, isOverdue, cn } from '../../lib/utils';
@@ -52,7 +52,7 @@ function buildGroups(tasks: Task[], groupBy: GroupBy, projectName: (id: string) 
 export function TaskList({ tasks, groupBy = 'status', projectId }: TaskListProps) {
   const { updateTask, deleteTask, togglePin, addTask, moveTask, duplicateTask, reorderTask } = useTaskStore();
   const { setSelectedTask, openTaskModal } = useUIStore();
-  const { currentUser } = useAuthStore();
+  const currentUser = useCurrentUser();
   const { getProjectById } = useProjectStore();
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [showCompleted, setShowCompleted] = useState(false);
@@ -70,7 +70,7 @@ export function TaskList({ tasks, groupBy = 'status', projectId }: TaskListProps
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const role = currentUser?.role ?? 'viewer';
-  const userId = currentUser?.id ?? '';
+  const userId = currentUser?._id ?? '';
   const canCreate = canCreateTask(role);
   const canDelete = canDeleteTask(role);
 

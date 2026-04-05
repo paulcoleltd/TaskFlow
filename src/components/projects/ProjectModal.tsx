@@ -7,7 +7,8 @@ import { Textarea } from '../ui/Textarea';
 import { Button } from '../ui/Button';
 import { useProjectStore } from '../../store/projectStore';
 import { useUIStore } from '../../store/uiStore';
-import { useAuthStore } from '../../store/authStore';
+import { useCurrentUser } from '../../hooks/useConvexUser';
+import { useCreateProject } from '../../hooks/useConvexProjects';
 import { PROJECT_COLOURS } from '../../lib/constants';
 import { emitProjectCreate } from '../../lib/collabEmit';
 import { cn } from '../../lib/utils';
@@ -24,7 +25,8 @@ type FormData = z.infer<typeof schema>;
 export function ProjectModal() {
   const { isProjectModalOpen, closeProjectModal } = useUIStore();
   const { addProject } = useProjectStore();
-  const { currentUser } = useAuthStore();
+  const currentUser = useCurrentUser();
+  const convexCreate = useCreateProject();
 
   const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -34,18 +36,29 @@ export function ProjectModal() {
   const selectedColour = watch('colour');
 
   const onSubmit = (data: FormData) => {
+    const uid = currentUser?._id ?? '';
     addProject({
       name: data.name,
       description: data.description,
       colour: data.colour,
       dueDate: data.dueDate || undefined,
       icon: 'FolderOpen',
-      ownerId: currentUser?.id ?? '',
-      memberIds: currentUser ? [currentUser.id] : [],
+      ownerId: uid,
+      memberIds: uid ? [uid] : [],
       status: 'active',
     });
     const newProject = useProjectStore.getState().projects.at(-1);
     if (newProject) emitProjectCreate(newProject);
+    // Persist to Convex
+    convexCreate({
+      name: data.name,
+      description: data.description,
+      colour: data.colour,
+      icon: 'FolderOpen',
+      dueDate: data.dueDate || undefined,
+      memberIds: uid ? [uid as any] : [],
+      status: 'active',
+    }).catch(() => {});
     reset();
     closeProjectModal();
   };

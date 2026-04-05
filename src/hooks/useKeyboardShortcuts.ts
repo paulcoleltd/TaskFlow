@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useUIStore } from '../store/uiStore';
-import { useAuthStore } from '../store/authStore';
+import { useConvexAuth } from 'convex/react';
+import { useCurrentUser } from './useConvexUser';
 import { useTaskStore } from '../store/taskStore';
 import { canCreateTask, canEditTask } from '../lib/permissions';
 import toast from 'react-hot-toast';
@@ -23,7 +24,8 @@ export function useKeyboardShortcuts() {
     openTaskModal, setSearchQuery,
     activeTimer, startTimer, stopTimer,
   } = useUIStore();
-  const { currentUser, isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useConvexAuth();
+  const currentUser = useCurrentUser();
   const { tasks, moveTask, togglePin } = useTaskStore();
 
   useEffect(() => {
@@ -100,7 +102,7 @@ export function useKeyboardShortcuts() {
         const task = tasks.find(t => t.id === selectedTaskId);
         if (!task) return;
         const role = currentUser?.role ?? 'viewer';
-        if (!canEditTask(role, task.assigneeId, currentUser?.id ?? '')) return;
+        if (!canEditTask(role, task.assigneeId, currentUser?._id ?? '')) return;
         e.preventDefault();
         openTaskModal(selectedTaskId);
         setSelectedTask(null);
@@ -126,7 +128,7 @@ export function useKeyboardShortcuts() {
         const task = tasks.find(t => t.id === selectedTaskId);
         if (!task) return;
         const role = currentUser?.role ?? 'viewer';
-        if (!canEditTask(role, task.assigneeId, currentUser?.id ?? '')) return;
+        if (!canEditTask(role, task.assigneeId, currentUser?._id ?? '')) return;
         e.preventDefault();
         moveTask(task.id, task.status === 'done' ? 'todo' : 'done');
         return;

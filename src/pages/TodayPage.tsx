@@ -3,7 +3,7 @@ import { isToday, isThisWeek, isYesterday, format } from 'date-fns';
 import { Target, AlertCircle, Clock, CheckCircle2, Zap, X, Plus, ClipboardCopy, ChevronDown } from 'lucide-react';
 import { useTaskStore } from '../store/taskStore';
 import { useUIStore } from '../store/uiStore';
-import { useAuthStore } from '../store/authStore';
+import { useCurrentUser } from '../hooks/useConvexUser';
 import { useProjectStore } from '../store/projectStore';
 import { isOverdue, cn, formatDate } from '../lib/utils';
 import { PriorityBadge } from '../components/ui/PriorityBadge';
@@ -17,11 +17,11 @@ export default function TodayPage() {
   const [showStandup, setShowStandup] = useState(false);
   const { tasks, updateTask } = useTaskStore();
   const { setSelectedTask, todayFocus, toggleTodayFocus } = useUIStore();
-  const { currentUser } = useAuthStore();
+  const currentUser = useCurrentUser();
   const { getProjectById } = useProjectStore();
 
   const myTasks = useMemo(() =>
-    tasks.filter(t => t.assigneeId === currentUser?.id),
+    tasks.filter(t => t.assigneeId === currentUser?._id),
     [tasks, currentUser]
   );
 

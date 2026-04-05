@@ -5,7 +5,7 @@ import { useProjectStore } from '../store/projectStore';
 import { useTaskStore } from '../store/taskStore';
 import type { Project } from '../types';
 import { useUIStore } from '../store/uiStore';
-import { useAuthStore } from '../store/authStore';
+import { useCurrentUser } from '../hooks/useConvexUser';
 import { RoleGuard } from '../components/auth/RoleGuard';
 import { canCreateProject, canDeleteProject } from '../lib/permissions';
 import { ProgressBar } from '../components/ui/ProgressBar';
@@ -20,7 +20,7 @@ export default function AllProjectsPage() {
   const { projects, deleteProject, updateProject } = useProjectStore();
   const { tasks } = useTaskStore();
   const { openProjectModal } = useUIStore();
-  const { currentUser } = useAuthStore();
+  const currentUser = useCurrentUser();
   const navigate = useNavigate();
   const [tab, setTab] = useState<'all' | 'active' | 'completed' | 'archived'>('all');
   const [search, setSearch] = useState('');

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useCollaborationStore } from '../../store/collaborationStore';
-import { useAuthStore } from '../../store/authStore';
+import { useCurrentUser } from '../../hooks/useConvexUser';
 import { getInitials } from '../../lib/utils';
 import { Tooltip } from '../ui/Tooltip';
 import { getSocket } from '../../lib/socket';
@@ -13,7 +13,7 @@ interface ViewerPileProps {
 const MAX_SHOWN = 3;
 
 export function ViewerPile({ projectId, taskId }: ViewerPileProps) {
-  const { currentUser } = useAuthStore();
+  const currentUser = useCurrentUser();
   const projectViewers = useCollaborationStore(s => s.projectViewers);
   const taskViewers = useCollaborationStore(s => s.taskViewers);
 
@@ -23,7 +23,7 @@ export function ViewerPile({ projectId, taskId }: ViewerPileProps) {
     ? (taskViewers[taskId] ?? [])
     : [];
 
-  const others = viewers.filter(v => v.userId !== currentUser?.id);
+  const others = viewers.filter(v => v.userId !== currentUser?._id);
 
   // ── Emit join/leave on mount/unmount ─────────────────────────────────────────
   useEffect(() => {
@@ -42,7 +42,7 @@ export function ViewerPile({ projectId, taskId }: ViewerPileProps) {
       // Socket not connected — offline mode, skip
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projectId, taskId, currentUser?.id]);
+  }, [projectId, taskId, currentUser?._id]);
 
   if (others.length === 0) return null;
 

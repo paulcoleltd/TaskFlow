@@ -14,7 +14,8 @@
 import { useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { connectSocket, disconnectSocket, getSocket } from '../lib/socket';
-import { useAuthStore } from '../store/authStore';
+import { useConvexAuth } from 'convex/react';
+import { useCurrentUser } from './useConvexUser';
 import { useTaskStore } from '../store/taskStore';
 import { useProjectStore } from '../store/projectStore';
 import { useCollaborationStore } from '../store/collaborationStore';
@@ -32,22 +33,23 @@ const TOAST_STYLE = {
 };
 
 export function useCollaboration() {
-  const { currentUser, token } = useAuthStore();
+  const { isAuthenticated } = useConvexAuth();
+  const currentUser = useCurrentUser();
   const taskStore = useTaskStore();
   const projectStore = useProjectStore();
   const collab = useCollaborationStore();
 
   // ── Connect / disconnect when auth changes ──────────────────────────────────
   useEffect(() => {
-    if (!currentUser || !token) {
+    if (!isAuthenticated || !currentUser) {
       disconnectSocket();
       collab.setConnected(false);
       collab.setOnlineUsers([]);
       return;
     }
 
-    // Only the server-issued token is sent — identity/role are extracted server-side
-    const socket = connectSocket(token);
+    // Connect without a token — Convex handles auth independently
+    const socket = connectSocket('');
 
     // ── Connection lifecycle ────────────────────────────────────────────────────
 
@@ -82,12 +84,12 @@ export function useCollaboration() {
 
     const onPresenceSnapshot = (data: { users: Array<{ userId: string; userName: string; userColour: string }> }) => {
       // Filter out ourselves from the online list
-      const others = data.users.filter(u => u.userId !== currentUser.id);
+      const others = data.users.filter(u => u.userId !== currentUser._id);
       collab.setOnlineUsers(others);
     };
 
     const onPresenceOnline = (data: { userId: string; userName: string; userColour: string }) => {
-      if (data.userId === currentUser.id) return;
+      if (data.userId === currentUser._id) return;
       collab.addOnlineUser(data);
     };
 
@@ -98,7 +100,7 @@ export function useCollaboration() {
     // ── Viewer events ──────────────────────────────────────────────────────────
 
     const onViewerJoinedProject = (data: { projectId: string; userId: string; userName: string; userColour: string }) => {
-      if (data.userId === currentUser.id) return;
+      if (data.userId === currentUser._id) return;
       collab.addProjectViewer(data.projectId, { userId: data.userId, userName: data.userName, userColour: data.userColour });
     };
 
@@ -107,12 +109,12 @@ export function useCollaboration() {
     };
 
     const onViewerSnapshotProject = (data: { projectId: string; viewers: Array<{ userId: string; userName: string; userColour: string }> }) => {
-      const others = (data.viewers ?? []).filter(v => v.userId !== currentUser.id);
+      const others = (data.viewers ?? []).filter(v => v.userId !== currentUser._id);
       collab.setProjectViewers(data.projectId, others);
     };
 
     const onViewerJoinedTask = (data: { taskId: string; userId: string; userName: string; userColour: string }) => {
-      if (data.userId === currentUser.id) return;
+      if (data.userId === currentUser._id) return;
       collab.addTaskViewer(data.taskId, { userId: data.userId, userName: data.userName, userColour: data.userColour });
     };
 
@@ -121,7 +123,7 @@ export function useCollaboration() {
     };
 
     const onViewerSnapshotTask = (data: { taskId: string; viewers: Array<{ userId: string; userName: string; userColour: string }> }) => {
-      const others = (data.viewers ?? []).filter(v => v.userId !== currentUser.id);
+      const others = (data.viewers ?? []).filter(v => v.userId !== currentUser._id);
       collab.setTaskViewers(data.taskId, others);
     };
 
@@ -254,7 +256,7 @@ export function useCollaboration() {
       socket.off('error', onError);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentUser?.id, token]);
+  }, [currentUser?._id, isAuthenticated]);
 
   // ── Write-through functions (emit + local apply) ────────────────────────────
 

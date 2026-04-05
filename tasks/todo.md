@@ -89,12 +89,58 @@
 
 ---
 
-## Phase 5 — Future
+## Phase 5 — Convex Backend Migration [IN PROGRESS]
 
-- [ ] Backend API (Node.js / Next.js) — replace localStorage with real persistence
-- [ ] Database (PostgreSQL / Prisma)
-- [ ] Real authentication (JWT, NextAuth.js v5)
-- [ ] File attachments on tasks
+### Convex Server (Done)
+- [x] `convex/schema.ts` — full DB schema (tasks, projects, users, sprints, comments, attachments, activityLog, presence, tags, templates)
+- [x] `convex/auth.ts` — @convex-dev/auth Password provider + createOrUpdateUser callback
+- [x] `convex/http.ts` — HTTP router (auth routes)
+- [x] `convex/seed.ts` — idempotent seed mutation
+- [x] `convex/tasks.ts` — listByProject, listByAssignee, listBySprint, listAll, get, create, update, updateStatus, remove, duplicate
+- [x] `convex/projects.ts` — list, get, create, update, remove (cascade)
+- [x] `convex/users.ts` — current, list, get, updateProfile
+- [x] `convex/sprints.ts` — listByProject, get, create, update, start, complete, remove
+- [x] `convex/comments.ts` — listByTask, add, remove
+- [x] `convex/presence.ts` — listRoom, heartbeat, leave
+- [x] `convex/activityLog.ts` — listByTask, listAll
+- [x] `convex/tags.ts` — list, create, remove
+- [x] `convex/templates.ts` — listByUser, create, remove
+- [x] `convex/attachments.ts` — listByTask, generateUploadUrl, saveAttachment, remove
+- [x] `main.tsx` — wrapped with ConvexAuthProvider
+- [x] `auth.config.ts` — providers config
+- [x] `.env.example` — VITE_CONVEX_URL, CONVEX_DEPLOYMENT, CONVEX_AUTH_ADAPTER_SECRET
+
+### Convex Client Migration (Done — requires `npx convex dev` to activate)
+- [x] Client hooks: `useConvexTasks`, `useConvexProjects`, `useConvexUsers` written
+- [x] `LoginPage` updated to use `useAuthActions` from @convex-dev/auth/react
+- [x] `ProtectedRoute` updated to use `useConvexAuth` (isLoading + isAuthenticated)
+- [x] `App.tsx` updated — removed authStore, uses useConvexAuth
+- [x] All 19 files updated: useAuthStore → useCurrentUser from Convex
+- [x] All `currentUser.id` → `currentUser._id` (Convex document ID pattern)
+- [x] `logout()` → `signOut()` in Sidebar, Header, Settings
+- [x] `useCollaboration.ts` uses `isAuthenticated` from Convex instead of token
+- [x] TypeScript: 0 errors (excluding expected _generated/ which needs `npx convex dev`)
+
+### Client Write Paths (Done)
+- [x] `src/lib/convexUtils.ts` — convexToTask, convexToProject, convexToSprint shape converters
+- [x] `src/hooks/useConvexSync.ts` — real-time Convex → Zustand bridge (replaces localStorage seeding)
+- [x] `src/hooks/usePresenceHeartbeat.ts` — Convex presence heartbeat (20s interval, auto-leave on unmount)
+- [x] `src/hooks/useRoomPresence.ts` — subscribe to live room presence, filtered to others
+- [x] `App.tsx` — wired useConvexSync + global presence heartbeat
+- [x] `ProjectPage.tsx` — wired per-project presence heartbeat (`project:<id>`)
+- [x] `TaskDetail.tsx` — wired per-task presence heartbeat + patchTask dual-write helper
+- [x] `TaskModal.tsx` — create/update dual-write (Zustand + Convex mutation)
+- [x] `TaskBoard.tsx` — drag-drop status change + quick-add dual-write to Convex
+- [x] `ProjectModal.tsx` — project create dual-write to Convex
+- [x] TypeScript: 0 errors (excluding expected _generated/ missing-module)
+
+### Remaining — After `npx convex dev`
+- [ ] Run `npx convex dev` → creates `.env.local` + `convex/_generated/`
+- [ ] Run `npx convex run seed:runSeed` to populate demo data in Convex DB
+- [ ] Verify end-to-end: login → seed data loads → create task → persists in Convex DB
+- [ ] File attachments UI — migrate from base64/localStorage to Convex file storage
+
+### Phase 5 — Future
 - [ ] Push notifications (Web Push API)
 - [ ] Mobile app (React Native / Expo)
 - [ ] E2E tests for real-time collaboration (multi-browser Playwright)

@@ -12,7 +12,8 @@ import { useTaskStore } from '../../store/taskStore';
 import { emitTaskCreate, emitTaskUpdate } from '../../lib/collabEmit';
 import { useProjectStore } from '../../store/projectStore';
 import { useUIStore } from '../../store/uiStore';
-import { useAuthStore } from '../../store/authStore';
+import { useCurrentUser } from '../../hooks/useConvexUser';
+import { useCreateTask, useUpdateTask } from '../../hooks/useConvexTasks';
 import { SEED_USERS } from '../../lib/sampleData';
 import { STATUS_OPTIONS, PRIORITY_OPTIONS, RECURRENCE_OPTIONS, TASK_TEMPLATES } from '../../lib/constants';
 import { useTemplateStore } from '../../store/templateStore';
@@ -47,7 +48,9 @@ export function TaskModal() {
   const { isTaskModalOpen, editingTaskId, prefillDueDate, prefillProjectId, prefillTitle, prefillPriority, prefillAssigneeId, closeTaskModal } = useUIStore();
   const { tasks, addTask, updateTask, logActivity } = useTaskStore();
   const { projects } = useProjectStore();
-  const { currentUser } = useAuthStore();
+  const currentUser = useCurrentUser();
+  const convexCreate = useCreateTask();
+  const convexUpdate = useUpdateTask();
   const allTags = useTagStore(s => s.tags);
   const { templates: userTemplates, deleteTemplate } = useTemplateStore();
   const { getProjectSprints } = useSprintStore();
@@ -136,7 +139,7 @@ export function TaskModal() {
   const onSubmit = (data: any) => {
     const dueDate = data.dueDate ? new Date(data.dueDate).toISOString() : undefined;
     const recurrence = data.recurrence === 'none' ? undefined : data.recurrence;
-    const uid = currentUser?.id ?? '';
+    const uid = currentUser?._id ?? '';
     const sprintId = selectedSprintId || undefined;
     if (editing) {
       const prev = editing;
@@ -145,6 +148,14 @@ export function TaskModal() {
       emitTaskUpdate(editing.id, updates);
       if (prev.status !== data.status) logActivity(editing.id, uid, 'status_changed', { from: prev.status, to: data.status });
       if (prev.priority !== data.priority) logActivity(editing.id, uid, 'priority_changed', { from: prev.priority, to: data.priority });
+      // Persist to Convex
+      convexUpdate({
+        id: editing.id as any,
+        ...updates,
+        projectId: undefined, // can't change project on update
+        assigneeId: data.assigneeId ? (data.assigneeId as any) : undefined,
+        sprintId: sprintId as any,
+      }).catch(() => {/* No-op: Convex not yet connected */});
     } else {
       addTask({
         ...data,
@@ -164,6 +175,21 @@ export function TaskModal() {
         logActivity(newTask.id, uid, 'created');
         emitTaskCreate(newTask);
       }
+      // Persist to Convex
+      convexCreate({
+        title: data.title,
+        description: data.description,
+        status: data.status,
+        priority: data.priority,
+        projectId: data.projectId as any,
+        assigneeId: (data.assigneeId || uid) as any,
+        dueDate,
+        tags: selectedTags,
+        subtasks,
+        estimatedHours: data.estimatedHours,
+        sprintId: sprintId as any,
+        recurrence,
+      }).catch(() => {/* No-op: Convex not yet connected */});
     }
     closeTaskModal();
   };

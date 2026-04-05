@@ -6,7 +6,8 @@ import {
 import { useUIStore } from '../../store/uiStore';
 import { useProjectStore } from '../../store/projectStore';
 import { useTaskStore } from '../../store/taskStore';
-import { useAuthStore } from '../../store/authStore';
+import { useAuthActions } from '@convex-dev/auth/react';
+import { useCurrentUser } from '../../hooks/useConvexUser';
 import { canCreateProject, ROLE_META } from '../../lib/permissions';
 import { cn, getInitials } from '../../lib/utils';
 import toast from 'react-hot-toast';
@@ -30,23 +31,25 @@ export function Sidebar() {
   const { sidebarCollapsed, toggleSidebar, openProjectModal } = useUIStore();
   const { projects } = useProjectStore();
   const { tasks } = useTaskStore();
-  const { currentUser, logout } = useAuthStore();
+  const currentUser = useCurrentUser();
+  const { signOut } = useAuthActions();
   const navigate = useNavigate();
 
-  const role = currentUser?.role ?? 'viewer';
+  const role = (currentUser?.role ?? 'viewer') as import('../../store/authStore').Role;
   const roleMeta = ROLE_META[role];
 
   const myActiveCount = tasks.filter(
-    t => t.assigneeId === currentUser?.id && t.status !== 'done'
+    t => t.assigneeId === currentUser?._id && t.status !== 'done'
   ).length;
 
   const myOverdueCount = tasks.filter(t => {
-    if (!t.dueDate || t.status === 'done' || t.assigneeId !== currentUser?.id) return false;
+    if (!t.dueDate || t.status === 'done' || t.assigneeId !== currentUser?._id) return false;
     return new Date(t.dueDate) < new Date();
   }).length;
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/login', { replace: true });
     toast.success('Signed out.');
   };
 
