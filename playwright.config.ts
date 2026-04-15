@@ -14,8 +14,6 @@ export default defineConfig({
     timeout: 15000,
   },
   use: {
-    baseURL: 'http://localhost:5175',
-    storageState: 'e2e/auth-state.json',
     screenshot: 'on',
     video: 'retain-on-failure',
     trace: 'retain-on-failure',
@@ -23,24 +21,49 @@ export default defineConfig({
     navigationTimeout: 15000,
   },
   projects: [
+    // ── Local mode (original 9 specs, no Convex) ────────────────────────────────
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      testMatch: /0[1-9]-.*\.spec\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: 'http://localhost:5175',
+        storageState: 'e2e/auth-state.json',
+      },
+    },
+    // ── Convex mode (new specs 10–14) ────────────────────────────────────────────
+    {
+      name: 'chromium-convex',
+      testMatch: /1[0-4]-.*\.spec\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: 'http://localhost:5176',
+        storageState: 'e2e/convex-auth-state.json',
+      },
     },
   ],
   webServer: [
     {
+      // Force LOCAL mode for the original 9 specs.
       command: 'npm run dev -- --port 5175',
       port: 5175,
-      reuseExistingServer: true,
+      env: { VITE_CONVEX_URL: '' },
+      reuseExistingServer: false,
       timeout: 30000,
     },
     {
-      // Auth (POST /api/auth/login) and WebSocket now require the server to be up.
+      // Socket.io server for local-mode auth.
       command: 'npm run dev:server',
       port: 3002,
       reuseExistingServer: true,
       timeout: 60000,
+    },
+    {
+      // Convex mode server for specs 10–14.
+      command: 'npm run dev -- --port 5176',
+      port: 5176,
+      reuseExistingServer: true,
+      timeout: 30000,
     },
   ],
   outputDir: 'e2e/results/artifacts',

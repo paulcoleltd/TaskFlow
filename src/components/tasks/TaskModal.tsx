@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, X, Trash2 } from 'lucide-react';
+import { Plus, X, Trash2, Wand2 } from 'lucide-react';
 import { Modal } from '../ui/Modal';
 import { Input } from '../ui/Input';
 import { Textarea } from '../ui/Textarea';
@@ -14,6 +14,7 @@ import { useProjectStore } from '../../store/projectStore';
 import { useUIStore } from '../../store/uiStore';
 import { useCurrentUser } from '../../hooks/useConvexUser';
 import { useCreateTask, useUpdateTask } from '../../hooks/useConvexTasks';
+import { useImproveDescription } from '../../hooks/useConvexAI';
 import { SEED_USERS } from '../../lib/sampleData';
 import { STATUS_OPTIONS, PRIORITY_OPTIONS, RECURRENCE_OPTIONS, TASK_TEMPLATES } from '../../lib/constants';
 import { useTemplateStore } from '../../store/templateStore';
@@ -22,6 +23,8 @@ import { useSprintStore } from '../../store/sprintStore';
 import { generateId } from '../../lib/utils';
 import type { Subtask } from '../../types';
 import { cn } from '../../lib/utils';
+
+const CONVEX_MODE = !!import.meta.env.VITE_CONVEX_URL;
 
 const schema = z.object({
   title: z.string().min(1, 'Title is required').max(256, 'Title must be 256 characters or fewer'),
@@ -51,6 +54,8 @@ export function TaskModal() {
   const currentUser = useCurrentUser();
   const convexCreate = useCreateTask();
   const convexUpdate = useUpdateTask();
+  const improveDescriptionAI = useImproveDescription();
+  const [isAILoading, setIsAILoading] = useState(false);
   const allTags = useTagStore(s => s.tags);
   const { templates: userTemplates, deleteTemplate } = useTemplateStore();
   const { getProjectSprints } = useSprintStore();
@@ -72,6 +77,8 @@ export function TaskModal() {
     },
   });
   const watchedProjectId = watchField('projectId');
+  const watchedTitle = watchField('title');
+  const watchedDescription = watchField('description');
 
   useEffect(() => {
     if (editing) {
@@ -239,7 +246,29 @@ export function TaskModal() {
           </div>
         )}
         <Input id="task-title" label="Title *" placeholder="Task name" error={errors.title?.message} {...register('title')} />
-        <Textarea id="task-description" label="Description" placeholder="Add details..." rows={2} {...register('description')} />
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <label htmlFor="task-description" className="text-xs font-medium text-slate-400">Description</label>
+            {CONVEX_MODE && watchedTitle?.trim() && (
+              <button
+                type="button"
+                onClick={async () => {
+                  setIsAILoading(true);
+                  try {
+                    const improved = await improveDescriptionAI({ title: watchedTitle, description: watchedDescription });
+                    if (improved) setValue('description', improved);
+                  } catch { /* silent */ } finally { setIsAILoading(false); }
+                }}
+                disabled={isAILoading}
+                className="flex items-center gap-1 px-2 py-0.5 rounded text-xs text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 transition-all disabled:opacity-50"
+              >
+                <Wand2 className="w-3 h-3" />
+                {isAILoading ? 'Improving…' : 'Improve'}
+              </button>
+            )}
+          </div>
+          <Textarea id="task-description" placeholder="Add details..." rows={2} {...register('description')} />
+        </div>
 
         <div className="grid grid-cols-2 gap-4">
           <Select id="task-status" label="Status" options={STATUS_OPTIONS.map(s => ({ value: s.value, label: s.label }))} {...register('status')} />

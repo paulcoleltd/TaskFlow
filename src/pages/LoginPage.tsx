@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -37,6 +37,8 @@ export default function LoginPage() {
 
   const [showPw, setShowPw] = useState(false);
   const [serverError, setServerError] = useState('');
+  const [lockedUntil, setLockedUntil] = useState(0);
+  const failCount = useRef(0);
 
   const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -45,9 +47,20 @@ export default function LoginPage() {
   const onSubmit = async (data: FormData) => {
     setServerError('');
     if (!CONVEX_MODE) {
+      // Rate limiting — block after 5 consecutive failures
+      if (Date.now() < lockedUntil) {
+        const secs = Math.ceil((lockedUntil - Date.now()) / 1000);
+        setServerError(`Too many attempts. Please wait ${secs} seconds before trying again.`);
+        return;
+      }
       // Local mode — validate against demo accounts directly (no server needed)
       const u = LOCAL_ACCOUNTS[data.email.trim().toLowerCase()];
       if (!u || u.password !== data.password) {
+        failCount.current += 1;
+        if (failCount.current >= 5) {
+          // Lock on the 5th failure — next attempt (6th) will be blocked at the top check
+          setLockedUntil(Date.now() + 60_000);
+        }
         setServerError('Invalid email or password. Please try again.');
         return;
       }

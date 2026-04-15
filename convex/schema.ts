@@ -35,6 +35,9 @@ export default defineSchema({
     image: v.optional(v.string()),
     emailVerificationTime: v.optional(v.number()),
     isAnonymous: v.optional(v.boolean()),
+    // opt-out model: undefined = enabled
+    emailNotifications: v.optional(v.boolean()),
+    activeWorkspaceId: v.optional(v.id("workspaces")),
   }).index("by_email", ["email"]),
 
   projects: defineTable({
@@ -51,6 +54,9 @@ export default defineSchema({
       v.literal("completed")
     ),
     dueDate: v.optional(v.string()),
+    shareToken: v.optional(v.string()),
+    isPublic: v.optional(v.boolean()),
+    workspaceId: v.optional(v.id("workspaces")),
     milestones: v.optional(
       v.array(
         v.object({
@@ -98,6 +104,7 @@ export default defineSchema({
     ),
     blockedBy: v.optional(v.array(v.string())),
     sprintId: v.optional(v.id("sprints")),
+    workspaceId: v.optional(v.id("workspaces")),
   })
     .index("by_project", ["projectId"])
     .index("by_assignee", ["assigneeId"])
@@ -178,6 +185,25 @@ export default defineSchema({
     tags: v.array(v.string()),
     estimatedHours: v.optional(v.number()),
   }).index("by_user", ["userId"]),
+
+  // Multi-workspace support
+  workspaces: defineTable({
+    name: v.string(),
+    slug: v.string(),
+    ownerId: v.id("users"),
+    plan: v.optional(v.string()),
+  })
+    .index("by_slug", ["slug"])
+    .index("by_owner", ["ownerId"]),
+
+  memberships: defineTable({
+    workspaceId: v.id("workspaces"),
+    userId: v.id("users"),
+    role: v.union(v.literal("owner"), v.literal("admin"), v.literal("member")),
+  })
+    .index("by_workspace", ["workspaceId"])
+    .index("by_user", ["userId"])
+    .index("by_workspace_user", ["workspaceId", "userId"]),
 
   // Lightweight presence — replaces Socket.io PresenceBar / ViewerPile entirely
   // room format: "project:<id>" | "task:<id>" | "global"

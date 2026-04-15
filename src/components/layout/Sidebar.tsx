@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, CheckSquare, FolderOpen, CalendarDays,
-  BarChart3, Settings2, ChevronLeft, ChevronRight, Plus, Zap, LogOut, Users2, Sun, Activity, Search, Clock, GitBranch,
+  BarChart3, Settings2, ChevronLeft, ChevronRight, Plus, Zap, LogOut, Users2, Sun, Activity, Search, Clock, GitBranch, Building2,
 } from 'lucide-react';
 import { useUIStore } from '../../store/uiStore';
 import { useProjectStore } from '../../store/projectStore';
@@ -9,6 +9,9 @@ import { useTaskStore } from '../../store/taskStore';
 import { useConvexAuth } from '../../hooks/useConvexUser';
 import { useCurrentUser } from '../../hooks/useConvexUser';
 import { canCreateProject, ROLE_META } from '../../lib/permissions';
+import { WorkspaceSwitcher } from './WorkspaceSwitcher';
+
+const CONVEX_MODE = !!import.meta.env.VITE_CONVEX_URL;
 import { cn, getInitials } from '../../lib/utils';
 import toast from 'react-hot-toast';
 
@@ -24,6 +27,7 @@ const NAV = [
   { to: '/activity', icon: Activity, label: 'Activity' },
   { to: '/time',     icon: Clock,      label: 'Time' },
   { to: '/roadmap',  icon: GitBranch,  label: 'Roadmap' },
+  { to: '/workspaces', icon: Building2,  label: 'Workspaces' },
   { to: '/settings', icon: Settings2,  label: 'Settings' },
 ];
 
@@ -69,6 +73,13 @@ export function Sidebar() {
           </span>
         )}
       </div>
+
+      {/* Workspace switcher — Convex mode only */}
+      {CONVEX_MODE && (
+        <div className="pt-3">
+          <WorkspaceSwitcher collapsed={sidebarCollapsed} />
+        </div>
+      )}
 
       {/* Nav */}
       <nav className="flex-1 px-2 py-4 space-y-0.5 overflow-y-auto">

@@ -10,6 +10,7 @@ import { CommandPalette } from './components/layout/CommandPalette';
 import { FocusMode } from './components/tasks/FocusMode';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { InstallBanner } from './components/ui/InstallBanner';
 import { useUIStore } from './store/uiStore';
 import { useAuthStore } from './store/authStore';
 import { useCurrentUser } from './hooks/useConvexUser';
@@ -17,6 +18,8 @@ import { useTaskStore } from './store/taskStore';
 import { useProjectStore } from './store/projectStore';
 import { useConvexSync } from './hooks/useConvexSync';
 import { usePresenceHeartbeat } from './hooks/usePresenceHeartbeat';
+import { useCollaboration } from './hooks/useCollaboration';
+import { useInstallPrompt } from './hooks/useInstallPrompt';
 import { SEED_TASKS, SEED_PROJECTS } from './lib/sampleData';
 
 const CONVEX_MODE = !!import.meta.env.VITE_CONVEX_URL;
@@ -35,10 +38,13 @@ const TodayPage       = lazy(() => import('./pages/TodayPage'));
 const ActivityPage    = lazy(() => import('./pages/ActivityPage'));
 const SearchPage      = lazy(() => import('./pages/SearchPage'));
 const TimePage        = lazy(() => import('./pages/TimePage'));
-const RoadmapPage     = lazy(() => import('./pages/RoadmapPage'));
+const RoadmapPage          = lazy(() => import('./pages/RoadmapPage'));
+const PublicProjectPage    = lazy(() => import('./pages/PublicProjectPage'));
+const WorkspacesPage       = lazy(() => import('./pages/WorkspacesPage'));
 
 function App() {
   const { selectedTaskId, isFocusModeOpen, closeFocusMode, theme } = useUIStore();
+  const { canInstall, promptInstall, dismiss: dismissInstall } = useInstallPrompt();
 
   // Auth state — currentUser is null/undefined when not logged in (both modes)
   const currentUser = useCurrentUser();
@@ -48,6 +54,9 @@ function App() {
   // Sync Convex real-time data → Zustand stores (no-op in local mode)
   useConvexSync();
 
+  // Socket.io collaboration — connects socket, wires all real-time events
+  useCollaboration();
+
   // Global presence heartbeat (no-op in local mode)
   usePresenceHeartbeat('global');
 
@@ -56,10 +65,13 @@ function App() {
   const { projects, seedProjects } = useProjectStore();
   useEffect(() => {
     if (!CONVEX_MODE) {
-      // Restore session from localStorage
+      // Restore session from localStorage (legacy fallback — Zustand persist handles the primary key)
       try {
         const saved = JSON.parse(localStorage.getItem('taskflow-local-auth') ?? 'null');
-        if (saved) useAuthStore.setState({ currentUser: saved, token: 'local', isAuthenticated: true });
+        // Only apply if there is no existing authenticated session
+        if (saved && !useAuthStore.getState().isAuthenticated) {
+          useAuthStore.setState({ currentUser: saved, token: saved.token ?? '', isAuthenticated: true });
+        }
       } catch {}
       // Seed data
       if (tasks.length === 0) seedTasks(SEED_TASKS);
@@ -86,6 +98,7 @@ function App() {
         <Suspense fallback={null}>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/share/:token" element={<PublicProjectPage />} />
             <Route element={<ProtectedRoute><AppShell /></ProtectedRoute>}>
               <Route index element={<DashboardPage />} />
               <Route path="my-tasks" element={<MyTasksPage />} />
@@ -100,6 +113,7 @@ function App() {
               <Route path="search" element={<SearchPage />} />
               <Route path="time" element={<TimePage />} />
               <Route path="roadmap" element={<RoadmapPage />} />
+              <Route path="workspaces" element={<WorkspacesPage />} />
             </Route>
           </Routes>
 
@@ -110,6 +124,11 @@ function App() {
           {isAuthenticated && <CommandPalette />}
           {isAuthenticated && isFocusModeOpen && selectedTaskId && (
             <FocusMode taskId={selectedTaskId} onClose={closeFocusMode} />
+          )}
+
+          {/* PWA install banner — shown when browser signals installability */}
+          {canInstall && (
+            <InstallBanner onInstall={promptInstall} onDismiss={dismissInstall} />
           )}
         </Suspense>
       </BrowserRouter>

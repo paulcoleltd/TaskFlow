@@ -15,6 +15,7 @@ import { useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { connectSocket, disconnectSocket, getSocket } from '../lib/socket';
 import { useCurrentUser, useIsAuthenticated } from './useConvexUser';
+import { useAuthStore } from '../store/authStore';
 import { useTaskStore } from '../store/taskStore';
 import { useProjectStore } from '../store/projectStore';
 import { useCollaborationStore } from '../store/collaborationStore';
@@ -34,6 +35,9 @@ const TOAST_STYLE = {
 export function useCollaboration() {
   const isAuthenticated = useIsAuthenticated();
   const currentUser = useCurrentUser();
+  // In local mode the HMAC session token is stored in authStore.
+  // In Convex mode this will be null but the socket server is bypassed anyway.
+  const sessionToken = useAuthStore(s => s.token);
   const taskStore = useTaskStore();
   const projectStore = useProjectStore();
   const collab = useCollaborationStore();
@@ -47,8 +51,13 @@ export function useCollaboration() {
       return;
     }
 
-    // Connect without a token — Convex handles auth independently
-    const socket = connectSocket('');
+    // In Convex mode sessionToken is null — Convex handles realtime, no Socket.IO needed.
+    if (!sessionToken) {
+      collab.setConnected(true);
+      return () => { collab.setConnected(false); };
+    }
+
+    const socket = connectSocket(sessionToken);
 
     // ── Connection lifecycle ────────────────────────────────────────────────────
 
@@ -255,7 +264,7 @@ export function useCollaboration() {
       socket.off('error', onError);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentUser?._id, isAuthenticated]);
+  }, [currentUser?._id, isAuthenticated, sessionToken]);
 
   // ── Write-through functions (emit + local apply) ────────────────────────────
 

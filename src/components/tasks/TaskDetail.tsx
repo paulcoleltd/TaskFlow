@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { ViewerPile } from '../collaboration/ViewerPile';
 import { useNavigate } from 'react-router-dom';
-import { X, Edit2, Trash2, Calendar, User, Tag, Clock, CheckSquare2, MessageCircle, Send, ChevronDown, Copy, ExternalLink, Plus, Timer, Pin, AlertCircle, Activity, Maximize2, Repeat2, Link2, XCircle, Square, BookmarkPlus, Paperclip, Download, FileText, Image, FileArchive, File } from 'lucide-react';
+import { X, Edit2, Trash2, Calendar, User, Tag, Clock, CheckSquare2, MessageCircle, Send, ChevronDown, Copy, ExternalLink, Plus, Timer, Pin, AlertCircle, Activity, Maximize2, Repeat2, Link2, XCircle, Square, BookmarkPlus, Paperclip, Download, FileText, Image, FileArchive, File, Wand2 } from 'lucide-react';
 import { formatDistanceToNow, formatDistance, addDays, addMonths, format } from 'date-fns';
 import type { Task, ActivityVerb, Attachment } from '../../types';
 import { useTaskStore } from '../../store/taskStore';
@@ -9,6 +9,10 @@ import { useProjectStore } from '../../store/projectStore';
 import { useUIStore } from '../../store/uiStore';
 import { useCurrentUser } from '../../hooks/useConvexUser';
 import { useDeleteTask, useUpdateTask } from '../../hooks/useConvexTasks';
+import { useConvexAttachments, useGenerateUploadUrl, useSaveAttachment, useRemoveAttachment } from '../../hooks/useConvexAttachments';
+import { useSuggestSubtasks } from '../../hooks/useConvexAI';
+
+const CONVEX_MODE = !!import.meta.env.VITE_CONVEX_URL;
 import { usePresenceHeartbeat } from '../../hooks/usePresenceHeartbeat';
 import { RoleGuard } from '../auth/RoleGuard';
 import { canEditTask, canDeleteTask } from '../../lib/permissions';
@@ -33,6 +37,11 @@ export function TaskDetail() {
   const currentUser = useCurrentUser();
   const convexDelete = useDeleteTask();
   const convexUpdate = useUpdateTask();
+  const convexAttachments = useConvexAttachments(selectedTaskId);
+  const generateUploadUrl = useGenerateUploadUrl();
+  const saveAttachment = useSaveAttachment();
+  const removeAttachmentConvex = useRemoveAttachment();
+  const suggestSubtasksAI = useSuggestSubtasks();
 
   // Task-level presence — shows who's viewing this task
   usePresenceHeartbeat(selectedTaskId ? `task:${selectedTaskId}` : '');
@@ -42,6 +51,7 @@ export function TaskDetail() {
   const [mentionState, setMentionState] = useState<{ query: string; atIndex: number } | null>(null);
   const [newSubtask, setNewSubtask] = useState('');
   const [showSubtaskInput, setShowSubtaskInput] = useState(false);
+  const [isAILoading, setIsAILoading] = useState(false);
   const [logHours, setLogHours] = useState('');
   const [showLogTime, setShowLogTime] = useState(false);
   const [showSetEstimate, setShowSetEstimate] = useState(false);
@@ -128,36 +138,59 @@ export function TaskDetail() {
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB per file
   const MAX_ATTACHMENTS = 10;
 
-  const processFiles = (files: FileList | null) => {
+  const processFiles = async (files: FileList | null) => {
     if (!files || !canEdit) return;
-    const existing = task.attachments ?? [];
+    const existing = CONVEX_MODE ? (convexAttachments ?? []) : (task.attachments ?? []);
     if (existing.length >= MAX_ATTACHMENTS) {
       toast.error(`Maximum ${MAX_ATTACHMENTS} attachments per task.`);
       return;
     }
-    Array.from(files).slice(0, MAX_ATTACHMENTS - existing.length).forEach(file => {
+    const toProcess = Array.from(files).slice(0, MAX_ATTACHMENTS - existing.length);
+    for (const file of toProcess) {
       if (file.size > MAX_FILE_SIZE) {
         toast.error(`"${file.name}" exceeds the 5 MB limit.`);
-        return;
+        continue;
       }
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const data = e.target?.result as string;
-        const attachment: Attachment = {
-          id: generateId(),
-          name: file.name.slice(0, 256),
-          size: file.size,
-          type: file.type || 'application/octet-stream',
-          data,
-          uploadedAt: now(),
-          uploadedBy: userId,
+      if (CONVEX_MODE) {
+        try {
+          // 1. Get a presigned upload URL from Convex storage
+          const uploadUrl: string = await generateUploadUrl({});
+          // 2. Upload the file directly to Convex storage
+          const res = await fetch(uploadUrl, { method: 'POST', headers: { 'Content-Type': file.type }, body: file });
+          const { storageId } = await res.json();
+          // 3. Save the attachment record
+          await saveAttachment({
+            taskId: task.id as any,
+            storageId,
+            name: file.name.slice(0, 256),
+            size: file.size,
+            type: file.type || 'application/octet-stream',
+          });
+          toast.success(`"${file.name}" attached`);
+        } catch {
+          toast.error(`Failed to attach "${file.name}"`);
+        }
+      } else {
+        // Local mode — base64 fallback for E2E tests
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const data = e.target?.result as string;
+          const attachment: Attachment = {
+            id: generateId(),
+            name: file.name.slice(0, 256),
+            size: file.size,
+            type: file.type || 'application/octet-stream',
+            data,
+            uploadedAt: now(),
+            uploadedBy: userId,
+          };
+          const updated = [...(useTaskStore.getState().tasks.find(t => t.id === task.id)?.attachments ?? []), attachment];
+          updateTask(task.id, { attachments: updated, attachmentCount: updated.length });
+          toast.success(`"${file.name}" attached`);
         };
-        const updated = [...(useTaskStore.getState().tasks.find(t => t.id === task.id)?.attachments ?? []), attachment];
-        updateTask(task.id, { attachments: updated, attachmentCount: updated.length });
-        toast.success(`"${file.name}" attached`);
-      };
-      reader.readAsDataURL(file);
-    });
+        reader.readAsDataURL(file);
+      }
+    }
   };
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -171,14 +204,22 @@ export function TaskDetail() {
     processFiles(e.dataTransfer.files);
   };
 
-  const handleRemoveAttachment = (attachmentId: string) => {
-    const updated = (task.attachments ?? []).filter(a => a.id !== attachmentId);
-    updateTask(task.id, { attachments: updated, attachmentCount: updated.length });
+  const handleRemoveAttachment = async (attachmentId: string, convexId?: string) => {
+    if (CONVEX_MODE && convexId) {
+      await removeAttachmentConvex({ id: convexId as any }).catch(() => toast.error('Failed to remove attachment'));
+    } else {
+      const updated = (task.attachments ?? []).filter(a => a.id !== attachmentId);
+      updateTask(task.id, { attachments: updated, attachmentCount: updated.length });
+    }
   };
 
-  const handleDownloadAttachment = (attachment: Attachment) => {
+  const handleDownloadAttachment = (attachment: Attachment & { url?: string }) => {
+    if (CONVEX_MODE && attachment.url) {
+      window.open(attachment.url, '_blank', 'noopener,noreferrer');
+      return;
+    }
     const a = document.createElement('a');
-    a.href = attachment.data;
+    a.href = attachment.data ?? '';
     a.download = attachment.name;
     document.body.appendChild(a);
     a.click();
@@ -352,6 +393,25 @@ export function TaskDetail() {
     emitUpdate({ comments });
   };
 
+  const handleSuggestSubtasks = async () => {
+    if (!task) return;
+    setIsAILoading(true);
+    try {
+      const titles = await suggestSubtasksAI({ title: task.title, description: task.description });
+      if (titles.length > 0) {
+        const newSubs = titles.map(t => ({ id: generateId(), title: t, completed: false }));
+        const subtasks = [...task.subtasks, ...newSubs];
+        updateTask(task.id, { subtasks });
+        emitUpdate({ subtasks });
+        toast.success(`${titles.length} subtasks suggested`);
+      }
+    } catch {
+      toast.error('AI suggestions failed');
+    } finally {
+      setIsAILoading(false);
+    }
+  };
+
   const handleAddSubtask = () => {
     const title = newSubtask.trim();
     if (!title) return;
@@ -444,7 +504,7 @@ export function TaskDetail() {
       <div className="fixed inset-0 z-30 bg-black/30" onClick={() => setSelectedTask(null)} />
 
       {/* Panel */}
-      <div className="fixed right-0 top-0 h-full w-full sm:w-96 bg-[#0C1526] border-l border-[#1C3054] z-40 flex flex-col overflow-hidden">
+      <div data-panel="task-detail" className="fixed right-0 top-0 h-full w-full sm:w-96 bg-[#0C1526] border-l border-[#1C3054] z-40 flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#1C3054]">
           <div className="flex items-center gap-1">
@@ -981,13 +1041,26 @@ export function TaskDetail() {
                 Subtasks {task.subtasks.length > 0 && `(${completedSubs}/${task.subtasks.length})`}
               </span>
               {canEdit && (
-                <button
-                  onClick={() => { setShowSubtaskInput(v => !v); setTimeout(() => subtaskInputRef.current?.focus(), 50); }}
-                  className="p-1 rounded-lg hover:bg-[#122040] text-slate-500 hover:text-blue-400 transition-colors"
-                  title="Add subtask"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                </button>
+                <div className="flex items-center gap-1">
+                  {CONVEX_MODE && (
+                    <button
+                      onClick={handleSuggestSubtasks}
+                      disabled={isAILoading}
+                      className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 border border-transparent hover:border-purple-500/20 transition-all disabled:opacity-50"
+                      title="AI suggest subtasks"
+                    >
+                      <Wand2 className="w-3 h-3" />
+                      {isAILoading ? 'Thinking…' : 'Suggest'}
+                    </button>
+                  )}
+                  <button
+                    onClick={() => { setShowSubtaskInput(v => !v); setTimeout(() => subtaskInputRef.current?.focus(), 50); }}
+                    className="p-1 rounded-lg hover:bg-[#122040] text-slate-500 hover:text-blue-400 transition-colors"
+                    title="Add subtask"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               )}
             </div>
             {task.subtasks.length > 0 && <ProgressBar value={subProgress} size="sm" className="mb-3" />}
@@ -1062,73 +1135,81 @@ export function TaskDetail() {
 
           {/* Attachments */}
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <Paperclip className="w-4 h-4 text-slate-500" />
-                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                  Attachments {(task.attachments ?? []).length > 0 && `(${(task.attachments ?? []).length})`}
-                </span>
-              </div>
-              {canEdit && (
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="p-1 rounded-lg hover:bg-[#122040] text-slate-500 hover:text-blue-400 transition-colors"
-                  title="Attach file"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
-
-            {/* File list */}
-            {(task.attachments ?? []).length > 0 && (
-              <div className="space-y-1.5 mb-2">
-                {(task.attachments ?? []).map(attachment => {
-                  const Icon = getFileIcon(attachment.type);
-                  const isImage = attachment.type.startsWith('image/');
-                  return (
-                    <div key={attachment.id} className="flex items-center gap-2.5 p-2 rounded-lg bg-[#06091A] border border-[#1C3054] group/att hover:border-[#2A4080] transition-colors">
-                      {isImage ? (
-                        <img
-                          src={attachment.data}
-                          alt={attachment.name}
-                          className="w-8 h-8 rounded object-cover flex-shrink-0 border border-[#1C3054]"
-                        />
-                      ) : (
-                        <div className="w-8 h-8 rounded flex items-center justify-center bg-[#0C1526] flex-shrink-0">
-                          <Icon className="w-4 h-4 text-blue-400" />
-                        </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs text-slate-300 truncate font-medium">{attachment.name}</p>
-                        <p className="text-[10px] text-slate-600">{formatBytes(attachment.size)}</p>
-                      </div>
-                      <div className="flex items-center gap-1 opacity-0 group-hover/att:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => handleDownloadAttachment(attachment)}
-                          title="Download"
-                          className="p-1 rounded-lg hover:bg-[#122040] text-slate-500 hover:text-emerald-400 transition-colors"
-                        >
-                          <Download className="w-3.5 h-3.5" />
-                        </button>
-                        {canEdit && (
-                          <button
-                            onClick={() => handleRemoveAttachment(attachment.id)}
-                            title="Remove attachment"
-                            className="p-1 rounded-lg hover:bg-[#122040] text-slate-500 hover:text-red-400 transition-colors"
-                          >
-                            <X className="w-3.5 h-3.5" />
-                          </button>
-                        )}
-                      </div>
+            {(() => {
+              const displayAttachments = CONVEX_MODE
+                ? (convexAttachments ?? [])
+                : (task.attachments ?? []);
+              return (
+                <>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Paperclip className="w-4 h-4 text-slate-500" />
+                      <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                        Attachments {displayAttachments.length > 0 && `(${displayAttachments.length})`}
+                      </span>
                     </div>
-                  );
-                })}
-              </div>
-            )}
+                    {canEdit && (
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className="p-1 rounded-lg hover:bg-[#122040] text-slate-500 hover:text-blue-400 transition-colors"
+                        title="Attach file"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
 
-            {/* Drop zone — only shown to editors */}
-            {canEdit && (task.attachments ?? []).length < MAX_ATTACHMENTS && (
+                  {/* File list */}
+                  {displayAttachments.length > 0 && (
+                    <div className="space-y-1.5 mb-2">
+                      {displayAttachments.map((attachment: any) => {
+                        const Icon = getFileIcon(attachment.type ?? '');
+                        const isImage = (attachment.type ?? '').startsWith('image/');
+                        const src = CONVEX_MODE ? attachment.url : attachment.data;
+                        const key = CONVEX_MODE ? attachment._id : attachment.id;
+                        return (
+                          <div key={key} className="flex items-center gap-2.5 p-2 rounded-lg bg-[#06091A] border border-[#1C3054] group/att hover:border-[#2A4080] transition-colors">
+                            {isImage && src ? (
+                              <img
+                                src={src}
+                                alt={attachment.name}
+                                className="w-8 h-8 rounded object-cover flex-shrink-0 border border-[#1C3054]"
+                              />
+                            ) : (
+                              <div className="w-8 h-8 rounded flex items-center justify-center bg-[#0C1526] flex-shrink-0">
+                                <Icon className="w-4 h-4 text-blue-400" />
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs text-slate-300 truncate font-medium">{attachment.name}</p>
+                              <p className="text-[10px] text-slate-600">{formatBytes(attachment.size)}</p>
+                            </div>
+                            <div className="flex items-center gap-1 opacity-0 group-hover/att:opacity-100 transition-opacity">
+                              <button
+                                onClick={() => handleDownloadAttachment(attachment)}
+                                title="Download"
+                                className="p-1 rounded-lg hover:bg-[#122040] text-slate-500 hover:text-emerald-400 transition-colors"
+                              >
+                                <Download className="w-3.5 h-3.5" />
+                              </button>
+                              {canEdit && (
+                                <button
+                                  onClick={() => handleRemoveAttachment(attachment.id ?? '', attachment._id)}
+                                  title="Remove attachment"
+                                  className="p-1 rounded-lg hover:bg-[#122040] text-slate-500 hover:text-red-400 transition-colors"
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Drop zone — only shown to editors */}
+                  {canEdit && displayAttachments.length < MAX_ATTACHMENTS && (
               <div
                 onDragOver={e => { e.preventDefault(); setDragOver(true); }}
                 onDragLeave={() => setDragOver(false)}
@@ -1148,15 +1229,18 @@ export function TaskDetail() {
               </div>
             )}
 
-            {/* Hidden file input */}
-            <input
-              ref={fileInputRef}
-              type="file"
-              multiple
-              className="hidden"
-              onChange={handleFileInput}
-              aria-label="Attach files"
-            />
+                  {/* Hidden file input */}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    className="hidden"
+                    onChange={handleFileInput}
+                    aria-label="Attach files"
+                  />
+                </>
+              );
+            })()}
           </div>
 
           {/* Activity log */}

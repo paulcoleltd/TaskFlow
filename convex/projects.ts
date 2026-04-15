@@ -108,6 +108,46 @@ export const remove = mutation({
   },
 });
 
+// ── Public sharing ────────────────────────────────────────────────────────────
+
+export const getByShareToken = query({
+  args: { token: v.string() },
+  handler: async (ctx, { token }) => {
+    const project = await ctx.db
+      .query("projects")
+      .filter(q => q.and(q.eq(q.field("shareToken"), token), q.eq(q.field("isPublic"), true)))
+      .unique();
+    if (!project) return null;
+
+    const tasks = await ctx.db
+      .query("tasks")
+      .withIndex("by_project", q => q.eq("projectId", project._id))
+      .collect();
+
+    return { project, tasks };
+  },
+});
+
+export const enableSharing = mutation({
+  args: {
+    id:      v.id("projects"),
+    enabled: v.boolean(),
+  },
+  handler: async (ctx, { id, enabled }): Promise<string | null> => {
+    await requireAuth(ctx);
+    if (!enabled) {
+      await ctx.db.patch(id, { isPublic: false });
+      return null;
+    }
+    const existing = await ctx.db.get(id);
+    if (!existing) throw new Error("Project not found");
+    // Reuse existing token or generate a new one
+    const token = (existing as any).shareToken ?? crypto.randomUUID().replace(/-/g, "");
+    await ctx.db.patch(id, { isPublic: true, shareToken: token });
+    return token;
+  },
+});
+
 // ── Auth helper ───────────────────────────────────────────────────────────────
 
 async function requireAuth(ctx: any): Promise<string> {

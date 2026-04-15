@@ -1,6 +1,6 @@
 import { convexAuth } from "@convex-dev/auth/server";
 import { Password } from "@convex-dev/auth/providers/Password";
-import { DataModel } from "./_generated/dataModel";
+import { internal } from "./_generated/api";
 
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   providers: [Password],
@@ -16,13 +16,16 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
         "#EF4444", "#8B5CF6", "#EC4899", "#06B6D4",
       ];
       const colour = colours[Math.floor(Math.random() * colours.length)];
-      return ctx.db.insert("users", {
+      const userId = await ctx.db.insert("users", {
         name: (args.profile.name as string | undefined) ?? args.profile.email?.split("@")[0] ?? "User",
         email: args.profile.email as string,
         colour,
         role: "member" as const,
         image: args.profile.image as string | undefined,
       });
+      // Auto-create a Personal workspace for new users
+      await ctx.runMutation(internal.workspaces.ensurePersonalWorkspace, { userId });
+      return userId;
     },
   },
 });

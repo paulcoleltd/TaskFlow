@@ -66,6 +66,7 @@ export interface Task {
   recurrence?: Recurrence;
   blockedBy?: string[];   // task IDs that block this task
   sprintId?: string;      // sprint this task belongs to
+  workspaceId?: string;
 }
 
 export interface Sprint {
@@ -103,6 +104,8 @@ export interface Project {
   createdAt: string;
   updatedAt: string;
   milestones?: Milestone[];
+  shareToken?: string;
+  isPublic?: boolean;
 }
 
 export type ActivityVerb =

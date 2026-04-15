@@ -32,6 +32,8 @@ export const updateProfile = mutation({
     name: v.optional(v.string()),
     colour: v.optional(v.string()),
     image: v.optional(v.string()),
+    emailNotifications: v.optional(v.boolean()),
+    activeWorkspaceId: v.optional(v.id("workspaces")),
   },
   handler: async (ctx, patch) => {
     const userId = await requireAuth(ctx);

@@ -17,7 +17,10 @@ import { TaskMatrix } from '../components/tasks/TaskMatrix';
 import { TaskFilters } from '../components/tasks/TaskFilters';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { Button } from '../components/ui/Button';
-import { Plus, ArrowLeft, Trash2, Archive, CheckCircle2, Play, CalendarClock, AlertTriangle, Heart, CheckCheck, Download, Flag, CheckCircle, Circle as CircleIcon, TrendingDown, ChevronDown, Zap, SquareCheck, X as XIcon } from 'lucide-react';
+import { Plus, ArrowLeft, Trash2, Archive, CheckCircle2, Play, CalendarClock, AlertTriangle, Heart, CheckCheck, Download, Flag, CheckCircle, Circle as CircleIcon, TrendingDown, ChevronDown, Zap, SquareCheck, X as XIcon, Link2 } from 'lucide-react';
+import { useEnableSharing } from '../hooks/useConvexProjects';
+
+const CONVEX_MODE = !!import.meta.env.VITE_CONVEX_URL;
 import { differenceInCalendarDays, eachDayOfInterval, startOfDay, format, addDays, isPast } from 'date-fns';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, Legend } from 'recharts';
 import { SEED_USERS } from '../lib/sampleData';
@@ -42,6 +45,7 @@ export default function ProjectPage() {
   const { openTaskModal, currentView, setView } = useUIStore();
   const currentUser = useCurrentUser();
   const navigate = useNavigate();
+  const enableSharing = useEnableSharing();
 
   // Presence: let others see who's viewing this project in real time
   usePresenceHeartbeat(id ? `project:${id}` : '');
@@ -202,6 +206,19 @@ export default function ProjectPage() {
     navigate('/projects');
   };
 
+  const handleShare = async () => {
+    try {
+      const token = await enableSharing({ id: project.id as any, enabled: true });
+      if (token) {
+        const url = `${window.location.origin}/share/${token}`;
+        await navigator.clipboard.writeText(url);
+        toast.success('Share link copied to clipboard!');
+      }
+    } catch {
+      toast.error('Failed to enable sharing');
+    }
+  };
+
   const StatusIcon = currentStatusMeta.icon;
 
   const milestones: Milestone[] = project.milestones ?? [];
@@ -314,6 +331,15 @@ export default function ProjectPage() {
                 title="Export tasks as CSV"
               >
                 <Download className="w-4 h-4" />
+              </button>
+            )}
+            {CONVEX_MODE && (
+              <button
+                onClick={handleShare}
+                className="p-1.5 rounded-lg hover:bg-[#122040] text-slate-500 hover:text-blue-400 transition-colors"
+                title="Copy share link"
+              >
+                <Link2 className="w-4 h-4" />
               </button>
             )}
             <RoleGuard allowed={canDeleteProject(role)}>

@@ -2,8 +2,7 @@ import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTaskStore } from '../store/taskStore';
 import { useProjectStore } from '../store/projectStore';
-import { useConvexAuth } from '../hooks/useConvexUser';
-import { useCurrentUser } from '../hooks/useConvexUser';
+import { useConvexAuth, useCurrentUser, useUpdateProfile } from '../hooks/useConvexUser';
 import { useTagStore } from '../store/tagStore';
 import { useUIStore } from '../store/uiStore';
 import { useTemplateStore } from '../store/templateStore';
@@ -102,11 +101,13 @@ function exportCSV() {
 
 // ── Notifications panel ───────────────────────────────────────────────────────
 function NotificationsPanel({
-  enabled, setEnabled, userId,
+  enabled, setEnabled, userId, emailNotifications, onEmailToggle,
 }: {
   enabled: boolean;
   setEnabled: (v: boolean) => void;
   userId: string;
+  emailNotifications: boolean;
+  onEmailToggle: (v: boolean) => void;
 }) {
   const permission = getNotificationPermission();
   const unsupported = permission === 'unsupported';
@@ -245,6 +246,39 @@ function NotificationsPanel({
           To unblock: open browser settings → Site settings → Notifications → allow this site.
         </p>
       )}
+
+      {/* Email notifications row */}
+      <div className="flex items-center justify-between p-3 bg-[#06091A] rounded-xl">
+        <div className="flex items-center gap-3">
+          {emailNotifications ? (
+            <Bell className="w-4 h-4 text-green-400 flex-shrink-0" />
+          ) : (
+            <BellOff className="w-4 h-4 text-slate-500 flex-shrink-0" />
+          )}
+          <div>
+            <p className="text-sm text-slate-200">Email notifications</p>
+            <p className="text-xs text-slate-400">
+              {emailNotifications
+                ? 'Receive emails for task assignments and due-date reminders'
+                : 'Opt out of task assignment and reminder emails'}
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={() => onEmailToggle(!emailNotifications)}
+          className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
+            emailNotifications ? 'bg-green-500' : 'bg-[#1C3054]'
+          }`}
+          role="switch"
+          aria-checked={emailNotifications}
+        >
+          <span
+            className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform transition-transform duration-200 ${
+              emailNotifications ? 'translate-x-5' : 'translate-x-0'
+            }`}
+          />
+        </button>
+      </div>
     </div>
   );
 }
@@ -258,6 +292,11 @@ export default function SettingsPage() {
   const { tags, addTag, updateTag, deleteTag } = useTagStore();
   const { notificationsEnabled, setNotificationsEnabled, theme, setTheme } = useUIStore();
   const { templates: userTemplates, deleteTemplate, updateTemplate } = useTemplateStore();
+  const updateProfile = useUpdateProfile();
+  const emailNotificationsEnabled = (currentUser as any)?.emailNotifications !== false;
+  const handleEmailToggle = async (v: boolean) => {
+    await updateProfile({ emailNotifications: v }).catch(() => {});
+  };
   const role = (currentUser?.role ?? 'viewer') as import('../store/authStore').Role;
   const [csvPreview, setCsvPreview] = useState<{
     headers: string[];
@@ -521,7 +560,13 @@ export default function SettingsPage() {
       {/* Notifications */}
       <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-6">
         <h3 className="text-sm font-semibold text-white mb-4">Notifications</h3>
-        <NotificationsPanel enabled={notificationsEnabled} setEnabled={setNotificationsEnabled} userId={currentUser?._id ?? ''} />
+        <NotificationsPanel
+          enabled={notificationsEnabled}
+          setEnabled={setNotificationsEnabled}
+          userId={currentUser?._id ?? ''}
+          emailNotifications={emailNotificationsEnabled}
+          onEmailToggle={handleEmailToggle}
+        />
       </div>
 
       {/* Tags */}

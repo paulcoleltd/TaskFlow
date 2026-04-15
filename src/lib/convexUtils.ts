@@ -40,6 +40,7 @@ export function convexToTask(doc: Record<string, any>): Task {
     recurrence: doc.recurrence ?? 'none',
     blockedBy: doc.blockedBy,
     sprintId: doc.sprintId as string | undefined,
+    workspaceId: doc.workspaceId as string | undefined,
   };
 }
 
@@ -60,6 +61,8 @@ export function convexToProject(doc: Record<string, any>): Project {
     createdAt: new Date(doc._creationTime as number).toISOString(),
     updatedAt: new Date(doc._creationTime as number).toISOString(),
     milestones: doc.milestones,
+    shareToken: doc.shareToken,
+    isPublic: doc.isPublic,
   };
 }
 
