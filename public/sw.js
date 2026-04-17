@@ -73,15 +73,23 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // 1. Skip non-GET and cross-origin requests (except Google Fonts)
+  // 1. Skip non-GET and cross-origin requests (except Google Fonts).
+  //    Use exact origin matching — url.origin.includes('fonts.g') is too broad and
+  //    would match crafted hostnames like evil-fonts.g.attacker.com (CWE-184).
+  const GOOGLE_FONTS_ORIGINS = new Set([
+    'https://fonts.googleapis.com',
+    'https://fonts.gstatic.com',
+  ]);
+  const isGoogleFont = GOOGLE_FONTS_ORIGINS.has(url.origin);
+
   if (request.method !== 'GET') return;
-  if (url.origin !== APP_ORIGIN && !url.origin.includes('fonts.g')) return;
+  if (url.origin !== APP_ORIGIN && !isGoogleFont) return;
 
   // 2. Network-only: API calls and Socket.io (must never be stale)
   if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/socket.io')) return;
 
-  // 3. Cache-First: Google Fonts
-  if (url.origin.includes('fonts.g')) {
+  // 3. Cache-First: Google Fonts (exact-origin checked above)
+  if (isGoogleFont) {
     event.respondWith(cacheFirst(FONT_CACHE, request));
     return;
   }

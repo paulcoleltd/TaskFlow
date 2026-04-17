@@ -79,9 +79,14 @@ export const update = mutation({
     ),
   },
   handler: async (ctx, { id, ...patch }) => {
-    await requireAuth(ctx);
+    const userId = await requireAuth(ctx);
     const existing = await ctx.db.get(id);
     if (!existing) throw new Error("Project not found");
+    // Owner OR any project member may update project metadata
+    const memberIds: string[] = (existing.memberIds ?? []).map(String);
+    if (String(existing.ownerId) !== userId && !memberIds.includes(userId)) {
+      throw new Error("Forbidden: you are not a member of this project");
+    }
     await ctx.db.patch(id, patch);
   },
 });
@@ -89,7 +94,13 @@ export const update = mutation({
 export const remove = mutation({
   args: { id: v.id("projects") },
   handler: async (ctx, { id }) => {
-    await requireAuth(ctx);
+    const userId = await requireAuth(ctx);
+    const existing = await ctx.db.get(id);
+    if (!existing) throw new Error("Project not found");
+    // Only the project owner may delete the project entirely
+    if (String(existing.ownerId) !== userId) {
+      throw new Error("Forbidden: only the project owner can delete a project");
+    }
     // Delete all tasks in the project (cascade)
     const tasks = await ctx.db
       .query("tasks")
@@ -134,13 +145,17 @@ export const enableSharing = mutation({
     enabled: v.boolean(),
   },
   handler: async (ctx, { id, enabled }): Promise<string | null> => {
-    await requireAuth(ctx);
+    const userId = await requireAuth(ctx);
+    const existing = await ctx.db.get(id);
+    if (!existing) throw new Error("Project not found");
+    // Only the project owner may toggle public sharing
+    if (String(existing.ownerId) !== userId) {
+      throw new Error("Forbidden: only the project owner can change sharing settings");
+    }
     if (!enabled) {
       await ctx.db.patch(id, { isPublic: false });
       return null;
     }
-    const existing = await ctx.db.get(id);
-    if (!existing) throw new Error("Project not found");
     // Reuse existing token or generate a new one
     const token = (existing as any).shareToken ?? crypto.randomUUID().replace(/-/g, "");
     await ctx.db.patch(id, { isPublic: true, shareToken: token });

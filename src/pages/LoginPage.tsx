@@ -16,18 +16,24 @@ const schema = z.object({
 });
 type FormData = z.infer<typeof schema>;
 
+// Demo account display — no passwords stored here; passwords never rendered in JSX.
+// The full demo panel is only shown in development builds (import.meta.env.DEV).
 const DEMO_ACCOUNTS = [
-  { email: 'alex@taskflow.io',   password: 'Admin1234!',  role: 'Admin',  desc: 'Full access — create, edit, delete' },
-  { email: 'sarah@taskflow.io',  password: 'Member1234!', role: 'Member', desc: 'Create & edit own tasks/projects' },
-  { email: 'marcus@taskflow.io', password: 'Viewer1234!', role: 'Viewer', desc: 'Read-only access' },
+  { email: 'alex@taskflow.io',   role: 'Admin',  desc: 'Full access — create, edit, delete' },
+  { email: 'sarah@taskflow.io',  role: 'Member', desc: 'Create & edit own tasks/projects' },
+  { email: 'marcus@taskflow.io', role: 'Viewer', desc: 'Read-only access' },
 ];
 
-// Local demo accounts — validated client-side when Convex is not configured
-const LOCAL_ACCOUNTS: Record<string, { id: string; name: string; email: string; colour: string; role: 'admin' | 'member' | 'viewer'; password: string }> = {
-  'alex@taskflow.io':   { id: 'user-1', name: 'Alex Morgan',     email: 'alex@taskflow.io',   colour: '#4B8CF7', role: 'admin',  password: 'Admin1234!'  },
-  'sarah@taskflow.io':  { id: 'user-2', name: 'Sarah Chen',      email: 'sarah@taskflow.io',  colour: '#8B5CF6', role: 'member', password: 'Member1234!' },
-  'marcus@taskflow.io': { id: 'user-3', name: 'Marcus Williams', email: 'marcus@taskflow.io', colour: '#10B981', role: 'viewer', password: 'Viewer1234!' },
-};
+// Local demo accounts — only defined in dev builds so credentials are tree-shaken
+// from production bundles. Convex mode always uses server-side auth regardless.
+const LOCAL_ACCOUNTS: Record<string, { id: string; name: string; email: string; colour: string; role: 'admin' | 'member' | 'viewer'; password: string }> =
+  import.meta.env.DEV
+    ? {
+        'alex@taskflow.io':   { id: 'user-1', name: 'Alex Morgan',     email: 'alex@taskflow.io',   colour: '#4B8CF7', role: 'admin',  password: import.meta.env.VITE_DEMO_ADMIN_PW   ?? 'Admin1234!'  },
+        'sarah@taskflow.io':  { id: 'user-2', name: 'Sarah Chen',      email: 'sarah@taskflow.io',  colour: '#8B5CF6', role: 'member', password: import.meta.env.VITE_DEMO_MEMBER_PW  ?? 'Member1234!' },
+        'marcus@taskflow.io': { id: 'user-3', name: 'Marcus Williams', email: 'marcus@taskflow.io', colour: '#10B981', role: 'viewer', password: import.meta.env.VITE_DEMO_VIEWER_PW  ?? 'Viewer1234!' },
+      }
+    : {};
 
 export default function LoginPage() {
   const { signIn } = useLocalConvexAuth();
@@ -81,9 +87,12 @@ export default function LoginPage() {
     }
   };
 
-  const fillDemo = (email: string, password: string) => {
+  // Looks up the password from LOCAL_ACCOUNTS (never from the display array).
+  // This function is only reachable in DEV builds where the demo panel renders.
+  const fillDemo = (email: string) => {
+    const pw = LOCAL_ACCOUNTS[email]?.password ?? '';
     setValue('email', email);
-    setValue('password', password);
+    setValue('password', pw);
     setServerError('');
   };
 
@@ -165,30 +174,30 @@ export default function LoginPage() {
           </form>
         </div>
 
-        {/* Demo accounts */}
-        <div className="mt-4 card-nebula rounded-2xl p-5">
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Demo accounts</p>
-          <div className="space-y-2">
-            {DEMO_ACCOUNTS.map(acc => (
-              <button
-                key={acc.email}
-                type="button"
-                onClick={() => fillDemo(acc.email, acc.password)}
-                className="w-full flex items-center justify-between p-3 rounded-xl bg-[#06091A] border border-[#1C3054] hover:border-[#4B8CF7]/40 hover:bg-[#0C1526] transition-all duration-200 text-left group"
-              >
-                <div>
-                  <p className="text-xs font-semibold text-slate-200 group-hover:text-blue-300 transition-colors">
-                    {acc.role} — {acc.email}
-                  </p>
-                  <p className="text-[11px] text-slate-500 mt-0.5">{acc.desc}</p>
-                </div>
-                <span className="text-[10px] text-slate-600 font-mono ml-3 flex-shrink-0">
-                  {acc.password}
-                </span>
-              </button>
-            ))}
+        {/* Demo accounts — only rendered in development builds */}
+        {import.meta.env.DEV && (
+          <div className="mt-4 card-nebula rounded-2xl p-5">
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Demo accounts</p>
+            <div className="space-y-2">
+              {DEMO_ACCOUNTS.map(acc => (
+                <button
+                  key={acc.email}
+                  type="button"
+                  onClick={() => fillDemo(acc.email)}
+                  className="w-full flex items-center justify-between p-3 rounded-xl bg-[#06091A] border border-[#1C3054] hover:border-[#4B8CF7]/40 hover:bg-[#0C1526] transition-all duration-200 text-left group"
+                >
+                  <div>
+                    <p className="text-xs font-semibold text-slate-200 group-hover:text-blue-300 transition-colors">
+                      {acc.role} — {acc.email}
+                    </p>
+                    <p className="text-[11px] text-slate-500 mt-0.5">{acc.desc}</p>
+                  </div>
+                  <span className="text-[10px] text-slate-400 ml-3 flex-shrink-0">Click to fill</span>
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

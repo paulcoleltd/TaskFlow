@@ -10,10 +10,20 @@ export default defineConfig(({ mode }) => {
     ? "script-src 'self'"
     : "script-src 'self' 'unsafe-inline'";
 
+  // connect-src: scoped tightly per environment.
+  // Production: only known Convex cloud domains + Resend API (no localhost).
+  // Development: allow localhost ports for Vite HMR, Socket.io proxy, and push API.
+  // The broad "ws:" wildcard used previously allowed WebSocket connections to ANY
+  // origin from the user's browser — an unnecessary attack surface (OWASP A05).
+  const connectSrc = isProd
+    ? "connect-src 'self' https://*.convex.cloud wss://*.convex.cloud https://api.resend.com"
+    : "connect-src 'self' ws://localhost:* wss://localhost:* http://localhost:3002 http://localhost:5174 http://localhost:5175";
+
   const securityHeaders: Record<string, string> = {
     'X-Content-Type-Options':  'nosniff',
     'X-Frame-Options':         'DENY',
-    'X-XSS-Protection':        '1; mode=block',
+    // X-XSS-Protection omitted: deprecated in all modern browsers, actively harmful
+    // in some older IE versions, and superseded by CSP (OWASP A05 / CWE-1021).
     'Referrer-Policy':         'strict-origin-when-cross-origin',
     'Permissions-Policy':      'camera=(), microphone=(), geolocation=()',
     'Content-Security-Policy': [
@@ -22,7 +32,7 @@ export default defineConfig(({ mode }) => {
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: blob:",
-      "connect-src 'self' ws: wss: http://localhost:3002",  // WS for HMR + Socket.io + push API
+      connectSrc,
       "frame-ancestors 'none'",
       "object-src 'none'",
       "base-uri 'self'",

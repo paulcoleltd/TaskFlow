@@ -5,16 +5,33 @@
  *  1. Register the service worker (if not already registered)
  *  2. Fetch the VAPID public key from the server
  *  3. Subscribe the browser via PushManager
- *  4. POST the subscription to the server keyed by userId
+ *  4. POST the subscription to the server (server derives userId from the auth token)
  *
- * Security notes (MITRE T1204 / OWASP A05):
+ * Security notes (MITRE T1557 / OWASP A01):
  * - The VAPID public key is fetched fresh each time to handle server key rotation.
  * - Subscription endpoint is always POST'd to /api/push/subscribe (same-origin proxy).
- * - userId is validated by the server before storing; the server never trusts the client claim alone.
+ * - userId is NOT sent in the request body; the server derives identity from the
+ *   Authorization header (Bearer token from authStore) to prevent subscription
+ *   hijacking by any caller who knows another user's ID.
+ * - In local dev mode (no Convex URL), the userId is still sent in the body because
+ *   there is no real auth token — acceptable for demo/dev environments only.
  */
 
-const SW_PATH      = '/sw.js';
+const SW_PATH       = '/sw.js';
 const PUSH_API_BASE = '/api/push';
+const CONVEX_MODE   = !!import.meta.env.VITE_CONVEX_URL;
+
+/** Read the current auth token from Zustand persist (avoids a circular import). */
+function getAuthToken(): string | null {
+  try {
+    const raw = localStorage.getItem('taskflow-auth');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { state?: { token?: string } };
+    return parsed?.state?.token ?? null;
+  } catch {
+    return null;
+  }
+}
 
 /** Convert a URL-safe base64 string to a Uint8Array (required by PushManager). */
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
@@ -68,11 +85,22 @@ export async function subscribeToPush(userId: string): Promise<boolean> {
       });
     }
 
-    // Send subscription to the server
+    // Send subscription to the server.
+    // In Convex mode the server derives userId from the Authorization token so we
+    // do NOT include userId in the body (prevents subscription hijacking, OWASP A01).
+    // In local dev mode there is no real token so we fall back to the userId param.
+    const token = CONVEX_MODE ? getAuthToken() : null;
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token && token !== 'local') headers['Authorization'] = `Bearer ${token}`;
+
+    const body = CONVEX_MODE
+      ? JSON.stringify({ subscription: sub.toJSON() })               // server reads userId from token
+      : JSON.stringify({ userId, subscription: sub.toJSON() });      // local dev fallback only
+
     const res = await fetch(`${PUSH_API_BASE}/subscribe`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, subscription: sub.toJSON() }),
+      headers,
+      body,
     });
 
     return res.ok;
@@ -92,10 +120,15 @@ export async function unsubscribeFromPush(userId: string): Promise<void> {
       const sub = await reg.pushManager.getSubscription();
       if (sub) await sub.unsubscribe();
     }
+    const token = CONVEX_MODE ? getAuthToken() : null;
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token && token !== 'local') headers['Authorization'] = `Bearer ${token}`;
     await fetch(`${PUSH_API_BASE}/subscribe`, {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId }),
+      headers,
+      body: CONVEX_MODE
+        ? JSON.stringify({})                    // server reads userId from token
+        : JSON.stringify({ userId }),           // local dev fallback only
     });
   } catch {
     // Best-effort cleanup — ignore errors

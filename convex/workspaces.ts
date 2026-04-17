@@ -83,6 +83,15 @@ export const setActive = mutation({
   args: { workspaceId: v.id("workspaces") },
   handler: async (ctx, { workspaceId }) => {
     const userId = await requireAuth(ctx);
+    // Verify the caller is actually a member of the workspace they are activating.
+    // Without this check any user could adopt any workspace ID (MITRE T1548 / OWASP A01).
+    const membership = await ctx.db
+      .query("memberships")
+      .withIndex("by_workspace_user", q =>
+        q.eq("workspaceId", workspaceId).eq("userId", userId as any)
+      )
+      .unique();
+    if (!membership) throw new Error("Forbidden: you are not a member of this workspace");
     await ctx.db.patch(userId as any, { activeWorkspaceId: workspaceId });
   },
 });
@@ -94,7 +103,18 @@ export const inviteMember = mutation({
     role: v.union(v.literal("admin"), v.literal("member")),
   },
   handler: async (ctx, { workspaceId, email, role }) => {
-    await requireAuth(ctx);
+    const callerId = await requireAuth(ctx);
+    // Only workspace owners/admins may invite members (MITRE T1078 / OWASP A01).
+    const callerMembership = await ctx.db
+      .query("memberships")
+      .withIndex("by_workspace_user", q =>
+        q.eq("workspaceId", workspaceId).eq("userId", callerId as any)
+      )
+      .unique();
+    if (!callerMembership || !["owner", "admin"].includes(callerMembership.role)) {
+      throw new Error("Forbidden: only workspace owners or admins can invite members");
+    }
+
     const user = await ctx.db
       .query("users")
       .withIndex("by_email", q => q.eq("email", email))
@@ -120,7 +140,21 @@ export const removeMember = mutation({
     userId: v.id("users"),
   },
   handler: async (ctx, { workspaceId, userId }) => {
-    await requireAuth(ctx);
+    const callerId = await requireAuth(ctx);
+    // Only workspace owners/admins may remove members (MITRE T1531 / OWASP A01).
+    const callerMembership = await ctx.db
+      .query("memberships")
+      .withIndex("by_workspace_user", q =>
+        q.eq("workspaceId", workspaceId).eq("userId", callerId as any)
+      )
+      .unique();
+    if (!callerMembership || !["owner", "admin"].includes(callerMembership.role)) {
+      throw new Error("Forbidden: only workspace owners or admins can remove members");
+    }
+    // Owners cannot be removed (prevents workspace lockout)
+    if (String(userId) === String(callerId)) {
+      throw new Error("You cannot remove yourself; transfer ownership first");
+    }
     const membership = await ctx.db
       .query("memberships")
       .withIndex("by_workspace_user", q =>

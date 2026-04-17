@@ -156,6 +156,7 @@ export const update = mutation({
     const userId = await requireAuth(ctx);
     const existing = await ctx.db.get(id);
     if (!existing) throw new Error("Task not found");
+    await requireProjectAccess(ctx, existing.projectId, userId);
 
     await ctx.db.patch(id, patch);
 
@@ -188,8 +189,9 @@ export const update = mutation({
         const siteUrl = process.env.SITE_URL ?? "http://localhost:5174";
         await ctx.scheduler.runAfter(0, internal.emails.sendEmail, {
           to: (assignee as any).email,
-          subject: `You've been assigned: "${existing.title}"`,
-          html: `<p>Hi ${(assignee as any).name},</p><p>You have been assigned the task <strong>${existing.title}</strong>.</p><p><a href="${siteUrl}/my-tasks">View your tasks →</a></p>`,
+          subject: `You've been assigned: "${htmlEncode(existing.title)}"`,
+          // htmlEncode prevents email body injection (CWE-80 / MITRE T1566.002)
+          html: `<p>Hi ${htmlEncode((assignee as any).name ?? "")},</p><p>You have been assigned the task <strong>${htmlEncode(existing.title)}</strong>.</p><p><a href="${siteUrl}/my-tasks">View your tasks →</a></p>`,
         });
       }
     }
@@ -212,6 +214,7 @@ export const updateStatus = mutation({
     const userId = await requireAuth(ctx);
     const existing = await ctx.db.get(id);
     if (!existing) throw new Error("Task not found");
+    await requireProjectAccess(ctx, existing.projectId, userId);
 
     await ctx.db.patch(id, { status, ...(order !== undefined ? { order } : {}) });
 
@@ -229,7 +232,10 @@ export const updateStatus = mutation({
 export const remove = mutation({
   args: { id: v.id("tasks") },
   handler: async (ctx, { id }) => {
-    await requireAuth(ctx);
+    const userId = await requireAuth(ctx);
+    const existing = await ctx.db.get(id);
+    if (!existing) throw new Error("Task not found");
+    await requireProjectAccess(ctx, existing.projectId, userId);
     // Clean up related records
     const comments = await ctx.db
       .query("comments")
@@ -259,6 +265,7 @@ export const duplicate = mutation({
     const userId = await requireAuth(ctx);
     const source = await ctx.db.get(id);
     if (!source) throw new Error("Task not found");
+    await requireProjectAccess(ctx, source.projectId, userId);
 
     const { _id, _creationTime, ...fields } = source;
     const newId = await ctx.db.insert("tasks", {
@@ -286,6 +293,34 @@ async function requireAuth(ctx: any): Promise<string> {
   const userId = await getAuthUserId(ctx);
   if (!userId) throw new Error("Not authenticated");
   return userId;
+}
+
+// ── Authorisation helpers ─────────────────────────────────────────────────────
+
+/**
+ * Throw unless userId is the project owner or an explicit project member.
+ * OWASP A01 / MITRE T1565.001 — prevents cross-user data manipulation.
+ */
+async function requireProjectAccess(ctx: any, projectId: any, userId: string): Promise<void> {
+  const project = await ctx.db.get(projectId);
+  if (!project) throw new Error("Project not found");
+  const memberIds: string[] = (project.memberIds ?? []).map(String);
+  if (String(project.ownerId) !== userId && !memberIds.includes(userId)) {
+    throw new Error("Forbidden: you are not a member of this project");
+  }
+}
+
+/**
+ * Escape HTML special characters to prevent email body injection.
+ * CWE-80 / MITRE T1566.002.
+ */
+function htmlEncode(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 // ── Internal: tasks due on a given date (for email reminders) ─────────────────
