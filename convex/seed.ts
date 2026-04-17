@@ -1,5 +1,5 @@
 import { internalMutation } from "./_generated/server";
-import { signIn } from "./auth";
+// signIn is available via @convex-dev/auth but not needed in seed mutations
 
 // Demo account credentials — mirrors the existing demo accounts in the app
 const DEMO_ACCOUNTS = [

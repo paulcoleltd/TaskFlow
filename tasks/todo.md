@@ -159,6 +159,57 @@
 - [x] `src/pages/SettingsPage.tsx` — NotificationsPanel now shows due-date alerts + push notifications rows
 - [x] TypeScript: 0 errors (client + server)
 
-### Phase 6 — Remaining
-- [ ] Multi-browser E2E tests (Playwright: two browsers, verify real-time sync)
-- [ ] Mobile App (React Native / Expo)
+---
+
+## Phase 6b — Multi-Browser E2E + Mobile App ✅
+
+- [x] `e2e/global-setup.ts` — updated to create both `auth-state.json` (admin) and `member-auth-state.json` (member Sarah) in parallel
+- [x] `e2e/09-realtime-collab.spec.ts` — 8 multi-browser Playwright tests:
+  - Admin and member both show "Live" connection status
+  - PresenceBar syncs between browsers (admin sees SC, member sees AJ)
+  - PresenceBar hides when second user disconnects
+  - Task created by admin appears in member board without refresh
+  - Task status change by admin reflects in member board
+  - Both users on same project see each other in ViewerPile
+  - ViewerPile hides when second user leaves the project
+  - Comment propagation between browsers
+- [x] `mobile/` — React Native / Expo mobile app scaffold:
+  - `App.tsx` — SafeAreaProvider + StatusBar + RootNavigator
+  - `src/constants/theme.ts` — Design tokens (matches web app exactly)
+  - `src/constants/api.ts` — Server URL config (EXPO_PUBLIC_SERVER_URL)
+  - `src/types/index.ts` — Domain types (Task, Project, User)
+  - `src/lib/socket.ts` — Socket.io singleton
+  - `src/lib/sampleData.ts` — Seed data (mirrors web app)
+  - `src/lib/utils.ts` — formatDate, getInitials, statusColor, priorityColor
+  - `src/store/authStore.ts` — Zustand + AsyncStorage auth (login via :3002)
+  - `src/store/taskStore.ts` — Zustand + AsyncStorage task CRUD + _applyRemote*
+  - `src/store/projectStore.ts` — Zustand + AsyncStorage project CRUD + _applyRemote*
+  - `src/store/collaborationStore.ts` — ephemeral presence state
+  - `src/components/StatusBadge.tsx` — colour-coded status chip
+  - `src/components/PriorityBadge.tsx` — colour-coded priority chip
+  - `src/components/ConnectionStatus.tsx` — Live / Reconnecting chip
+  - `src/components/TaskCard.tsx` — task list item with badges + due date
+  - `src/components/ProjectCard.tsx` — project card with progress bar
+  - `src/screens/LoginScreen.tsx` — email/password form + demo account shortcuts
+  - `src/screens/DashboardScreen.tsx` — stats grid + active projects + my tasks
+  - `src/screens/TasksScreen.tsx` — task list with search + status filter
+  - `src/screens/TaskDetailScreen.tsx` — status/priority change + delete
+  - `src/screens/ProjectsScreen.tsx` — project grid with status filter
+  - `src/screens/SettingsScreen.tsx` — profile + connection status + logout
+  - `src/navigation/RootNavigator.tsx` — stack + bottom tab navigator + Socket.io wiring
+  - `src/navigation/types.ts` — navigation param list types
+
+---
+
+## Phase 7 — PWA + Performance ✅
+
+- [x] `public/manifest.json` — PWA manifest: name, icons, shortcuts (My Tasks, Dashboard, Projects), display: standalone, dark theme colors
+- [x] `index.html` — PWA meta tags: manifest link, theme-color, apple-mobile-web-app-*, viewport-fit=cover
+- [x] `public/sw.js` — upgraded to full app-shell caching: cache-first for static assets, network-first for HTML, offline shell fallback, old-cache pruning on activate; push code preserved intact
+- [x] `src/main.tsx` — SW registered on startup for all users; push flow reuses existing registration
+- [x] `src/hooks/useInstallPrompt.ts` — captures `beforeinstallprompt`, persists dismiss, detects standalone mode
+- [x] `src/components/ui/InstallBanner.tsx` — dark navy install CTA banner, slides up from bottom
+- [x] `src/App.tsx` — wired install prompt + `<InstallBanner>`
+- [x] `vite.config.ts` — `manualChunks` splits 9 vendor libraries into named chunks for stable caching
+- [x] `src/lib/pushSubscription.ts` — fixed TS 5.9 `Uint8Array` type error
+- [x] Build: 0 errors, 9 vendor chunks, built in 3.93 s

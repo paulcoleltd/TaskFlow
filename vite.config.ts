@@ -31,6 +31,36 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+
+    build: {
+      rollupOptions: {
+        output: {
+          // Split large, stable vendor libraries into separate chunks.
+          // They receive a long-lived cache fingerprint and only re-download
+          // when the library version changes — not on every app deploy.
+          manualChunks(id) {
+            // Split stable vendor libraries into named chunks so they get
+            // long-lived cache fingerprints and only re-download on version bumps.
+            if (id.includes('/node_modules/recharts') || id.includes('/node_modules/d3-')) return 'vendor-recharts';
+            if (id.includes('/node_modules/framer-motion')) return 'vendor-framer';
+            if (id.includes('/node_modules/socket.io-client') || id.includes('/node_modules/engine.io-client')) return 'vendor-socketio';
+            if (id.includes('/node_modules/date-fns')) return 'vendor-datefns';
+            if (id.includes('/node_modules/react-hook-form') || id.includes('/node_modules/zod') || id.includes('/node_modules/@hookform')) return 'vendor-forms';
+            if (id.includes('/node_modules/react-router') || id.includes('/node_modules/@remix-run')) return 'vendor-router';
+            if (id.includes('/node_modules/zustand') || id.includes('/node_modules/immer')) return 'vendor-state';
+            if (id.includes('/node_modules/react-dom')) return 'vendor-react-dom';
+            if (id.includes('/node_modules/react/')) return 'vendor-react';
+          },
+        },
+      },
+      // Raise the inline-asset limit slightly — SVG icons stay inlined
+      assetsInlineLimit: 4096,
+      // Enable source maps for production debugging (stripped in prod by default)
+      sourcemap: false,
+      // Warn when a chunk exceeds 600 kB (Vite default is 500 kB)
+      chunkSizeWarningLimit: 600,
+    },
+
     server: {
       port: 5175,
       strictPort: true,

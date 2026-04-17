@@ -37,7 +37,8 @@ export default function LoginPage() {
 
   const [showPw, setShowPw] = useState(false);
   const [serverError, setServerError] = useState('');
-  const [lockedUntil, setLockedUntil] = useState(0);
+  const [_lockedUntil, setLockedUntil] = useState(0);
+  const lockedUntilRef = useRef(0);   // mirrors state — always readable in onSubmit closure
   const failCount = useRef(0);
 
   const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<FormData>({
@@ -48,8 +49,8 @@ export default function LoginPage() {
     setServerError('');
     if (!CONVEX_MODE) {
       // Rate limiting — block after 5 consecutive failures
-      if (Date.now() < lockedUntil) {
-        const secs = Math.ceil((lockedUntil - Date.now()) / 1000);
+      if (Date.now() < lockedUntilRef.current) {
+        const secs = Math.ceil((lockedUntilRef.current - Date.now()) / 1000);
         setServerError(`Too many attempts. Please wait ${secs} seconds before trying again.`);
         return;
       }
@@ -59,7 +60,9 @@ export default function LoginPage() {
         failCount.current += 1;
         if (failCount.current >= 5) {
           // Lock on the 5th failure — next attempt (6th) will be blocked at the top check
-          setLockedUntil(Date.now() + 60_000);
+          const lockTime = Date.now() + 60_000;
+          lockedUntilRef.current = lockTime;
+          setLockedUntil(lockTime);
         }
         setServerError('Invalid email or password. Please try again.');
         return;

@@ -17,12 +17,19 @@ const noop = async (_args?: any) => undefined as any;
 
 // ── Read ──────────────────────────────────────────────────────────────────────
 
-export function useConvexAttachments(taskId: string | null) {
+// Dual-mode: the LOCAL version must NEVER call useQuery (no ConvexProvider in tree)
+function _useConvexAttachmentsActive(taskId: string | null) {
   return useQuery(
     api.attachments.listByTask,
-    CONVEX_MODE && taskId ? { taskId: taskId as Id<'tasks'> } : 'skip',
+    taskId ? { taskId: taskId as Id<'tasks'> } : 'skip',
   );
 }
+function _useConvexAttachmentsLocal(_taskId: string | null) {
+  return undefined;
+}
+export const useConvexAttachments = CONVEX_MODE
+  ? _useConvexAttachmentsActive
+  : _useConvexAttachmentsLocal;
 
 // ── Write ─────────────────────────────────────────────────────────────────────
 

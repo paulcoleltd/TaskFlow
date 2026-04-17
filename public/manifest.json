@@ -1,0 +1,54 @@
+{
+  "name": "TaskFlow — Task Management",
+  "short_name": "TaskFlow",
+  "description": "Production-grade task and project management for modern teams.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0B1437",
+  "theme_color": "#3B82F6",
+  "categories": ["productivity", "business"],
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "My Tasks",
+      "short_name": "Tasks",
+      "url": "/my-tasks",
+      "description": "View and manage your tasks"
+    },
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "url": "/",
+      "description": "Task overview and statistics"
+    },
+    {
+      "name": "All Projects",
+      "short_name": "Projects",
+      "url": "/projects",
+      "description": "Browse all projects"
+    }
+  ]
+}

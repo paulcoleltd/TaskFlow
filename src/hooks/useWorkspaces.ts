@@ -11,20 +11,30 @@ import type { Id } from '../../convex/_generated/dataModel';
 const CONVEX_MODE = !!import.meta.env.VITE_CONVEX_URL;
 const noop = async (_args?: any) => undefined as any;
 
-export function useWorkspaces() {
-  return useQuery(api.workspaces.list, CONVEX_MODE ? {} : 'skip') ?? [];
-}
+// Dual-mode: LOCAL versions must NEVER call useQuery (no ConvexProvider in tree)
 
-export function useWorkspace(id: Id<'workspaces'> | null) {
-  return useQuery(api.workspaces.get, CONVEX_MODE && id ? { id } : 'skip');
+function _useWorkspacesActive() {
+  return useQuery(api.workspaces.list, {}) ?? [];
 }
+function _useWorkspacesLocal() { return []; }
+export const useWorkspaces = CONVEX_MODE ? _useWorkspacesActive : _useWorkspacesLocal;
 
-export function useWorkspaceMembers(workspaceId: Id<'workspaces'> | null) {
+function _useWorkspaceActive(id: Id<'workspaces'> | null) {
+  return useQuery(api.workspaces.get, id ? { id } : 'skip');
+}
+function _useWorkspaceLocal(_id: Id<'workspaces'> | null) { return undefined; }
+export const useWorkspace = CONVEX_MODE ? _useWorkspaceActive : _useWorkspaceLocal;
+
+function _useWorkspaceMembersActive(workspaceId: Id<'workspaces'> | null) {
   return useQuery(
     api.workspaces.listMembers,
-    CONVEX_MODE && workspaceId ? { workspaceId } : 'skip'
+    workspaceId ? { workspaceId } : 'skip',
   ) ?? [];
 }
+function _useWorkspaceMembersLocal(_workspaceId: Id<'workspaces'> | null) { return []; }
+export const useWorkspaceMembers = CONVEX_MODE
+  ? _useWorkspaceMembersActive
+  : _useWorkspaceMembersLocal;
 
 function _useCreateWorkspaceConvex()  { return useMutation(api.workspaces.create); }
 function _useSetActiveConvex()        { return useMutation(api.workspaces.setActive); }

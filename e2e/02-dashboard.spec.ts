@@ -60,8 +60,10 @@ test.describe('Dashboard Page', () => {
   });
 
   test('clicking a task in My Active Tasks opens TaskDetail panel', async ({ page }) => {
-    const taskRow = page.locator('main div[class*="cursor-pointer"]').first();
+    // Click a known seeded task title — more reliable than CSS class matching.
+    const taskRow = page.getByText('Design new onboarding flow').first();
+    await expect(taskRow).toBeVisible({ timeout: 8000 });
     await taskRow.click();
-    await expect(page.locator('div[class*="fixed right-0"]')).toBeVisible();
+    await expect(page.locator('[data-panel="task-detail"]')).toBeVisible();
   });
 });

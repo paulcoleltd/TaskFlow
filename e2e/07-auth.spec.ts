@@ -72,17 +72,18 @@ test.describe('Authentication', () => {
     await page.goto('/login');
     // Trigger 5 consecutive failures against the same email
     for (let i = 0; i < 5; i++) {
-      await page.fill('input[type="email"]', 'alex@taskflow.io');
-      await page.fill('input[type="password"]', 'WrongPass!');
-      await page.click('button[type="submit"]');
-      // Wait for each error before the next attempt
-      await page.waitForSelector('text=Invalid email or password.', { state: 'visible' });
+      await page.locator('input[type="email"]').fill('alex@taskflow.io');
+      await page.locator('input[type="password"]').fill('WrongPass!');
+      await page.locator('button[type="submit"]').click();
+      // Wait for error and ensure submit button is re-enabled before next iteration
+      await expect(page.getByText('Invalid email or password.')).toBeVisible({ timeout: 10000 });
+      await expect(page.locator('button[type="submit"]')).toBeEnabled({ timeout: 5000 });
     }
-    // 6th attempt should hit the rate limit
-    await page.fill('input[type="email"]', 'alex@taskflow.io');
-    await page.fill('input[type="password"]', 'Admin1234!');
-    await page.click('button[type="submit"]');
-    await expect(page.getByText(/Too many attempts/i)).toBeVisible();
+    // 6th attempt should be blocked by client-side rate limiter before the request fires
+    await page.locator('input[type="email"]').fill('alex@taskflow.io');
+    await page.locator('input[type="password"]').fill('Admin1234!');
+    await page.locator('button[type="submit"]').click();
+    await expect(page.getByText(/Too many attempts/i)).toBeVisible({ timeout: 5000 });
     await expect(page).toHaveURL('/login');
   });
 

@@ -6,7 +6,7 @@
       "localStorage": [
         {
           "name": "taskflow-auth",
-          "value": "{\"state\":{\"currentUser\":{\"id\":\"user-1\",\"name\":\"Alex Johnson\",\"email\":\"alex@taskflow.io\",\"colour\":\"#3B82F6\",\"role\":\"admin\"},\"token\":\"eyJ1c2VySWQiOiJ1c2VyLTEiLCJyb2xlIjoiYWRtaW4iLCJuYW1lIjoiQWxleCBKb2huc29uIiwiY29sb3VyIjoiIzNCODJGNiIsImV4cCI6MTc3NjQ3Mzc3NDAwN30.5uGLKqRynUtvuv4Q8PLa2N-oTdOXU8b3Fk7gEj44-ho\",\"isAuthenticated\":true},\"version\":0}"
+          "value": "{\"state\":{\"currentUser\":{\"id\":\"user-2\",\"name\":\"Sarah Chen\",\"email\":\"sarah@taskflow.io\",\"colour\":\"#8B5CF6\",\"role\":\"member\"},\"token\":\"eyJ1c2VySWQiOiJ1c2VyLTIiLCJyb2xlIjoibWVtYmVyIiwibmFtZSI6IlNhcmFoIENoZW4iLCJjb2xvdXIiOiIjOEI1Q0Y2IiwiZXhwIjoxNzc2NDczNzc0MDAyfQ.2N1vvjrf3HZdbmCOsZH0TlhaaU5Jf6zf9biOw2X64gM\",\"isAuthenticated\":true},\"version\":0}"
         },
         {
           "name": "taskflow-projects",

@@ -15,11 +15,12 @@
 | 2 | Real-Time Collaboration (Socket.io) | ✅ Complete |
 | 3 | Auth + Feature Expansion | ✅ Complete |
 | 4 | Test Coverage (125/125 E2E) | ✅ Complete |
-| 5 | Convex Backend Migration | 🔄 ~90% done |
+| 5 | Convex Backend Migration | ✅ Complete |
 | 6 | Push Notifications (Web Push API) | ✅ Complete |
-| 6b | Multi-browser E2E + Mobile App | 📋 Planned |
+| 6b | Multi-browser E2E + Mobile App | ✅ Complete |
+| 7 | PWA + Performance (manifest, caching, install prompt, vendor chunks) | ✅ Complete |
 
-**5 phases fully complete. 1 in progress (Phase 5 blocked on `npx convex dev`). Phase 6b planned.**
+**All 7 phases fully complete. Convex cloud is live on deployment `agreeable-alpaca-308`.**
 
 ---
 
@@ -185,6 +186,15 @@ useIsAuthenticated()   // → useConvexAuth().isAuthenticated OR authStore.isAut
 | File attachments | Migrate from base64/localStorage → Convex file storage (`convex/attachments.ts` is ready) |
 
 **To activate Convex:** Open a terminal, run `npx convex dev` — it opens a browser login. After login it auto-generates `convex/_generated/` and creates `.env.local` with `VITE_CONVEX_URL`. The real generated files replace the stubs automatically.
+
+---
+
+## Phase 6b — Multi-Browser E2E + Mobile App ✅ (Complete)
+
+**Built 2026-04-05:**
+- `e2e/global-setup.ts` — now saves both `auth-state.json` (admin) and `member-auth-state.json` (member) in parallel
+- `e2e/09-realtime-collab.spec.ts` — 8 multi-browser Playwright tests; two simultaneous browser contexts; tests presence sync, task propagation, ViewerPile sync, comment propagation
+- `mobile/` — full React Native / Expo scaffold with Login, Dashboard, Tasks, TaskDetail, Projects, Settings screens; Zustand + AsyncStorage stores; Socket.io wired for real-time sync; dark navy design tokens matched to web app
 
 ---
 
@@ -424,4 +434,4 @@ When resuming a session, do this in order:
 
 ---
 
-*Last updated: 2026-04-05 — Phase 6 (Web Push Notifications) complete. Phase 5 still awaits `npx convex dev`.*
+*Last updated: 2026-04-05 — All phases complete. Convex cloud live: deployment agreeable-alpaca-308. Auth accounts seeded via convex/seedAuth.ts + convex/seedAuthMutation.ts.*

@@ -48,7 +48,7 @@ export default defineConfig({
       command: 'npm run dev -- --port 5175',
       port: 5175,
       env: { VITE_CONVEX_URL: '' },
-      reuseExistingServer: false,
+      reuseExistingServer: true,
       timeout: 30000,
     },
     {

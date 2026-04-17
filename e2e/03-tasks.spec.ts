@@ -73,23 +73,46 @@ test.describe('Task CRUD Operations', () => {
   });
 
   test('click task card opens detail panel', async ({ page }) => {
-    const card = page.locator('main div[draggable="true"]').first().locator('> div');
+    // Previous tests in the same context may have switched to list view — reset to board.
+    const switcher = page.locator('div[class*="bg-\\[\\#0C1526\\]"][class*="rounded-xl"][class*="p-1"]');
+    if (await switcher.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await switcher.locator('button').nth(0).click();
+      await page.waitForTimeout(300);
+    }
+    const card = page.locator('main div[draggable="true"]').first();
+    await expect(card).toBeVisible({ timeout: 8000 });
     await card.click();
-    const panel = page.locator('div[class*="fixed right-0"]');
-    await expect(panel).toBeVisible();
+    await expect(page.locator('[data-panel="task-detail"]')).toBeVisible();
   });
 
   test('task detail panel close button works', async ({ page }) => {
-    await page.locator('main div[draggable="true"]').first().locator('> div').click();
-    const panel = page.locator('div[class*="fixed right-0"]');
+    // Reset to board view in case a prior test switched to list.
+    const switcher = page.locator('div[class*="bg-\\[\\#0C1526\\]"][class*="rounded-xl"][class*="p-1"]');
+    if (await switcher.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await switcher.locator('button').nth(0).click();
+      await page.waitForTimeout(300);
+    }
+    const card = page.locator('main div[draggable="true"]').first();
+    await expect(card).toBeVisible({ timeout: 8000 });
+    await card.click();
+    const panel = page.locator('[data-panel="task-detail"]');
     await expect(panel).toBeVisible();
     await panel.getByRole('button', { name: 'Close' }).click();
     await expect(panel).not.toBeVisible();
   });
 
   test('edit task opens pre-filled modal', async ({ page }) => {
-    await page.locator('main div[draggable="true"]').first().locator('> div').click();
-    const panel = page.locator('div[class*="fixed right-0"]');
+    // Reset to board view in case a prior test switched to list.
+    const switcher = page.locator('div[class*="bg-\\[\\#0C1526\\]"][class*="rounded-xl"][class*="p-1"]');
+    if (await switcher.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await switcher.locator('button').nth(0).click();
+      await page.waitForTimeout(300);
+    }
+    const card = page.locator('main div[draggable="true"]').first();
+    await expect(card).toBeVisible({ timeout: 8000 });
+    await card.click();
+    const panel = page.locator('[data-panel="task-detail"]');
+    await expect(panel).toBeVisible();
     await panel.getByTitle('Edit task').click();
     await expect(page.getByText('Edit Task')).toBeVisible();
   });

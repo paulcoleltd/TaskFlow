@@ -29,3 +29,17 @@ async function mount() {
 }
 
 mount();
+
+// ── Service Worker registration ───────────────────────────────────────────────
+// Register on startup for ALL users so the app-shell cache is always active.
+// The push-subscription flow (pushSubscription.ts) reuses this registration via
+// navigator.serviceWorker.getRegistration() — no double registration occurs.
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('/sw.js', { scope: '/' })
+      .catch(() => {
+        // SW registration failure is non-fatal — app works without it
+      });
+  });
+}
