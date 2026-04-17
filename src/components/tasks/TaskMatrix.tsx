@@ -4,7 +4,7 @@ import type { Task } from '../../types';
 import { useUIStore } from '../../store/uiStore';
 import { useProjectStore } from '../../store/projectStore';
 import { useTagStore } from '../../store/tagStore';
-import { SEED_USERS } from '../../lib/sampleData';
+import { useUserStore } from '../../store/userStore';
 import { PRIORITY_OPTIONS } from '../../lib/constants';
 import { formatRelativeDate, isOverdue, cn } from '../../lib/utils';
 import { Calendar, AlertTriangle } from 'lucide-react';
@@ -91,8 +91,9 @@ function MatrixCard({ task }: { task: Task }) {
   const { setSelectedTask } = useUIStore();
   const { getProjectById } = useProjectStore();
   const tags = useTagStore(s => s.tags);
+  const allUsers = useUserStore(s => s.users);
   const project = getProjectById(task.projectId);
-  const assignee = SEED_USERS.find(u => u.id === task.assigneeId);
+  const assignee = allUsers.find(u => u.id === task.assigneeId);
   const priorityMeta = PRIORITY_OPTIONS.find(p => p.value === task.priority);
   const overdue = isOverdue(task.dueDate) && task.status !== 'done';
 

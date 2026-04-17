@@ -60,6 +60,9 @@ export const canManageTags = (role: Role): boolean => role === 'admin';
 export const canExportData = (role: Role): boolean =>
   role === 'admin' || role === 'member';
 
+/** Can the user add or remove team members? (admin-only) */
+export const canManageUsers = (role: Role): boolean => role === 'admin';
+
 // ── Helper ───────────────────────────────────────────────────────────────────
 
 /** Human-readable role label with colour. */

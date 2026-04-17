@@ -9,7 +9,7 @@ import { StatusBadge } from '../ui/StatusBadge';
 import { PriorityBadge } from '../ui/PriorityBadge';
 import { STATUS_OPTIONS, PRIORITY_OPTIONS } from '../../lib/constants';
 import { useTagStore } from '../../store/tagStore';
-import { SEED_USERS } from '../../lib/sampleData';
+import { useUserStore } from '../../store/userStore';
 import { formatDate, isOverdue, cn } from '../../lib/utils';
 import { Calendar, Trash2, Edit2, CheckSquare2, Square, Minus, Pin } from 'lucide-react';
 import { RoleGuard } from '../auth/RoleGuard';
@@ -21,6 +21,7 @@ interface TaskTableProps {
 }
 
 export function TaskTable({ tasks }: TaskTableProps) {
+  const allUsers = useUserStore(s => s.users);
   const { setSelectedTask, openTaskModal } = useUIStore();
   const { getProjectById } = useProjectStore();
   const { deleteTask, updateTask, togglePin } = useTaskStore();
@@ -150,7 +151,7 @@ export function TaskTable({ tasks }: TaskTableProps) {
               className="bg-[#0C1526] border border-[#1C3054] rounded-lg px-2 py-1 text-xs text-slate-300 outline-none"
             >
               <option value="">Assign to…</option>
-              {SEED_USERS.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+              {allUsers.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
             </select>
             <button
               onClick={handleBulkAssignee}
@@ -214,7 +215,7 @@ export function TaskTable({ tasks }: TaskTableProps) {
           <tbody>
             {tasks.map((task, i) => {
               const project = getProjectById(task.projectId);
-              const assignee = SEED_USERS.find(u => u.id === task.assigneeId);
+              const assignee = allUsers.find(u => u.id === task.assigneeId);
               const overdue = isOverdue(task.dueDate) && task.status !== 'done';
               const taskTags = task.tags.map(id => allTags.find(t => t.id === id)).filter(Boolean);
               const canEdit = canEditTask(role, task.assigneeId, userId);

@@ -9,7 +9,7 @@ import { useCurrentUser } from '../../hooks/useConvexUser';
 import { useProjectStore } from '../../store/projectStore';
 import { canEditTask, canCreateTask, canDeleteTask, canMoveTask } from '../../lib/permissions';
 import { formatDate, isOverdue, cn } from '../../lib/utils';
-import { SEED_USERS } from '../../lib/sampleData';
+import { useUserStore } from '../../store/userStore';
 import { STATUS_OPTIONS, PRIORITY_OPTIONS } from '../../lib/constants';
 import { ContextMenu } from '../ui/ContextMenu';
 import type { ContextMenuItem } from '../ui/ContextMenu';
@@ -50,6 +50,7 @@ function buildGroups(tasks: Task[], groupBy: GroupBy, projectName: (id: string) 
 }
 
 export function TaskList({ tasks, groupBy = 'status', projectId }: TaskListProps) {
+  const allUsers = useUserStore(s => s.users);
   const { updateTask, deleteTask, togglePin, addTask, moveTask, duplicateTask, reorderTask } = useTaskStore();
   const { setSelectedTask, openTaskModal } = useUIStore();
   const currentUser = useCurrentUser();
@@ -151,7 +152,7 @@ export function TaskList({ tasks, groupBy = 'status', projectId }: TaskListProps
     selectedTasks.forEach(t => {
       if (canEditTask(role, t.assigneeId, userId)) updateTask(t.id, { assigneeId });
     });
-    const name = assigneeId ? (SEED_USERS.find(u => u.id === assigneeId)?.name ?? 'someone') : 'unassigned';
+    const name = assigneeId ? (allUsers.find(u => u.id === assigneeId)?.name ?? 'someone') : 'unassigned';
     toast.success(`${selectedTasks.length} task${selectedTasks.length !== 1 ? 's' : ''} assigned to ${name}`);
     clearSelection();
   };
@@ -246,7 +247,7 @@ export function TaskList({ tasks, groupBy = 'status', projectId }: TaskListProps
             {!isCollapsed && (
               <div className="space-y-1.5">
                 {group.tasks.map(task => {
-                  const assignee = SEED_USERS.find(u => u.id === task.assigneeId);
+                  const assignee = allUsers.find(u => u.id === task.assigneeId);
                   const overdue = isOverdue(task.dueDate) && task.status !== 'done';
                   const canEdit = canEditTask(role, task.assigneeId, userId);
                   const canMove = canMoveTask(role, task.assigneeId, userId);
@@ -461,7 +462,7 @@ export function TaskList({ tasks, groupBy = 'status', projectId }: TaskListProps
             {showCompleted && (
               <div className="space-y-1.5 opacity-60">
                 {doneTasks.map(task => {
-                  const assignee = SEED_USERS.find(u => u.id === task.assigneeId);
+                  const assignee = allUsers.find(u => u.id === task.assigneeId);
                   const canEdit = canEditTask(role, task.assigneeId, userId);
                   return (
                     <div
@@ -595,7 +596,7 @@ export function TaskList({ tasks, groupBy = 'status', projectId }: TaskListProps
               >
                 Unassign
               </button>
-              {SEED_USERS.map(u => (
+              {allUsers.map(u => (
                 <button
                   key={u.id}
                   onClick={() => bulkAssign(u.id)}

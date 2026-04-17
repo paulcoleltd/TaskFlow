@@ -3,7 +3,7 @@ import { Search, X, ArrowUpDown, ArrowUp, ArrowDown, Bookmark, BookmarkPlus, Tra
 import type { Status, Priority, ViewMode } from '../../types';
 import { STATUS_OPTIONS, PRIORITY_OPTIONS } from '../../lib/constants';
 import { useTagStore } from '../../store/tagStore';
-import { SEED_USERS } from '../../lib/sampleData';
+import { useUserStore } from '../../store/userStore';
 import { cn, getInitials } from '../../lib/utils';
 import { useUIStore } from '../../store/uiStore';
 import { LayoutGrid, List, Table2, GanttChartSquare, LayoutTemplate } from 'lucide-react';
@@ -71,6 +71,7 @@ const BASE_VIEWS: { value: ViewMode; icon: typeof LayoutGrid; title: string }[] 
 ];
 
 export function TaskFilters({ filters, onChange, view, onViewChange, showTimeline = false }: TaskFiltersProps) {
+  const allUsers = useUserStore(s => s.users);
   const VIEWS = showTimeline ? BASE_VIEWS : BASE_VIEWS.filter(v => v.value !== 'timeline');
   const toggle = <T extends string>(arr: T[], val: T): T[] =>
     arr.includes(val) ? arr.filter(v => v !== val) : [...arr, val];
@@ -165,7 +166,7 @@ export function TaskFilters({ filters, onChange, view, onViewChange, showTimelin
 
       {/* Assignee filter — avatar toggles */}
       <div className="flex items-center gap-1.5">
-        {SEED_USERS.map(user => {
+        {allUsers.map(user => {
           const active = filters.assignees.includes(user.id);
           return (
             <button

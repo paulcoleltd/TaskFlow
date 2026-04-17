@@ -8,14 +8,14 @@ import { useCurrentUser } from '../../hooks/useConvexUser';
 import { canCreateTask } from '../../lib/permissions';
 import { cn } from '../../lib/utils';
 import { STATUS_OPTIONS, PRIORITY_OPTIONS } from '../../lib/constants';
-import { SEED_USERS } from '../../lib/sampleData';
+import { useUserStore } from '../../store/userStore';
 import { format, addDays } from 'date-fns';
 import type { Priority } from '../../types';
 
 // ── Inline task syntax parser ──────────────────────────────────────────────
 // Parses: "Fix login bug !high @sarah tomorrow"
 // Tokens: !priority · @name · today · tomorrow · next week
-function parseInlineTask(raw: string): {
+function parseInlineTask(raw: string, users: { id: string; name: string }[]): {
   title: string;
   priority: Priority;
   assigneeId?: string;
@@ -32,9 +32,9 @@ function parseInlineTask(raw: string): {
     return '';
   });
 
-  // @name → match to SEED_USERS by first name
+  // @name → match to users by first name
   text = text.replace(/\s?@(\w+)\b/g, (_, name) => {
-    const match = SEED_USERS.find(u => u.name.split(' ')[0].toLowerCase() === name.toLowerCase());
+    const match = users.find(u => u.name.split(' ')[0].toLowerCase() === name.toLowerCase());
     if (match) assigneeId = match.id;
     return '';
   });
@@ -118,6 +118,7 @@ export function CommandPalette() {
   const { tasks } = useTaskStore();
   const { projects } = useProjectStore();
   const currentUser = useCurrentUser();
+  const allUsers = useUserStore(s => s.users);
   const [query, setQuery] = useState('');
   const [activeIdx, setActiveIdx] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -217,10 +218,10 @@ export function CommandPalette() {
     // Quick-create item — shown when user is typing and can create tasks
     const createItems: PaletteItem[] = [];
     if (canCreate) {
-      const parsed = parseInlineTask(q);
+      const parsed = parseInlineTask(q, allUsers);
       if (parsed.title) {
         const priOpt = PRIORITY_OPTIONS.find(p => p.value === parsed.priority);
-        const assignee = parsed.assigneeId ? SEED_USERS.find(u => u.id === parsed.assigneeId) : null;
+        const assignee = parsed.assigneeId ? allUsers.find(u => u.id === parsed.assigneeId) : null;
         const chips: string[] = [];
         if (parsed.priority !== 'medium') chips.push(priOpt?.label ?? parsed.priority);
         if (assignee) chips.push(`@${assignee.name.split(' ')[0]}`);

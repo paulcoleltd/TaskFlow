@@ -16,11 +16,12 @@ import { useAuthStore } from './store/authStore';
 import { useCurrentUser } from './hooks/useConvexUser';
 import { useTaskStore } from './store/taskStore';
 import { useProjectStore } from './store/projectStore';
+import { useUserStore } from './store/userStore';
 import { useConvexSync } from './hooks/useConvexSync';
 import { usePresenceHeartbeat } from './hooks/usePresenceHeartbeat';
 import { useCollaboration } from './hooks/useCollaboration';
 import { useInstallPrompt } from './hooks/useInstallPrompt';
-import { SEED_TASKS, SEED_PROJECTS } from './lib/sampleData';
+import { SEED_TASKS, SEED_PROJECTS, SEED_USERS } from './lib/sampleData';
 
 const CONVEX_MODE = !!import.meta.env.VITE_CONVEX_URL;
 
@@ -63,6 +64,7 @@ function App() {
   // Local mode — seed sample data on first launch
   const { tasks, seedTasks } = useTaskStore();
   const { projects, seedProjects } = useProjectStore();
+  const { seedUsers } = useUserStore();
   useEffect(() => {
     if (!CONVEX_MODE) {
       // Restore session from localStorage (legacy fallback — Zustand persist handles the primary key)
@@ -76,6 +78,7 @@ function App() {
       // Seed data
       if (tasks.length === 0) seedTasks(SEED_TASKS);
       if (projects.length === 0) seedProjects(SEED_PROJECTS);
+      seedUsers(SEED_USERS);   // idempotent — only seeds if store is empty
     }
   }, []);
 

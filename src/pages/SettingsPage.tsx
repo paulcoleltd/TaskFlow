@@ -7,17 +7,18 @@ import { useTagStore } from '../store/tagStore';
 import { useUIStore } from '../store/uiStore';
 import { useTemplateStore } from '../store/templateStore';
 import { RoleGuard } from '../components/auth/RoleGuard';
-import { canClearData, canExportData, canManageTags, ROLE_META } from '../lib/permissions';
+import { canClearData, canExportData, canManageTags, canManageUsers, ROLE_META } from '../lib/permissions';
+import { InviteUserModal } from '../components/users/InviteUserModal';
 import { sanitiseTasks, sanitiseProjects } from '../lib/storageValidation';
 import { requestNotificationPermission, getNotificationPermission, usePushNotifications } from '../hooks/useNotifications';
 import { Button } from '../components/ui/Button';
 import { Avatar } from '../components/ui/Avatar';
-import { SEED_USERS } from '../lib/sampleData';
+import { useUserStore } from '../store/userStore';
 import { PROJECT_COLOURS, STATUS_OPTIONS, PRIORITY_OPTIONS } from '../lib/constants';
 import type { Task } from '../types';
 import toast from 'react-hot-toast';
 import { emitTaskCreate } from '../lib/collabEmit';
-import { LogOut, Upload, Plus, Pencil, Trash2, Check, X, Bell, BellOff, FileSpreadsheet, AlertCircle, Sun, Moon } from 'lucide-react';
+import { LogOut, Upload, Plus, Pencil, Trash2, Check, X, Bell, BellOff, FileSpreadsheet, AlertCircle, Sun, Moon, UserPlus, UserMinus } from 'lucide-react';
 
 // ── Robust CSV parser (handles quoted fields with commas) ─────────────────────
 function parseCsvLine(line: string): string[] {
@@ -71,7 +72,7 @@ function exportCSV() {
   const { tasks } = useTaskStore.getState();
   const { projects } = useProjectStore.getState();
   const projectMap = new Map(projects.map(p => [p.id, p.name]));
-  const userMap = new Map(SEED_USERS.map(u => [u.id, u.name]));
+  const userMap = new Map(useUserStore.getState().users.map(u => [u.id, u.name]));
 
   const headers = ['ID', 'Title', 'Description', 'Status', 'Priority', 'Project', 'Assignee', 'Due Date', 'Tags', 'Estimated Hours', 'Logged Hours', 'Created At'];
   const escape = (v: string) => `"${v.replace(/"/g, '""')}"`;
@@ -284,7 +285,9 @@ function NotificationsPanel({
 }
 
 export default function SettingsPage() {
+  const { users: allUsers, removeUser } = useUserStore();
   const currentUser = useCurrentUser();
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const { signOut } = useConvexAuth();
   const navigate = useNavigate();
   const importRef = useRef<HTMLInputElement>(null);
@@ -415,7 +418,7 @@ export default function SettingsPage() {
 
     // Build lookup maps
     const projectMap = new Map(projects.map(p => [p.name.toLowerCase(), p.id]));
-    const userMap    = new Map(SEED_USERS.map(u => [u.name.toLowerCase(), u.id]));
+    const userMap    = new Map(allUsers.map(u => [u.name.toLowerCase(), u.id]));
     const fallbackProject = projects[0];
 
     let imported = 0;
@@ -846,40 +849,78 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* Team */}
+      {/* Team Members */}
       <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-6">
-        <h3 className="text-sm font-semibold text-white mb-4">Team Members</h3>
-        <div className="space-y-3">
-          {SEED_USERS.map(u => {
-            const uRole = u.id === 'user-1' ? 'admin' : u.id === 'user-2' ? 'member' : 'viewer';
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-sm font-semibold text-white">Team Members</h3>
+            <p className="text-xs text-slate-500 mt-0.5">{allUsers.length} member{allUsers.length !== 1 ? 's' : ''}</p>
+          </div>
+          {canManageUsers(role) && (
+            <Button
+              size="sm"
+              icon={<UserPlus className="w-3.5 h-3.5" />}
+              onClick={() => setInviteModalOpen(true)}
+            >
+              Add Member
+            </Button>
+          )}
+        </div>
+        <div className="space-y-2">
+          {allUsers.map(u => {
+            // Derive role: seed users have fixed roles; new users default to member
+            const uRole: import('../store/authStore').Role =
+              u.id === 'user-1' ? 'admin' :
+              u.id === 'user-2' ? 'member' :
+              u.id === 'user-3' ? 'viewer' : 'member';
             const uMeta = ROLE_META[uRole];
             const { tasks: allTasks } = useTaskStore.getState();
             const assigned = allTasks.filter(t => t.assigneeId === u.id).length;
-            const done = allTasks.filter(t => t.assigneeId === u.id && t.status === 'done').length;
+            const done     = allTasks.filter(t => t.assigneeId === u.id && t.status === 'done').length;
+            const isSelf   = u.id === (currentUser as any)?._id || u.id === (currentUser as any)?.id;
             return (
-              <div key={u.id} className="flex items-center gap-3">
+              <div
+                key={u.id}
+                className="flex items-center gap-3 p-3 rounded-xl bg-[#06091A] border border-[#1C3054] hover:border-[#2a4070] transition-colors"
+              >
                 <Avatar name={u.name} colour={u.colour} />
-                <div className="flex-1">
-                  <p className="text-sm text-slate-200">{u.name}</p>
-                  <p className="text-xs text-slate-400">{u.email}</p>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-slate-200 truncate">{u.name}</p>
+                  <p className="text-xs text-slate-500 truncate">{u.email}</p>
                 </div>
                 {assigned > 0 && (
-                  <div className="text-xs text-slate-500 text-right">
+                  <div className="text-xs text-slate-500 text-right flex-shrink-0">
                     <span className="text-white font-medium">{done}</span>/{assigned}
                     <span className="text-slate-600 ml-1">done</span>
                   </div>
                 )}
-                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${uMeta.colour} ${uMeta.bg}`}>
+                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border flex-shrink-0 ${uMeta.colour} ${uMeta.bg}`}>
                   {uMeta.label}
                 </span>
-                {u.id === currentUser?._id && (
-                  <span className="text-xs text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded-full border border-blue-400/20">You</span>
+                {isSelf ? (
+                  <span className="text-xs text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded-full border border-blue-400/20 flex-shrink-0">You</span>
+                ) : canManageUsers(role) && (
+                  <button
+                    onClick={() => {
+                      if (window.confirm(`Remove ${u.name} from the team?`)) {
+                        removeUser(u.id);
+                        toast.success(`${u.name} removed.`);
+                      }
+                    }}
+                    className="p-1.5 text-slate-600 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all flex-shrink-0"
+                    title={`Remove ${u.name}`}
+                  >
+                    <UserMinus className="w-3.5 h-3.5" />
+                  </button>
                 )}
               </div>
             );
           })}
         </div>
       </div>
+
+      {/* Invite User Modal (admin-only) */}
+      <InviteUserModal open={inviteModalOpen} onClose={() => setInviteModalOpen(false)} />
 
       {/* Sign out */}
       <div className="bg-[#0C1526] border border-[#1C3054] rounded-xl p-6">

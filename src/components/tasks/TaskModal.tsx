@@ -15,7 +15,7 @@ import { useUIStore } from '../../store/uiStore';
 import { useCurrentUser } from '../../hooks/useConvexUser';
 import { useCreateTask, useUpdateTask } from '../../hooks/useConvexTasks';
 import { useImproveDescription } from '../../hooks/useConvexAI';
-import { SEED_USERS } from '../../lib/sampleData';
+import { useUserStore } from '../../store/userStore';
 import { STATUS_OPTIONS, PRIORITY_OPTIONS, RECURRENCE_OPTIONS, TASK_TEMPLATES } from '../../lib/constants';
 import { useTemplateStore } from '../../store/templateStore';
 import { useTagStore } from '../../store/tagStore';
@@ -48,6 +48,7 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export function TaskModal() {
+  const allUsers = useUserStore(s => s.users);
   const { isTaskModalOpen, editingTaskId, prefillDueDate, prefillProjectId, prefillTitle, prefillPriority, prefillAssigneeId, closeTaskModal } = useUIStore();
   const { tasks, addTask, updateTask, logActivity } = useTaskStore();
   const { projects } = useProjectStore();
@@ -276,7 +277,7 @@ export function TaskModal() {
           <Select label="Project *" options={projects.map(p => ({ value: p.id, label: p.name }))} error={errors.projectId?.message} {...register('projectId')} />
           <Select
             label="Assignee"
-            options={[{ value: '', label: 'Unassigned' }, ...SEED_USERS.map(u => ({ value: u.id, label: u.name }))]}
+            options={[{ value: '', label: 'Unassigned' }, ...allUsers.map(u => ({ value: u.id, label: u.name }))]}
             {...register('assigneeId')}
           />
           <Input label="Due Date" type="date" {...register('dueDate')} />

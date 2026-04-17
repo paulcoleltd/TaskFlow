@@ -11,7 +11,7 @@ import { useQuery, useMutation, useConvexAuth as _useConvexAuthHook } from 'conv
 import { useAuthActions } from '@convex-dev/auth/react';
 import { api } from '../../convex/_generated/api';
 import { useAuthStore } from '../store/authStore';
-import { SEED_USERS } from '../lib/sampleData';
+import { useUserStore } from '../store/userStore';
 
 const CONVEX_MODE = !!import.meta.env.VITE_CONVEX_URL;
 
@@ -28,7 +28,7 @@ function _useCurrentUserLocal() {
   if (!user) return undefined;
   return { ...user, _id: user.id };  // expose _id alias so components work in both modes
 }
-function _useAllUsersLocal()      { return SEED_USERS; }
+function _useAllUsersLocal()      { return useUserStore(s => s.users); }
 function _useUpdateProfileLocal() { return async (_args: any) => {}; }
 
 // ── Exported hooks — function reference is fixed at module load ───────────────

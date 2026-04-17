@@ -20,7 +20,7 @@ import { StatusBadge } from '../ui/StatusBadge';
 import { PriorityBadge } from '../ui/PriorityBadge';
 import { ProgressBar } from '../ui/ProgressBar';
 import { formatDate, cn, generateId, now } from '../../lib/utils';
-import { SEED_USERS } from '../../lib/sampleData';
+import { useUserStore } from '../../store/userStore';
 import { STATUS_OPTIONS, PRIORITY_OPTIONS, RECURRENCE_OPTIONS } from '../../lib/constants';
 import { useTagStore } from '../../store/tagStore';
 import { useTemplateStore } from '../../store/templateStore';
@@ -47,6 +47,7 @@ export function TaskDetail() {
   usePresenceHeartbeat(selectedTaskId ? `task:${selectedTaskId}` : '');
   const tags = useTagStore(s => s.tags);
   const addTemplate = useTemplateStore(s => s.addTemplate);
+  const allUsers = useUserStore(s => s.users);
   const [commentText, setCommentText] = useState('');
   const [mentionState, setMentionState] = useState<{ query: string; atIndex: number } | null>(null);
   const [newSubtask, setNewSubtask] = useState('');
@@ -92,7 +93,7 @@ export function TaskDetail() {
   };
 
   const project = getProjectById(task.projectId);
-  const assignee = SEED_USERS.find(u => u.id === task.assigneeId);
+  const assignee = allUsers.find(u => u.id === task.assigneeId);
   const completedSubs = task.subtasks.filter(s => s.completed).length;
   const subProgress = task.subtasks.length ? (completedSubs / task.subtasks.length) * 100 : 0;
 
@@ -304,7 +305,6 @@ export function TaskDetail() {
   };
 
   // ── @mention helpers ────────────────────────────────────────────────────
-  const allUsers = SEED_USERS;
 
   const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const val = e.target.value;
@@ -319,7 +319,7 @@ export function TaskDetail() {
     }
   };
 
-  const insertMention = (user: typeof SEED_USERS[0]) => {
+  const insertMention = (user: typeof allUsers[0]) => {
     if (!mentionState) return;
     const firstName = user.name.split(' ')[0];
     const before = commentText.slice(0, mentionState.atIndex);
@@ -727,7 +727,7 @@ export function TaskDetail() {
                   value={task.assigneeId ?? ''}
                   onChange={e => {
                     const newId = e.target.value || undefined;
-                    const newName = SEED_USERS.find(u => u.id === newId)?.name ?? 'Unassigned';
+                    const newName = allUsers.find(u => u.id === newId)?.name ?? 'Unassigned';
                     updateTask(task.id, { assigneeId: newId });
                     emitUpdate({ assigneeId: newId });
                     logActivity(task.id, userId, 'assigned', { to: newName });
@@ -735,7 +735,7 @@ export function TaskDetail() {
                   className="bg-transparent border-0 outline-none text-sm text-slate-400 cursor-pointer hover:text-slate-200 transition-colors"
                 >
                   <option value="" className="bg-[#0C1526] text-slate-400">Unassigned</option>
-                  {SEED_USERS.map(u => (
+                  {allUsers.map(u => (
                     <option key={u.id} value={u.id} className="bg-[#0C1526] text-slate-200">{u.name}</option>
                   ))}
                 </select>
@@ -1269,7 +1269,7 @@ export function TaskDetail() {
                 </div>
                 <div className="space-y-2">
                   {events.slice(0, 8).map(event => {
-                    const actor = SEED_USERS.find(u => u.id === event.userId)
+                    const actor = allUsers.find(u => u.id === event.userId)
                       ?? (currentUser?._id === event.userId ? { name: currentUser.name, colour: currentUser.colour } : null);
                     return (
                       <div key={event.id} className="flex items-start gap-2">
@@ -1306,7 +1306,7 @@ export function TaskDetail() {
             {task.comments.length > 0 && (
               <div className="space-y-3 mb-3">
                 {task.comments.map(comment => {
-                  const author = SEED_USERS.find(u => u.id === comment.userId)
+                  const author = allUsers.find(u => u.id === comment.userId)
                     ?? (currentUser?._id === comment.userId ? { name: currentUser.name, colour: currentUser.colour } : null);
                   return (
                     <div key={comment.id} className="flex gap-2.5 group/comment">

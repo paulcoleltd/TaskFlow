@@ -3,7 +3,7 @@ import { addDays, startOfDay, differenceInDays, format, isToday, isWeekend } fro
 import type { Task } from '../../types';
 import { useUIStore } from '../../store/uiStore';
 import { STATUS_OPTIONS, PRIORITY_OPTIONS } from '../../lib/constants';
-import { SEED_USERS } from '../../lib/sampleData';
+import { useUserStore } from '../../store/userStore';
 import { cn } from '../../lib/utils';
 
 const DAY_W   = 32;   // px per day column
@@ -23,6 +23,7 @@ interface Props {
 }
 
 export function TaskTimeline({ tasks }: Props) {
+  const allUsers = useUserStore(s => s.users);
   const { setSelectedTask } = useUIStore();
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -59,11 +60,11 @@ export function TaskTimeline({ tasks }: Props) {
         ? Math.max(DAY_W, (differenceInDays(taskEnd, taskStart) + 1) * DAY_W)
         : DAY_W * 3;  // placeholder width for no-due-date tasks
       const overdue  = task.dueDate && task.status !== 'done' && new Date(task.dueDate) < new Date();
-      const assignee  = SEED_USERS.find(u => u.id === task.assigneeId);
+      const assignee  = allUsers.find(u => u.id === task.assigneeId);
       const colour    = overdue ? '#EF4444' : statusColour(task.status);
       return { task, left, width, colour, assignee, hasEnd: !!taskEnd };
     }),
-    [tasks, startDate]
+    [tasks, startDate, allUsers]
   );
 
   // ── Today offset ──────────────────────────────────────────────────────
