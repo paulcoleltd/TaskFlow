@@ -69,7 +69,7 @@ export function InviteUserModal({ open, onClose }: Props) {
 
   return (
     <Modal open={open} onClose={() => { reset(); onClose(); }} title="Add Team Member">
-      <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className="p-6 space-y-4">
 
         {/* Name */}
         <Input

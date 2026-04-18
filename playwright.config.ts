@@ -21,10 +21,10 @@ export default defineConfig({
     navigationTimeout: 15000,
   },
   projects: [
-    // ── Local mode (original 9 specs, no Convex) ────────────────────────────────
+    // ── Local mode (original 9 specs + new-features spec 15, no Convex) ───────────
     {
       name: 'chromium',
-      testMatch: /0[1-9]-.*\.spec\.ts/,
+      testMatch: /(?:0[1-9]|15)-.*\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         baseURL: 'http://localhost:5175',
