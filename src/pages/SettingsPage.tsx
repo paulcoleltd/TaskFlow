@@ -869,10 +869,8 @@ export default function SettingsPage() {
         <div className="space-y-2">
           {allUsers.map(u => {
             // Derive role: seed users have fixed roles; new users default to member
-            const uRole: import('../store/authStore').Role =
-              u.id === 'user-1' ? 'admin' :
-              u.id === 'user-2' ? 'member' :
-              u.id === 'user-3' ? 'viewer' : 'member';
+            // Use stored role; fall back to 'member' for legacy records without role field
+            const uRole: import('../store/authStore').Role = (u.role ?? 'member') as import('../store/authStore').Role;
             const uMeta = ROLE_META[uRole];
             const { tasks: allTasks } = useTaskStore.getState();
             const assigned = allTasks.filter(t => t.assigneeId === u.id).length;
@@ -903,6 +901,11 @@ export default function SettingsPage() {
                   <button
                     onClick={() => {
                       if (window.confirm(`Remove ${u.name} from the team?`)) {
+                        const adminsBefore = allUsers.filter(x => x.role === 'admin').length;
+                        if (uRole === 'admin' && adminsBefore <= 1) {
+                          toast.error('Cannot remove the last admin account.');
+                          return;
+                        }
                         removeUser(u.id);
                         toast.success(`${u.name} removed.`);
                       }

@@ -3,12 +3,17 @@ export type Status = 'todo' | 'in-progress' | 'review' | 'done' | 'blocked';
 export type ViewMode = 'board' | 'list' | 'table' | 'timeline' | 'matrix';
 export type Recurrence = 'none' | 'daily' | 'weekly' | 'monthly';
 
+/** RBAC role — shared by AuthUser and the team member User record. */
+export type Role = 'admin' | 'member' | 'viewer';
+
 export interface User {
   id: string;
   name: string;
   email: string;
   avatar?: string;
   colour: string;
+  /** RBAC role — optional for backward-compat with stored data; defaults to 'member'. */
+  role?: Role;
 }
 
 export interface Tag {

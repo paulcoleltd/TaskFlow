@@ -1,9 +1,9 @@
 import type { User, Project, Task } from '../types';
 
 export const SEED_USERS: User[] = [
-  { id: 'user-1', name: 'Alex Johnson', email: 'alex@taskflow.io', colour: '#4B8CF7' },
-  { id: 'user-2', name: 'Sarah Chen', email: 'sarah@taskflow.io', colour: '#8B5CF6' },
-  { id: 'user-3', name: 'Marcus Williams', email: 'marcus@taskflow.io', colour: '#10B981' },
+  { id: 'user-1', name: 'Alex Johnson',    email: 'alex@taskflow.io',   colour: '#4B8CF7', role: 'admin'  },
+  { id: 'user-2', name: 'Sarah Chen',      email: 'sarah@taskflow.io',  colour: '#8B5CF6', role: 'member' },
+  { id: 'user-3', name: 'Marcus Williams', email: 'marcus@taskflow.io', colour: '#10B981', role: 'viewer' },
 ];
 
 export const SEED_PROJECTS: Project[] = [

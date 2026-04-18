@@ -12,6 +12,8 @@ import { Modal } from '../ui/Modal';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
 import { useUserStore } from '../../store/userStore';
+import { useAuthStore } from '../../store/authStore';
+import { canManageUsers } from '../../lib/permissions';
 import { cn } from '../../lib/utils';
 import toast from 'react-hot-toast';
 
@@ -48,6 +50,14 @@ export function InviteUserModal({ open, onClose }: Props) {
   const selectedColour = watch('colour');
 
   const onSubmit = async (data: FormData) => {
+    // Defence-in-depth: verify the caller has admin rights regardless of where
+    // this modal is rendered (T1548 — Abuse Elevation Control, CWE-285).
+    const callerRole = useAuthStore.getState().currentUser?.role ?? 'viewer';
+    if (!canManageUsers(callerRole)) {
+      toast.error('You do not have permission to add team members.');
+      return;
+    }
+
     // Guard: duplicate email check
     const emailLower = data.email.trim().toLowerCase();
     if (users.some(u => u.email.toLowerCase() === emailLower)) {
@@ -61,7 +71,7 @@ export function InviteUserModal({ open, onClose }: Props) {
       toast('Convex mode: user was added to the local store. Wire to workspaces.inviteMember for persistent server-side invite.', { icon: 'ℹ️' });
     }
 
-    addUser({ name: data.name, email: data.email, colour: data.colour });
+    addUser({ name: data.name, email: data.email, colour: data.colour, role: data.role });
     toast.success(`${data.name} added to the team.`);
     reset();
     onClose();

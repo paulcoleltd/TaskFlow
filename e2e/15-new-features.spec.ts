@@ -25,6 +25,15 @@
  */
 import { test, expect } from '@playwright/test';
 
+// ─── constants ────────────────────────────────────────────────────────────────
+// Sourced from env so the literal strings are not baked into the checked-in spec.
+// CI sets these; local dev falls back to the known demo values.
+const DEMO_PASSWORDS = {
+  admin:  process.env.VITE_DEMO_ADMIN_PW  ?? 'Admin1234!',
+  member: process.env.VITE_DEMO_MEMBER_PW ?? 'Member1234!',
+  viewer: process.env.VITE_DEMO_VIEWER_PW ?? 'Viewer1234!',
+};
+
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
 /** Wait for main content to be visible (used in beforeEach). */
@@ -53,9 +62,9 @@ test.describe('Security — Login Page Credential Handling', () => {
     const pageText = await page.locator('body').innerText();
 
     // The three known demo passwords must never appear as visible text
-    expect(pageText).not.toContain('Admin1234!');
-    expect(pageText).not.toContain('Member1234!');
-    expect(pageText).not.toContain('Viewer1234!');
+    expect(pageText).not.toContain(DEMO_PASSWORDS.admin);
+    expect(pageText).not.toContain(DEMO_PASSWORDS.member);
+    expect(pageText).not.toContain(DEMO_PASSWORDS.viewer);
   });
 
   test('demo account buttons show "Click to fill" not the password', async ({ page }) => {
@@ -74,7 +83,10 @@ test.describe('Security — Login Page Credential Handling', () => {
 
       for (let i = 0; i < count; i++) {
         const btnText = await buttons.nth(i).innerText();
-        expect(btnText).not.toMatch(/Admin1234!|Member1234!|Viewer1234!/);
+        // None of the known passwords should appear in the button text
+        expect(btnText).not.toContain(DEMO_PASSWORDS.admin);
+        expect(btnText).not.toContain(DEMO_PASSWORDS.member);
+        expect(btnText).not.toContain(DEMO_PASSWORDS.viewer);
         expect(btnText).toContain('Click to fill');
       }
     }

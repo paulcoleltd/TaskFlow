@@ -11,7 +11,7 @@
  */
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { User } from '../types';
+import type { User, Role } from '../types';
 import { generateId } from '../lib/utils';
 
 // Colour palette cycled when creating a new user without an explicit colour
@@ -27,7 +27,7 @@ interface UserState {
   seedUsers: (initial: User[]) => void;
 
   // CRUD
-  addUser:    (u: Omit<User, 'id' | 'colour'> & { colour?: string }) => User;
+  addUser:    (u: Omit<User, 'id' | 'colour'> & { colour?: string; role?: Role }) => User;
   updateUser: (id: string, patch: Partial<Omit<User, 'id'>>) => void;
   removeUser: (id: string) => void;
 
@@ -55,6 +55,7 @@ export const useUserStore = create<UserState>()(
           name:   input.name.trim(),
           email:  input.email.trim().toLowerCase(),
           colour,
+          role:   input.role ?? 'member',
           ...(input.avatar ? { avatar: input.avatar } : {}),
         };
         set(s => ({ users: [...s.users, newUser] }));
@@ -66,8 +67,19 @@ export const useUserStore = create<UserState>()(
           users: s.users.map(u => (u.id === id ? { ...u, ...patch } : u)),
         })),
 
-      removeUser: (id) =>
-        set(s => ({ users: s.users.filter(u => u.id !== id) })),
+      removeUser: (id) => {
+        // Security: prevent removal of the last admin account (T1531)
+        const { users } = get();
+        const target = users.find(u => u.id === id);
+        if (target?.role === 'admin') {
+          const remainingAdmins = users.filter(u => u.role === 'admin' && u.id !== id);
+          if (remainingAdmins.length === 0) {
+            console.warn('[userStore] removeUser blocked — cannot remove the last admin account');
+            return; // silently block; caller should surface an error message
+          }
+        }
+        set(s => ({ users: s.users.filter(u => u.id !== id) }));
+      },
 
       getUserById: (id) => get().users.find(u => u.id === id),
     }),
@@ -79,13 +91,17 @@ export const useUserStore = create<UserState>()(
         if (!state) return;
         state.users = (state.users ?? [])
           .filter((u): u is User => !!u && typeof u.id === 'string')
-          .map(u => ({
-            id:     String(u.id).slice(0, 64),
-            name:   String(u.name  ?? '').slice(0, 100),
-            email:  String(u.email ?? '').slice(0, 200),
-            colour: /^#[0-9a-fA-F]{6}$/.test(u.colour ?? '') ? u.colour : '#4B8CF7',
-            ...(u.avatar ? { avatar: String(u.avatar).slice(0, 500) } : {}),
-          }));
+          .map(u => {
+            const VALID_ROLES: Role[] = ['admin', 'member', 'viewer'];
+            return {
+              id:     String(u.id).slice(0, 64),
+              name:   String(u.name  ?? '').slice(0, 100),
+              email:  String(u.email ?? '').slice(0, 200),
+              colour: /^#[0-9a-fA-F]{6}$/.test(u.colour ?? '') ? u.colour : '#4B8CF7',
+              role:   (VALID_ROLES.includes(u.role) ? u.role : 'member') as Role,
+              ...(u.avatar ? { avatar: String(u.avatar).slice(0, 500) } : {}),
+            };
+          });
       },
     }
   )

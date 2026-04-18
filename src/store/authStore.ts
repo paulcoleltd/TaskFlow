@@ -16,8 +16,9 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import type { Role } from '../types';
 
-export type Role = 'admin' | 'member' | 'viewer';
+export type { Role }; // re-export so existing imports from authStore still compile
 
 export interface AuthUser {
   id: string;
