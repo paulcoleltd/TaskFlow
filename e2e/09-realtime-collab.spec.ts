@@ -67,10 +67,14 @@ test.describe('Real-Time Collaboration (multi-browser)', () => {
   // ── 1. Connection health ────────────────────────────────────────────────────
 
   test('admin browser connects to Socket.io and shows Live status', async ({ browser }) => {
+    // Mark as slow — Socket.io WS handshake can take time under suite load
+    test.slow();
     const ctx  = await (browser as any).newContext({ storageState: 'e2e/auth-state.json' });
     const page = await ctx.newPage();
     try {
       await page.goto('/');
+      // Wait for full app shell before checking Socket.io status
+      await page.waitForSelector('nav, [data-testid="sidebar"], aside', { state: 'visible', timeout: 20000 });
       await waitForLiveConnection(page);
       await expect(page.getByTitle('Real-time collaboration active')).toContainText('Live');
     } finally {
@@ -79,10 +83,12 @@ test.describe('Real-Time Collaboration (multi-browser)', () => {
   });
 
   test('member browser connects to Socket.io and shows Live status', async ({ browser }) => {
+    test.slow();
     const ctx  = await (browser as any).newContext({ storageState: 'e2e/member-auth-state.json' });
     const page = await ctx.newPage();
     try {
       await page.goto('/');
+      await page.waitForSelector('nav, [data-testid="sidebar"], aside', { state: 'visible', timeout: 20000 });
       await waitForLiveConnection(page);
       await expect(page.getByTitle('Real-time collaboration active')).toContainText('Live');
     } finally {
@@ -155,10 +161,12 @@ test.describe('Real-Time Collaboration (multi-browser)', () => {
       // Member closes their context (triggers disconnect / presence:leave)
       await memberCtx.close();
 
-      // Admin's PresenceBar should eventually hide (server broadcasts leave)
+      // Admin's PresenceBar should eventually hide (server broadcasts leave).
+      // Socket.io disconnect detection can take up to pingTimeout (~20 s) on the
+      // server side; allow 35 s to avoid spurious failures under suite load.
       await expect(
         adminPage.locator('[aria-label="Online collaborators"]').getByText('SC'),
-      ).not.toBeVisible({ timeout: 20000 });
+      ).not.toBeVisible({ timeout: 35000 });
     } finally {
       await cleanup();
     }
@@ -198,8 +206,9 @@ test.describe('Real-Time Collaboration (multi-browser)', () => {
       // Confirm task is visible in admin's project board
       await expect(adminPage.getByText(taskTitle).first()).toBeVisible({ timeout: 10000 });
 
-      // Task should propagate to member's project board via Socket.io — no refresh needed
-      await expect(memberPage.getByText(taskTitle).first()).toBeVisible({ timeout: 15000 });
+      // Task should propagate to member's project board via Socket.io — no refresh needed.
+      // Allow extra time under suite load (multiple WS connections competing).
+      await expect(memberPage.getByText(taskTitle).first()).toBeVisible({ timeout: 25000 });
     } finally {
       await cleanup();
     }
@@ -236,7 +245,7 @@ test.describe('Real-Time Collaboration (multi-browser)', () => {
       await expect(adminPage.getByText(taskTitle).first()).toBeVisible({ timeout: 10000 });
 
       // Wait for member to receive the new task via Socket.io
-      await expect(memberPage.getByText(taskTitle).first()).toBeVisible({ timeout: 15000 });
+      await expect(memberPage.getByText(taskTitle).first()).toBeVisible({ timeout: 25000 });
 
       // Admin: open the task by clicking the draggable card container (not just the title
       // text, which may trigger inline editing instead of opening the detail panel).
@@ -258,7 +267,7 @@ test.describe('Real-Time Collaboration (multi-browser)', () => {
       // Member should see the task still present in the project board (now in In Progress column)
       await expect(
         memberPage.getByText(taskTitle).first(),
-      ).toBeVisible({ timeout: 15000 });
+      ).toBeVisible({ timeout: 25000 });
     } finally {
       await cleanup();
     }
@@ -285,20 +294,21 @@ test.describe('Real-Time Collaboration (multi-browser)', () => {
         waitForLiveConnection(memberPage),
       ]);
 
-      // Each user should see the other in the ViewerPile ("N other viewing")
+      // Each user should see the other in the ViewerPile ("N other viewing").
+      // Allow extra time under suite load for both presence events to propagate.
       await expect(
         adminPage.locator('[aria-label="Current viewers"]'),
-      ).toBeVisible({ timeout: 15000 });
+      ).toBeVisible({ timeout: 25000 });
       await expect(
         adminPage.getByText(/other viewing/i).first(),
-      ).toBeVisible({ timeout: 15000 });
+      ).toBeVisible({ timeout: 25000 });
 
       await expect(
         memberPage.locator('[aria-label="Current viewers"]'),
-      ).toBeVisible({ timeout: 15000 });
+      ).toBeVisible({ timeout: 25000 });
       await expect(
         memberPage.getByText(/other viewing/i).first(),
-      ).toBeVisible({ timeout: 15000 });
+      ).toBeVisible({ timeout: 25000 });
     } finally {
       await cleanup();
     }

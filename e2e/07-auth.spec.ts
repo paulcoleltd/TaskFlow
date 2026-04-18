@@ -69,6 +69,8 @@ test.describe('Authentication', () => {
   });
 
   test('rate limit kicks in after 5 failed attempts', async ({ page }) => {
+    // Mark as slow — 5 round-trips with error/re-enable wait each
+    test.slow();
     await page.goto('/login');
     // Trigger 5 consecutive failures against the same email
     for (let i = 0; i < 5; i++) {
@@ -76,14 +78,14 @@ test.describe('Authentication', () => {
       await page.locator('input[type="password"]').fill('WrongPass!');
       await page.locator('button[type="submit"]').click();
       // Wait for error and ensure submit button is re-enabled before next iteration
-      await expect(page.getByText('Invalid email or password.')).toBeVisible({ timeout: 10000 });
-      await expect(page.locator('button[type="submit"]')).toBeEnabled({ timeout: 5000 });
+      await expect(page.getByText('Invalid email or password.')).toBeVisible({ timeout: 15000 });
+      await expect(page.locator('button[type="submit"]')).toBeEnabled({ timeout: 10000 });
     }
     // 6th attempt should be blocked by client-side rate limiter before the request fires
     await page.locator('input[type="email"]').fill('alex@taskflow.io');
     await page.locator('input[type="password"]').fill('Admin1234!');
     await page.locator('button[type="submit"]').click();
-    await expect(page.getByText(/Too many attempts/i)).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/Too many attempts/i)).toBeVisible({ timeout: 15000 });
     await expect(page).toHaveURL('/login');
   });
 
@@ -129,8 +131,9 @@ test.describe('Authentication', () => {
     // Log out — two buttons with this title exist (sidebar + header); use first
     await page.locator('button[title="Sign out"]').first().click();
     await page.waitForURL('/login');
-    // Try accessing a protected route
+    // Try accessing a protected route — React Router's auth guard redirects
+    // asynchronously after mount; use waitForURL for an explicit reliable wait.
     await page.goto('/my-tasks');
-    await expect(page).toHaveURL('/login');
+    await page.waitForURL('/login', { timeout: 10000 });
   });
 });

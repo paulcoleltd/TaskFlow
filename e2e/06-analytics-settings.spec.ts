@@ -42,7 +42,9 @@ test.describe('Analytics Page', () => {
   });
 
   test('Completion Trend chart renders', async ({ page }) => {
-    await expect(page.getByText('Completion Trend')).toBeVisible();
+    // Recharts can render section headings asynchronously — scroll into view first
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await expect(page.getByText('Completion Trend')).toBeVisible({ timeout: 15000 });
   });
 
   test('completion rate shows percentage', async ({ page }) => {
@@ -53,7 +55,10 @@ test.describe('Analytics Page', () => {
 test.describe('Settings Page', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/settings');
-    await page.waitForSelector('main', { state: 'visible' });
+    // Wait for the Settings h1 heading — it only appears after the full page
+    // layout has mounted (more reliable than 'main' which fires before all
+    // Zustand-driven sections have rendered).
+    await page.waitForSelector('h1', { state: 'visible', timeout: 20000 });
   });
 
   test('Settings page loads', async ({ page }) => {

@@ -30,6 +30,8 @@ test.describe('Today Page', () => {
 
   test('sidebar nav link navigates to /today', async ({ page }) => {
     await page.goto('/');
+    // Wait for sidebar to be fully interactive before clicking
+    await page.waitForSelector('aside', { state: 'visible', timeout: 20000 });
     await page.locator('aside').getByText('Today').click();
     await expect(page).toHaveURL('/today');
   });
@@ -88,6 +90,9 @@ test.describe('Search Page', () => {
 
   test('sidebar nav link navigates to /search', async ({ page }) => {
     await page.goto('/');
+    // Wait for sidebar to be interactive before clicking — the beforeEach left
+    // us on /search so the goto('/') causes a full reload that must finish first.
+    await page.waitForSelector('aside', { state: 'visible', timeout: 20000 });
     await page.locator('aside').getByText('Search').click();
     await expect(page).toHaveURL('/search');
   });
