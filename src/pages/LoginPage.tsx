@@ -53,19 +53,22 @@ export default function LoginPage() {
 
   const onSubmit = async (data: FormData) => {
     setServerError('');
+
+    // ── Rate limiter (all non-Convex modes) ─────────────────────────────────
     if (!CONVEX_MODE) {
-      // Rate limiting — block after 5 consecutive failures
       if (Date.now() < lockedUntilRef.current) {
         const secs = Math.ceil((lockedUntilRef.current - Date.now()) / 1000);
         setServerError(`Too many attempts. Please wait ${secs} seconds before trying again.`);
         return;
       }
-      // Local mode — validate against demo accounts directly (no server needed)
+    }
+
+    if (!CONVEX_MODE && import.meta.env.DEV) {
+      // ── DEV local mode — validate in-memory, no server needed ─────────────
       const u = LOCAL_ACCOUNTS[data.email.trim().toLowerCase()];
       if (!u || u.password !== data.password) {
         failCount.current += 1;
         if (failCount.current >= 5) {
-          // Lock on the 5th failure — next attempt (6th) will be blocked at the top check
           const lockTime = Date.now() + 60_000;
           lockedUntilRef.current = lockTime;
           setLockedUntil(lockTime);
@@ -79,6 +82,26 @@ export default function LoginPage() {
       navigate(from, { replace: true });
       return;
     }
+
+    if (!CONVEX_MODE) {
+      // ── Production mode — call the /api/auth/login serverless function ────
+      const { login } = useAuthStore.getState();
+      const result = await login(data.email, data.password);
+      if (!result.success) {
+        failCount.current += 1;
+        if (failCount.current >= 5) {
+          const lockTime = Date.now() + 60_000;
+          lockedUntilRef.current = lockTime;
+          setLockedUntil(lockTime);
+        }
+        setServerError(result.error ?? 'Invalid email or password.');
+        return;
+      }
+      navigate(from, { replace: true });
+      return;
+    }
+
+    // ── Convex mode ──────────────────────────────────────────────────────────
     try {
       await signIn('password', { email: data.email, password: data.password, flow: 'signIn' });
       navigate(from, { replace: true });
