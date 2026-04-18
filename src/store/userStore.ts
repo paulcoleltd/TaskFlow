@@ -98,7 +98,7 @@ export const useUserStore = create<UserState>()(
               name:   String(u.name  ?? '').slice(0, 100),
               email:  String(u.email ?? '').slice(0, 200),
               colour: /^#[0-9a-fA-F]{6}$/.test(u.colour ?? '') ? u.colour : '#4B8CF7',
-              role:   (VALID_ROLES.includes(u.role) ? u.role : 'member') as Role,
+              role:   (u.role && VALID_ROLES.includes(u.role as Role) ? u.role : 'member') as Role,
               ...(u.avatar ? { avatar: String(u.avatar).slice(0, 500) } : {}),
             };
           });
