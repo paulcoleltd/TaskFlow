@@ -4,10 +4,11 @@
  * In local mode:  persists to userStore (Zustand persist → localStorage).
  * In Convex mode: delegates to workspace.inviteMember mutation (sends invite by email).
  */
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { UserPlus } from 'lucide-react';
+import { UserPlus, Eye, EyeOff } from 'lucide-react';
 import { Modal } from '../ui/Modal';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
@@ -17,6 +18,40 @@ import { canManageUsers } from '../../lib/permissions';
 import { cn } from '../../lib/utils';
 import toast from 'react-hot-toast';
 
+/** Key used to store credentials for dynamically-added users (local/prod mode). */
+export const LOCAL_USERS_KEY = 'taskflow-local-users';
+
+export interface LocalUserCredential {
+  email: string;
+  password: string;
+  id: string;
+  name: string;
+  colour: string;
+  role: 'admin' | 'member' | 'viewer';
+}
+
+/** Persist a new user's credentials to localStorage so they can sign in. */
+export function storeLocalCredential(cred: LocalUserCredential): void {
+  try {
+    const raw = localStorage.getItem(LOCAL_USERS_KEY);
+    const list: LocalUserCredential[] = raw ? JSON.parse(raw) : [];
+    // Upsert by email
+    const idx = list.findIndex(u => u.email === cred.email);
+    if (idx >= 0) list[idx] = cred; else list.push(cred);
+    localStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(list));
+  } catch { /* ignore storage errors */ }
+}
+
+/** Look up a locally-stored credential by email. */
+export function getLocalCredential(email: string): LocalUserCredential | null {
+  try {
+    const raw = localStorage.getItem(LOCAL_USERS_KEY);
+    if (!raw) return null;
+    const list: LocalUserCredential[] = JSON.parse(raw);
+    return list.find(u => u.email.toLowerCase() === email.toLowerCase()) ?? null;
+  } catch { return null; }
+}
+
 const CONVEX_MODE = !!import.meta.env.VITE_CONVEX_URL;
 
 const COLOUR_PALETTE = [
@@ -25,10 +60,15 @@ const COLOUR_PALETTE = [
 ];
 
 const schema = z.object({
-  name:  z.string().min(2, 'Name must be at least 2 characters').max(100, 'Name too long'),
-  email: z.string().email('Enter a valid email address').max(200, 'Email too long'),
-  role:  z.enum(['admin', 'member', 'viewer']),
-  colour: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Pick a colour'),
+  name:            z.string().min(2, 'Name must be at least 2 characters').max(100, 'Name too long'),
+  email:           z.string().email('Enter a valid email address').max(200, 'Email too long'),
+  role:            z.enum(['admin', 'member', 'viewer']),
+  colour:          z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Pick a colour'),
+  password:        z.string().min(8, 'Password must be at least 8 characters').max(128, 'Password too long'),
+  confirmPassword: z.string().min(1, 'Please confirm the password'),
+}).refine(d => d.password === d.confirmPassword, {
+  message: 'Passwords do not match',
+  path: ['confirmPassword'],
 });
 
 type FormData = z.infer<typeof schema>;
@@ -40,11 +80,13 @@ interface Props {
 
 export function InviteUserModal({ open, onClose }: Props) {
   const { addUser, users } = useUserStore();
+  const [showPw, setShowPw]  = useState(false);
+  const [showCp, setShowCp]  = useState(false);
 
   const { register, handleSubmit, watch, setValue, reset, formState: { errors, isSubmitting } } =
     useForm<FormData>({
       resolver: zodResolver(schema),
-      defaultValues: { name: '', email: '', role: 'member', colour: COLOUR_PALETTE[0] },
+      defaultValues: { name: '', email: '', role: 'member', colour: COLOUR_PALETTE[0], password: '', confirmPassword: '' },
     });
 
   const selectedColour = watch('colour');
@@ -71,8 +113,20 @@ export function InviteUserModal({ open, onClose }: Props) {
       toast('Convex mode: user was added to the local store. Wire to workspaces.inviteMember for persistent server-side invite.', { icon: 'ℹ️' });
     }
 
-    addUser({ name: data.name, email: data.email, colour: data.colour, role: data.role });
-    toast.success(`${data.name} added to the team.`);
+    const newUser = addUser({ name: data.name, email: data.email, colour: data.colour, role: data.role });
+
+    // Store credentials so the new member can sign in (local + production mode).
+    // In Convex mode this is handled server-side; we still store locally as a fallback.
+    storeLocalCredential({
+      email:    emailLower,
+      password: data.password,
+      id:       newUser.id,
+      name:     data.name,
+      colour:   data.colour,
+      role:     data.role,
+    });
+
+    toast.success(`${data.name} added! They can now sign in with their email and password.`);
     reset();
     onClose();
   };
@@ -97,6 +151,46 @@ export function InviteUserModal({ open, onClose }: Props) {
           error={errors.email?.message}
           {...register('email')}
         />
+
+        {/* Password */}
+        <div className="relative">
+          <Input
+            label="Password *"
+            type={showPw ? 'text' : 'password'}
+            placeholder="Min. 8 characters"
+            error={errors.password?.message}
+            {...register('password')}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPw(v => !v)}
+            className="absolute right-3 top-8 text-slate-500 hover:text-slate-300 transition-colors"
+            tabIndex={-1}
+            aria-label={showPw ? 'Hide password' : 'Show password'}
+          >
+            {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          </button>
+        </div>
+
+        {/* Confirm Password */}
+        <div className="relative">
+          <Input
+            label="Confirm Password *"
+            type={showCp ? 'text' : 'password'}
+            placeholder="Re-enter password"
+            error={errors.confirmPassword?.message}
+            {...register('confirmPassword')}
+          />
+          <button
+            type="button"
+            onClick={() => setShowCp(v => !v)}
+            className="absolute right-3 top-8 text-slate-500 hover:text-slate-300 transition-colors"
+            tabIndex={-1}
+            aria-label={showCp ? 'Hide password' : 'Show password'}
+          >
+            {showCp ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          </button>
+        </div>
 
         {/* Role */}
         <div>

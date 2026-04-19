@@ -7,6 +7,7 @@ import { Zap, Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import { useConvexAuth as useLocalConvexAuth } from '../hooks/useConvexUser';
 import { useAuthStore } from '../store/authStore';
 import { Button } from '../components/ui/Button';
+import { getLocalCredential } from '../components/users/InviteUserModal';
 
 const CONVEX_MODE = !!import.meta.env.VITE_CONVEX_URL;
 
@@ -84,7 +85,38 @@ export default function LoginPage() {
     }
 
     if (!CONVEX_MODE) {
-      // ── Production mode — call the /api/auth/login serverless function ────
+      // ── Production mode ───────────────────────────────────────────────────
+      // 1. Check locally-stored credentials first (users added by admin via
+      //    InviteUserModal — their passwords live in taskflow-local-users).
+      const localCred = getLocalCredential(data.email.trim().toLowerCase());
+      if (localCred) {
+        if (localCred.password !== data.password) {
+          failCount.current += 1;
+          if (failCount.current >= 5) {
+            const lockTime = Date.now() + 60_000;
+            lockedUntilRef.current = lockTime;
+            setLockedUntil(lockTime);
+          }
+          setServerError('Invalid email or password.');
+          return;
+        }
+        // Credentials match — log in without a server round-trip
+        useAuthStore.setState({
+          currentUser: {
+            id:     localCred.id,
+            name:   localCred.name,
+            email:  localCred.email,
+            colour: localCred.colour,
+            role:   localCred.role,
+          },
+          token:           'local',
+          isAuthenticated: true,
+        });
+        navigate(from, { replace: true });
+        return;
+      }
+
+      // 2. Fall back to the /api/auth/login serverless function (demo accounts)
       const { login } = useAuthStore.getState();
       const result = await login(data.email, data.password);
       if (!result.success) {
