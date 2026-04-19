@@ -12,14 +12,14 @@
  *
  * Security controls:
  *   - Caller must present a valid HMAC session token (admin role)
- *   - Password hashed with bcrypt (cost=12) — proper KDF, not SHA-256
+ *   - Password hashed with bcrypt (cost=12) — proper KDF, not SHA-256 (CWE-916)
  *   - Blob read/write uses server-side token — never exposed to client
  *   - Email uniqueness enforced before write
  */
 
 import { createHmac } from 'crypto';
 import bcrypt from 'bcryptjs';
-import { put, head, get } from '@vercel/blob';
+import { put, list } from '@vercel/blob';
 
 // ── Token verification (mirrors api/auth/login.ts) ───────────────────────────
 const TOKEN_SECRET = process.env.TOKEN_SECRET;
@@ -59,26 +59,30 @@ export interface BlobUser {
   createdAt:    number;
 }
 
+/** Read users from Vercel Blob. Returns empty array if blob doesn't exist yet. */
 export async function readBlobUsers(): Promise<BlobUser[]> {
   try {
-    const info = await head(USERS_BLOB_PATH, { token: process.env.BLOB_READ_WRITE_TOKEN }).catch(() => null);
-    if (!info) return [];
-    const res = await get(info.url);
-    const text = await res.text();
-    return JSON.parse(text) as BlobUser[];
+    const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
+    const { blobs } = await list({ prefix: USERS_BLOB_PATH, token: blobToken });
+    if (blobs.length === 0) return [];
+    // Fetch the blob content via its public CDN URL (no auth needed — content is hashed)
+    const res = await fetch(blobs[0].url);
+    if (!res.ok) return [];
+    return (await res.json()) as BlobUser[];
   } catch { return []; }
 }
 
+/** Write the full user list back to Vercel Blob (overwrite). */
 async function writeBlobUsers(users: BlobUser[]): Promise<void> {
   await put(USERS_BLOB_PATH, JSON.stringify(users), {
-    access:      'public',    // public URL — safe because content is hashed only
-    contentType: 'application/json',
-    token:       process.env.BLOB_READ_WRITE_TOKEN,
-    addRandomSuffix: false,   // deterministic path for read-by-path pattern
+    access:          'public',            // content is hashed — safe to be publicly readable
+    contentType:     'application/json',
+    token:           process.env.BLOB_READ_WRITE_TOKEN,
+    addRandomSuffix: false,               // deterministic path for overwrite semantics
   });
 }
 
-// ── Zod-lite validation (no extra deps) ──────────────────────────────────────
+// ── Validation helpers ────────────────────────────────────────────────────────
 const VALID_ROLES = new Set(['admin', 'member', 'viewer']);
 
 // ── Vercel handler ────────────────────────────────────────────────────────────
@@ -107,12 +111,12 @@ export default async function handler(req: any, res: any): Promise<void> {
   const colour   = String(body?.colour   ?? '').slice(0, 7);
   const role     = String(body?.role     ?? 'member');
 
-  if (name.length < 2)   { res.status(400).json({ error: 'Name must be at least 2 characters.' }); return; }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { res.status(400).json({ error: 'Invalid email address.' }); return; }
-  if (password.length < 8) { res.status(400).json({ error: 'Password must be at least 8 characters.' }); return; }
-  if (!/[A-Z]/.test(password)) { res.status(400).json({ error: 'Password must contain an uppercase letter.' }); return; }
-  if (!/[0-9]/.test(password)) { res.status(400).json({ error: 'Password must contain a number.' }); return; }
-  if (!VALID_ROLES.has(role))  { res.status(400).json({ error: 'Invalid role.' }); return; }
+  if (name.length < 2)                                      { res.status(400).json({ error: 'Name must be at least 2 characters.' }); return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))           { res.status(400).json({ error: 'Invalid email address.' }); return; }
+  if (password.length < 8)                                  { res.status(400).json({ error: 'Password must be at least 8 characters.' }); return; }
+  if (!/[A-Z]/.test(password))                             { res.status(400).json({ error: 'Password must contain an uppercase letter.' }); return; }
+  if (!/[0-9]/.test(password))                             { res.status(400).json({ error: 'Password must contain a number.' }); return; }
+  if (!VALID_ROLES.has(role))                               { res.status(400).json({ error: 'Invalid role.' }); return; }
 
   // ── 3. Check for duplicate email ──────────────────────────────────────────
   const existing = await readBlobUsers();
@@ -121,16 +125,16 @@ export default async function handler(req: any, res: any): Promise<void> {
     return;
   }
 
-  // ── 4. Hash password with bcrypt (cost=12 ≈ 250ms — proper KDF, CWE-916 fix)
+  // ── 4. Hash password with bcrypt (cost=12 ≈ 250ms — proper KDF, CWE-916) ─
   const passwordHash = await bcrypt.hash(password, 12);
 
   // ── 5. Write to Vercel Blob ────────────────────────────────────────────────
   const newUser: BlobUser = {
-    id:           `user-dyn-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    id:        `user-dyn-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
     name, email, colour,
-    role:         role as BlobUser['role'],
+    role:      role as BlobUser['role'],
     passwordHash,
-    createdAt:    Date.now(),
+    createdAt: Date.now(),
   };
   await writeBlobUsers([...existing, newUser]);
 

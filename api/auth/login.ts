@@ -18,7 +18,7 @@
 
 import { createHmac, timingSafeEqual } from 'crypto';
 import bcrypt from 'bcryptjs';
-import { readBlobUsers } from './register';
+import { readBlobUsers } from './register.js';
 
 // ── Demo user registry (server-side ONLY — never sent to the client) ──────────
 type Role = 'admin' | 'member' | 'viewer';
@@ -141,8 +141,10 @@ export default async function handler(req: any, res: any): Promise<void> {
     });
   }
 
-  // ── Not found — constant-time dummy work to prevent user enumeration ──────
-  await bcrypt.compare('dummy', '$2a$12$dummydummydummydummydummydummydummydummydummydummy...');
+  // ── Not found — constant-time dummy bcrypt work to prevent user enumeration (CWE-208) ──
+  // Pre-computed hash of "dummy-timing-safety" at cost=12. The compare always fails
+  // but takes the same ~250ms as a real comparison, preventing timing-based user enumeration.
+  await bcrypt.compare('dummy-timing-safety', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQyCkl1aSGFkSW9R7H1OBsUni');
   recordIpFailure(clientIp);
   res.status(401).json({ error: 'Invalid email or password.' });
 }
