@@ -7,7 +7,7 @@ import { Zap, Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import { useConvexAuth as useLocalConvexAuth } from '../hooks/useConvexUser';
 import { useAuthStore } from '../store/authStore';
 import { Button } from '../components/ui/Button';
-import { getLocalCredential } from '../components/users/InviteUserModal';
+import { getLocalCredential, verifyLocalPassword } from '../components/users/InviteUserModal';
 
 const CONVEX_MODE = !!import.meta.env.VITE_CONVEX_URL;
 
@@ -86,11 +86,12 @@ export default function LoginPage() {
 
     if (!CONVEX_MODE) {
       // ── Production mode ───────────────────────────────────────────────────
-      // 1. Check locally-stored credentials first (users added by admin via
-      //    InviteUserModal — their passwords live in taskflow-local-users).
+      // 1. Check locally-stored hashed credentials (same-device login for
+      //    users added via InviteUserModal — fixes CWE-312 plaintext issue).
       const localCred = getLocalCredential(data.email.trim().toLowerCase());
       if (localCred) {
-        if (localCred.password !== data.password) {
+        const passwordOk = await verifyLocalPassword(data.password, localCred.passwordHash);
+        if (!passwordOk) {
           failCount.current += 1;
           if (failCount.current >= 5) {
             const lockTime = Date.now() + 60_000;
@@ -116,7 +117,8 @@ export default function LoginPage() {
         return;
       }
 
-      // 2. Fall back to the /api/auth/login serverless function (demo accounts)
+      // 2. Fall back to /api/auth/login serverless function (original 3 demo accounts
+      //    + any users registered cross-device via the server endpoint).
       const { login } = useAuthStore.getState();
       const result = await login(data.email, data.password);
       if (!result.success) {

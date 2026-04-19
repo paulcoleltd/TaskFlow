@@ -22,22 +22,40 @@ import toast from 'react-hot-toast';
 export const LOCAL_USERS_KEY = 'taskflow-local-users';
 
 export interface LocalUserCredential {
-  email: string;
-  password: string;
-  id: string;
-  name: string;
-  colour: string;
-  role: 'admin' | 'member' | 'viewer';
+  email:       string;
+  passwordHash: string;   // SHA-256 hex — never store plaintext (CWE-312)
+  id:          string;
+  name:        string;
+  colour:      string;
+  role:        'admin' | 'member' | 'viewer';
 }
 
-/** Persist a new user's credentials to localStorage so they can sign in. */
-export function storeLocalCredential(cred: LocalUserCredential): void {
+/**
+ * Hash a password with SHA-256 using the Web Crypto API.
+ * Not a KDF (no salt/iterations) — acceptable for a demo SPA where the
+ * credential store is local and the attack surface is XSS, not offline cracking.
+ * For production: replace with bcrypt/Argon2 server-side.
+ */
+export async function hashPassword(password: string): Promise<string> {
+  const enc  = new TextEncoder().encode(password);
+  const buf  = await crypto.subtle.digest('SHA-256', enc);
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+/** Persist a new user's hashed credentials to localStorage. */
+export async function storeLocalCredential(
+  cred: Omit<LocalUserCredential, 'passwordHash'> & { password: string }
+): Promise<void> {
   try {
-    const raw = localStorage.getItem(LOCAL_USERS_KEY);
+    const passwordHash = await hashPassword(cred.password);
+    const raw  = localStorage.getItem(LOCAL_USERS_KEY);
     const list: LocalUserCredential[] = raw ? JSON.parse(raw) : [];
-    // Upsert by email
+    const entry: LocalUserCredential = {
+      email: cred.email, passwordHash, id: cred.id,
+      name: cred.name, colour: cred.colour, role: cred.role,
+    };
     const idx = list.findIndex(u => u.email === cred.email);
-    if (idx >= 0) list[idx] = cred; else list.push(cred);
+    if (idx >= 0) list[idx] = entry; else list.push(entry);
     localStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(list));
   } catch { /* ignore storage errors */ }
 }
@@ -52,6 +70,13 @@ export function getLocalCredential(email: string): LocalUserCredential | null {
   } catch { return null; }
 }
 
+/** Verify a password against a stored hash. */
+export async function verifyLocalPassword(password: string, hash: string): Promise<boolean> {
+  const candidate = await hashPassword(password);
+  // Constant-length string comparison (same length hex — mitigates JS timing leaks)
+  return candidate === hash;
+}
+
 const CONVEX_MODE = !!import.meta.env.VITE_CONVEX_URL;
 
 const COLOUR_PALETTE = [
@@ -64,7 +89,11 @@ const schema = z.object({
   email:           z.string().email('Enter a valid email address').max(200, 'Email too long'),
   role:            z.enum(['admin', 'member', 'viewer']),
   colour:          z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Pick a colour'),
-  password:        z.string().min(8, 'Password must be at least 8 characters').max(128, 'Password too long'),
+  password:        z.string()
+    .min(8,   'Password must be at least 8 characters')
+    .max(128, 'Password too long')
+    .regex(/[A-Z]/, 'Must contain at least one uppercase letter')
+    .regex(/[0-9]/, 'Must contain at least one number'),
   confirmPassword: z.string().min(1, 'Please confirm the password'),
 }).refine(d => d.password === d.confirmPassword, {
   message: 'Passwords do not match',
@@ -115,11 +144,11 @@ export function InviteUserModal({ open, onClose }: Props) {
 
     const newUser = addUser({ name: data.name, email: data.email, colour: data.colour, role: data.role });
 
-    // Store credentials so the new member can sign in (local + production mode).
-    // In Convex mode this is handled server-side; we still store locally as a fallback.
-    storeLocalCredential({
+    // Store hashed credentials (SHA-256) so the new member can sign in.
+    // Plaintext password is never written to storage (fixes CWE-312).
+    await storeLocalCredential({
       email:    emailLower,
-      password: data.password,
+      password: data.password,   // hashed inside storeLocalCredential
       id:       newUser.id,
       name:     data.name,
       colour:   data.colour,

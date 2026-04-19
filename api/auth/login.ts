@@ -10,7 +10,7 @@
  *   401:  { error: string }
  */
 
-import { createHmac } from 'crypto';
+import { createHmac, timingSafeEqual } from 'crypto';
 
 // ── Demo user registry (server-side ONLY — never sent to the client) ──────────
 type Role = 'admin' | 'member' | 'viewer';
@@ -31,10 +31,16 @@ const DEMO_USERS: DemoUser[] = [
 ];
 
 // ── HMAC token (same format as server/src/index.ts) ──────────────────────────
-const TOKEN_SECRET = process.env.TOKEN_SECRET ?? 'taskflow-demo-secret-CHANGE-BEFORE-PRODUCTION-DO-NOT-DEPLOY-AS-IS';
+// Fail loudly if TOKEN_SECRET is not set — never fall back to a known string
+// (CWE-798: hard-coded credentials in fallback = token forgery risk).
+const TOKEN_SECRET = process.env.TOKEN_SECRET;
+if (!TOKEN_SECRET) {
+  console.error('[auth] FATAL: TOKEN_SECRET env var is not set. Set it in Vercel project settings.');
+}
 const TOKEN_TTL_MS = 8 * 60 * 60 * 1000; // 8 hours
 
 function signToken(payload: object): string {
+  if (!TOKEN_SECRET) throw new Error('TOKEN_SECRET is not configured');
   const body = Buffer.from(JSON.stringify(payload)).toString('base64url');
   const sig  = createHmac('sha256', TOKEN_SECRET).update(body).digest('base64url');
   return `${body}.${sig}`;
@@ -54,8 +60,14 @@ export default async function handler(req: any, res: any): Promise<void> {
   const password = String(body?.password ?? '').slice(0, 128);
 
   const user = DEMO_USERS.find(u => u.email === email);
-  // Evaluate password regardless of whether user exists (prevents timing oracle)
-  const passwordOk = user !== undefined && user.password === password;
+  // Timing-safe comparison — prevents password oracle via response-time analysis (CWE-208).
+  // Compare against a dummy if user not found (constant-time regardless of existence).
+  const storedPw  = user?.password ?? 'dummy-password-for-timing-safety';
+  const candidateBuf = Buffer.from(password.padEnd(storedPw.length, '\0'));
+  const storedBuf    = Buffer.from(storedPw.padEnd(candidateBuf.length, '\0'));
+  const passwordOk   = user !== undefined &&
+    candidateBuf.length === storedBuf.length &&
+    timingSafeEqual(candidateBuf, storedBuf);
 
   if (!passwordOk) {
     // Same response for unknown email + wrong password — prevents enumeration
