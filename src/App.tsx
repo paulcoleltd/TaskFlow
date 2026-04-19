@@ -61,20 +61,17 @@ function App() {
   // Global presence heartbeat (no-op in local mode)
   usePresenceHeartbeat('global');
 
-  // Local mode — seed sample data on first launch
+  // Local mode — seed sample data on first launch + restore server-side session
   const { tasks, seedTasks } = useTaskStore();
   const { projects, seedProjects } = useProjectStore();
   const { seedUsers } = useUserStore();
+  const { restoreSession } = useAuthStore();
   useEffect(() => {
     if (!CONVEX_MODE) {
-      // Restore session from localStorage (legacy fallback — Zustand persist handles the primary key)
-      try {
-        const saved = JSON.parse(localStorage.getItem('taskflow-local-auth') ?? 'null');
-        // Only apply if there is no existing authenticated session
-        if (saved && !useAuthStore.getState().isAuthenticated) {
-          useAuthStore.setState({ currentUser: saved, token: saved.token ?? '', isAuthenticated: true });
-        }
-      } catch {}
+      // Re-validate the httpOnly cookie server-side on every page load.
+      // This is the only way JS can know if the cookie is still valid.
+      // In DEV mode without a running API server, this is a no-op (catches network error).
+      restoreSession();
       // Seed data
       if (tasks.length === 0) seedTasks(SEED_TASKS);
       if (projects.length === 0) seedProjects(SEED_PROJECTS);

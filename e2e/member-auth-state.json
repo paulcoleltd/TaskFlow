@@ -5,8 +5,12 @@
       "origin": "http://localhost:5175",
       "localStorage": [
         {
+          "name": "taskflow-users",
+          "value": "{\"state\":{\"users\":[{\"id\":\"user-1\",\"name\":\"Alex Johnson\",\"email\":\"alex@taskflow.io\",\"colour\":\"#4B8CF7\",\"role\":\"admin\"},{\"id\":\"user-2\",\"name\":\"Sarah Chen\",\"email\":\"sarah@taskflow.io\",\"colour\":\"#8B5CF6\",\"role\":\"member\"},{\"id\":\"user-3\",\"name\":\"Marcus Williams\",\"email\":\"marcus@taskflow.io\",\"colour\":\"#10B981\",\"role\":\"viewer\"}]},\"version\":0}"
+        },
+        {
           "name": "taskflow-auth",
-          "value": "{\"state\":{\"currentUser\":{\"id\":\"user-2\",\"name\":\"Sarah Chen\",\"email\":\"sarah@taskflow.io\",\"colour\":\"#8B5CF6\",\"role\":\"member\"},\"token\":\"eyJ1c2VySWQiOiJ1c2VyLTIiLCJyb2xlIjoibWVtYmVyIiwibmFtZSI6IlNhcmFoIENoZW4iLCJjb2xvdXIiOiIjOEI1Q0Y2IiwiZXhwIjoxNzc2NDczNzc0MDAyfQ.2N1vvjrf3HZdbmCOsZH0TlhaaU5Jf6zf9biOw2X64gM\",\"isAuthenticated\":true},\"version\":0}"
+          "value": "{\"state\":{\"currentUser\":{\"id\":\"user-2\",\"name\":\"Sarah Chen\",\"email\":\"sarah@taskflow.io\",\"colour\":\"#8B5CF6\",\"role\":\"member\"},\"token\":\"eyJ1c2VySWQiOiJ1c2VyLTIiLCJyb2xlIjoibWVtYmVyIiwibmFtZSI6IlNhcmFoIENoZW4iLCJjb2xvdXIiOiIjOEI1Q0Y2IiwiZXhwIjoxNzc2NTU5NTc3MTkwfQ.AqLzhyXXZb93uxhTW40gfSaorOOk3zKf9ssnbbwlkHM\",\"isAuthenticated\":true},\"version\":0}"
         },
         {
           "name": "taskflow-projects",

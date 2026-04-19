@@ -35,9 +35,11 @@ const TOAST_STYLE = {
 export function useCollaboration() {
   const isAuthenticated = useIsAuthenticated();
   const currentUser = useCurrentUser();
-  // In local mode the HMAC session token is stored in authStore.
-  // In Convex mode this will be null but the socket server is bypassed anyway.
-  const sessionToken = useAuthStore(s => s.token);
+  // The session token lives in the httpOnly cookie — not accessible to JS.
+  // For Socket.io auth we use a sentinel string; the server validates the cookie
+  // directly from the WebSocket upgrade headers (credentials: 'include').
+  // In Convex mode this is null and the socket server is bypassed entirely.
+  const sessionToken = useAuthStore(s => s.isAuthenticated ? 'cookie-auth' : null);
   const taskStore = useTaskStore();
   const projectStore = useProjectStore();
   const collab = useCollaborationStore();

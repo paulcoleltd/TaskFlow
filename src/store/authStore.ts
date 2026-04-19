@@ -1,42 +1,42 @@
 /**
  * Auth Store — session management and role-based identity.
  *
- * Login validates credentials server-side via POST /api/auth/login.
- * The server issues an HMAC-signed token; the client stores only the
- * opaque token + the user profile returned by the server.
+ * Security model (post-hardening):
+ *   - Session token lives in an httpOnly; Secure; SameSite=Strict cookie — JS cannot read it.
+ *   - Only the user profile (id, name, email, colour, role) is stored in Zustand / localStorage.
+ *   - On page load, /api/auth/me re-validates the cookie server-side and refreshes the profile.
+ *   - Logout calls /api/auth/logout which clears the cookie (Max-Age=0).
  *
- * ⚠️  The server still uses demo passwords in DEMO mode. This is fine for
- *     a demo/development build. In production, replace with a real user store.
+ * Token is NEVER stored in localStorage or anywhere JS-readable (mitigates XSS token theft).
  *
- * Demo accounts (shown in the login UI for convenience):
- *   alex@taskflow.io   → Admin
- *   sarah@taskflow.io  → Member
- *   marcus@taskflow.io → Viewer
+ * Demo accounts:
+ *   alex@taskflow.io   → Admin    (password: Admin1234!)
+ *   sarah@taskflow.io  → Member   (password: Member1234!)
+ *   marcus@taskflow.io → Viewer   (password: Viewer1234!)
  */
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Role } from '../types';
 
-export type { Role }; // re-export so existing imports from authStore still compile
+export type { Role };
 
 export interface AuthUser {
-  id: string;
-  name: string;
-  email: string;
+  id:     string;
+  name:   string;
+  email:  string;
   colour: string;
-  role: Role;
+  role:   Role;
 }
 
-// ── Auth endpoint — relative so it works through the Vite proxy in dev
-//    and a same-origin reverse proxy in production. No CORS required.
-const AUTH_URL = '/api/auth/login';
+const AUTH_URL    = '/api/auth/login';
+const LOGOUT_URL  = '/api/auth/logout';
+const ME_URL      = '/api/auth/me';
 
-// ── In-memory brute-force limiter (UX guard only) ─────────────────────────────
-// Resets on page refresh — real rate limiting lives on the server.
+// ── In-memory brute-force limiter (UX guard — also enforced server-side) ─────
 const _attempts = new Map<string, { count: number; lockedUntil: number }>();
 const MAX_ATTEMPTS = 5;
-const LOCKOUT_MS   = 60_000; // 60 seconds
+const LOCKOUT_MS   = 60_000;
 
 function checkRateLimit(email: string): { allowed: boolean; error?: string } {
   const key    = email.trim().toLowerCase();
@@ -52,10 +52,7 @@ function recordFailure(email: string): void {
   const key    = email.trim().toLowerCase();
   const record = _attempts.get(key) ?? { count: 0, lockedUntil: 0 };
   const count  = record.count + 1;
-  _attempts.set(key, {
-    count,
-    lockedUntil: count >= MAX_ATTEMPTS ? Date.now() + LOCKOUT_MS : 0,
-  });
+  _attempts.set(key, { count, lockedUntil: count >= MAX_ATTEMPTS ? Date.now() + LOCKOUT_MS : 0 });
 }
 
 function clearAttempts(email: string): void {
@@ -64,30 +61,52 @@ function clearAttempts(email: string): void {
 
 interface AuthStore {
   currentUser:     AuthUser | null;
-  token:           string | null;
   isAuthenticated: boolean;
-  login:  (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  logout: () => void;
+  /** Call once on app mount to verify cookie and restore session. */
+  restoreSession: () => Promise<void>;
+  login:   (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  logout:  () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthStore>()(
   persist(
     (set) => ({
       currentUser:     null,
-      token:           null,
       isAuthenticated: false,
 
+      restoreSession: async () => {
+        // /api/auth/me verifies the httpOnly cookie and returns the user profile.
+        // If the cookie is absent or expired, it returns 401 and we clear local state.
+        try {
+          const res = await fetch(ME_URL, { credentials: 'include' });
+          if (res.ok) {
+            const data = (await res.json()) as { user: AuthUser };
+            set({ currentUser: data.user, isAuthenticated: true });
+          } else {
+            set({ currentUser: null, isAuthenticated: false });
+          }
+        } catch {
+          // Network error — leave existing state as-is (offline resilience)
+        }
+      },
+
       login: async (email, password) => {
-        // Client-side rate limit (UX guard — blocks the UI before the round-trip)
+        // Client-side guard (UX feedback) — server enforces its own rate limit too
         const rateCheck = checkRateLimit(email);
         if (!rateCheck.allowed) return { success: false, error: rateCheck.error };
 
         try {
           const res = await fetch(AUTH_URL, {
-            method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ email: email.trim(), password }),
+            method:      'POST',
+            headers:     { 'Content-Type': 'application/json' },
+            body:        JSON.stringify({ email: email.trim(), password }),
+            credentials: 'include',   // required so the Set-Cookie header is accepted
           });
+
+          if (res.status === 429) {
+            const data = (await res.json()) as { error?: string; retryAfter?: number };
+            return { success: false, error: data.error ?? 'Too many attempts. Please wait.' };
+          }
 
           if (!res.ok) {
             const data = (await res.json()) as { error?: string };
@@ -95,18 +114,28 @@ export const useAuthStore = create<AuthStore>()(
             return { success: false, error: data.error ?? 'Invalid email or password.' };
           }
 
-          const data = (await res.json()) as { token: string; user: AuthUser };
+          const data = (await res.json()) as { user: AuthUser };
           clearAttempts(email);
-          set({ currentUser: data.user, token: data.token, isAuthenticated: true });
+          // Store ONLY the user profile — never the token (token is in the httpOnly cookie)
+          set({ currentUser: data.user, isAuthenticated: true });
           return { success: true };
         } catch {
-          // Network error — server unreachable
-          return { success: false, error: 'Cannot reach the authentication server. Is the server running?' };
+          return { success: false, error: 'Cannot reach the authentication server.' };
         }
       },
 
-      logout: () => set({ currentUser: null, token: null, isAuthenticated: false }),
+      logout: async () => {
+        try {
+          await fetch(LOGOUT_URL, { method: 'POST', credentials: 'include' });
+        } catch { /* best-effort — clear local state regardless */ }
+        set({ currentUser: null, isAuthenticated: false });
+      },
     }),
-    { name: 'taskflow-auth' }
+    {
+      name: 'taskflow-auth',
+      // Persist only the user profile for fast initial render.
+      // isAuthenticated is re-validated server-side via restoreSession() on every mount.
+      partialize: (s) => ({ currentUser: s.currentUser, isAuthenticated: s.isAuthenticated }),
+    }
   )
 );

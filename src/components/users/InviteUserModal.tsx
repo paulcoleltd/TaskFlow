@@ -1,8 +1,13 @@
 /**
- * InviteUserModal — admin-only form to add a new team member to the local user store.
+ * InviteUserModal — admin-only form to add a new team member.
  *
- * In local mode:  persists to userStore (Zustand persist → localStorage).
- * In Convex mode: delegates to workspace.inviteMember mutation (sends invite by email).
+ * Security model (post-hardening):
+ *   - In production: POSTs to /api/auth/register which stores bcrypt-hashed
+ *     credentials in Vercel Blob. Any device can then log in cross-device.
+ *   - In DEV: falls back to localStorage (no server running).
+ *   - In Convex mode: delegates to workspace.inviteMember mutation.
+ *   - Password never leaves the browser unencrypted.
+ *   - Admin role is re-verified server-side (defence-in-depth, CWE-285).
  */
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -17,65 +22,6 @@ import { useAuthStore } from '../../store/authStore';
 import { canManageUsers } from '../../lib/permissions';
 import { cn } from '../../lib/utils';
 import toast from 'react-hot-toast';
-
-/** Key used to store credentials for dynamically-added users (local/prod mode). */
-export const LOCAL_USERS_KEY = 'taskflow-local-users';
-
-export interface LocalUserCredential {
-  email:       string;
-  passwordHash: string;   // SHA-256 hex — never store plaintext (CWE-312)
-  id:          string;
-  name:        string;
-  colour:      string;
-  role:        'admin' | 'member' | 'viewer';
-}
-
-/**
- * Hash a password with SHA-256 using the Web Crypto API.
- * Not a KDF (no salt/iterations) — acceptable for a demo SPA where the
- * credential store is local and the attack surface is XSS, not offline cracking.
- * For production: replace with bcrypt/Argon2 server-side.
- */
-export async function hashPassword(password: string): Promise<string> {
-  const enc  = new TextEncoder().encode(password);
-  const buf  = await crypto.subtle.digest('SHA-256', enc);
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-/** Persist a new user's hashed credentials to localStorage. */
-export async function storeLocalCredential(
-  cred: Omit<LocalUserCredential, 'passwordHash'> & { password: string }
-): Promise<void> {
-  try {
-    const passwordHash = await hashPassword(cred.password);
-    const raw  = localStorage.getItem(LOCAL_USERS_KEY);
-    const list: LocalUserCredential[] = raw ? JSON.parse(raw) : [];
-    const entry: LocalUserCredential = {
-      email: cred.email, passwordHash, id: cred.id,
-      name: cred.name, colour: cred.colour, role: cred.role,
-    };
-    const idx = list.findIndex(u => u.email === cred.email);
-    if (idx >= 0) list[idx] = entry; else list.push(entry);
-    localStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(list));
-  } catch { /* ignore storage errors */ }
-}
-
-/** Look up a locally-stored credential by email. */
-export function getLocalCredential(email: string): LocalUserCredential | null {
-  try {
-    const raw = localStorage.getItem(LOCAL_USERS_KEY);
-    if (!raw) return null;
-    const list: LocalUserCredential[] = JSON.parse(raw);
-    return list.find(u => u.email.toLowerCase() === email.toLowerCase()) ?? null;
-  } catch { return null; }
-}
-
-/** Verify a password against a stored hash. */
-export async function verifyLocalPassword(password: string, hash: string): Promise<boolean> {
-  const candidate = await hashPassword(password);
-  // Constant-length string comparison (same length hex — mitigates JS timing leaks)
-  return candidate === hash;
-}
 
 const CONVEX_MODE = !!import.meta.env.VITE_CONVEX_URL;
 
@@ -97,63 +43,79 @@ const schema = z.object({
   confirmPassword: z.string().min(1, 'Please confirm the password'),
 }).refine(d => d.password === d.confirmPassword, {
   message: 'Passwords do not match',
-  path: ['confirmPassword'],
+  path:    ['confirmPassword'],
 });
 
 type FormData = z.infer<typeof schema>;
 
 interface Props {
-  open: boolean;
+  open:    boolean;
   onClose: () => void;
 }
 
 export function InviteUserModal({ open, onClose }: Props) {
   const { addUser, users } = useUserStore();
-  const [showPw, setShowPw]  = useState(false);
-  const [showCp, setShowCp]  = useState(false);
+  const [showPw, setShowPw] = useState(false);
+  const [showCp, setShowCp] = useState(false);
 
   const { register, handleSubmit, watch, setValue, reset, formState: { errors, isSubmitting } } =
     useForm<FormData>({
-      resolver: zodResolver(schema),
+      resolver:      zodResolver(schema),
       defaultValues: { name: '', email: '', role: 'member', colour: COLOUR_PALETTE[0], password: '', confirmPassword: '' },
     });
 
   const selectedColour = watch('colour');
 
   const onSubmit = async (data: FormData) => {
-    // Defence-in-depth: verify the caller has admin rights regardless of where
-    // this modal is rendered (T1548 — Abuse Elevation Control, CWE-285).
+    // Defence-in-depth: verify admin rights in the client (server also checks — CWE-285)
     const callerRole = useAuthStore.getState().currentUser?.role ?? 'viewer';
     if (!canManageUsers(callerRole)) {
       toast.error('You do not have permission to add team members.');
       return;
     }
 
-    // Guard: duplicate email check
     const emailLower = data.email.trim().toLowerCase();
+
+    // Duplicate check against local user store
     if (users.some(u => u.email.toLowerCase() === emailLower)) {
       toast.error('A user with that email already exists.');
       return;
     }
 
     if (CONVEX_MODE) {
-      // In Convex mode the proper flow is workspace invitation — surface a note.
-      // (Full Convex invite wired through workspaces.inviteMember mutation)
-      toast('Convex mode: user was added to the local store. Wire to workspaces.inviteMember for persistent server-side invite.', { icon: 'ℹ️' });
+      toast('Convex mode: wire to workspaces.inviteMember for server-side invite.', { icon: 'ℹ️' });
     }
 
-    const newUser = addUser({ name: data.name, email: data.email, colour: data.colour, role: data.role });
+    // ── Register credentials server-side (production) ──────────────────────
+    if (!CONVEX_MODE && !import.meta.env.DEV) {
+      // Production: send to /api/auth/register
+      // Server hashes with bcrypt (cost=12) and stores in Vercel Blob.
+      // The new member can log in from ANY device after this call.
+      const res = await fetch('/api/auth/register', {
+        method:      'POST',
+        headers:     { 'Content-Type': 'application/json' },
+        credentials: 'include',   // send session cookie so server can verify admin role
+        body:        JSON.stringify({
+          name:     data.name,
+          email:    emailLower,
+          password: data.password,
+          colour:   data.colour,
+          role:     data.role,
+        }),
+      });
 
-    // Store hashed credentials (SHA-256) so the new member can sign in.
-    // Plaintext password is never written to storage (fixes CWE-312).
-    await storeLocalCredential({
-      email:    emailLower,
-      password: data.password,   // hashed inside storeLocalCredential
-      id:       newUser.id,
-      name:     data.name,
-      colour:   data.colour,
-      role:     data.role,
-    });
+      if (!res.ok) {
+        const err = (await res.json()) as { error?: string };
+        toast.error(err.error ?? 'Failed to register user. Please try again.');
+        return;
+      }
+    } else if (import.meta.env.DEV) {
+      // DEV fallback: store SHA-256 hash in localStorage (no server in local dev)
+      await _storeDevCredential({ email: emailLower, password: data.password, role: data.role });
+    }
+
+    // Add to the local user store (so they appear in Settings, task assignee list, etc.)
+    addUser({ name: data.name, email: emailLower, colour: data.colour, role: data.role });
 
     toast.success(`${data.name} added! They can now sign in with their email and password.`);
     reset();
@@ -186,7 +148,7 @@ export function InviteUserModal({ open, onClose }: Props) {
           <Input
             label="Password *"
             type={showPw ? 'text' : 'password'}
-            placeholder="Min. 8 characters"
+            placeholder="Min. 8 chars, 1 uppercase, 1 number"
             error={errors.password?.message}
             {...register('password')}
           />
@@ -292,10 +254,28 @@ export function InviteUserModal({ open, onClose }: Props) {
         <div className="flex justify-end gap-3 pt-2">
           <Button type="button" variant="secondary" onClick={() => { reset(); onClose(); }}>Cancel</Button>
           <Button type="submit" icon={<UserPlus className="w-3.5 h-3.5" />} disabled={isSubmitting}>
-            Add Member
+            {isSubmitting ? 'Adding…' : 'Add Member'}
           </Button>
         </div>
       </form>
     </Modal>
   );
+}
+
+// ── DEV-only fallback: SHA-256 hash to localStorage ───────────────────────────
+// Used when there is no running API server (local development only).
+// In production, bcrypt via /api/auth/register is used instead.
+async function _storeDevCredential(cred: { email: string; password: string; role: string }): Promise<void> {
+  try {
+    const enc  = new TextEncoder().encode(cred.password);
+    const buf  = await crypto.subtle.digest('SHA-256', enc);
+    const hash = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    const KEY  = 'taskflow-local-users';
+    const raw  = localStorage.getItem(KEY);
+    const list = raw ? (JSON.parse(raw) as Array<{ email: string; passwordHash: string; role: string }>) : [];
+    const idx  = list.findIndex(u => u.email === cred.email);
+    const entry = { email: cred.email, passwordHash: hash, role: cred.role };
+    if (idx >= 0) list[idx] = entry; else list.push(entry);
+    localStorage.setItem(KEY, JSON.stringify(list));
+  } catch { /* ignore storage errors in dev */ }
 }

@@ -7,26 +7,24 @@ import { Zap, Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import { useConvexAuth as useLocalConvexAuth } from '../hooks/useConvexUser';
 import { useAuthStore } from '../store/authStore';
 import { Button } from '../components/ui/Button';
-import { getLocalCredential, verifyLocalPassword } from '../components/users/InviteUserModal';
 
 const CONVEX_MODE = !!import.meta.env.VITE_CONVEX_URL;
 
 const schema = z.object({
-  email: z.string().email('Enter a valid email address'),
+  email:    z.string().email('Enter a valid email address'),
   password: z.string().min(1, 'Password is required'),
 });
 type FormData = z.infer<typeof schema>;
 
-// Demo account display — no passwords stored here; passwords never rendered in JSX.
-// The full demo panel is only shown in development builds (import.meta.env.DEV).
+// Demo account display — roles and descriptions only, no passwords in JSX.
 const DEMO_ACCOUNTS = [
   { email: 'alex@taskflow.io',   role: 'Admin',  desc: 'Full access — create, edit, delete' },
   { email: 'sarah@taskflow.io',  role: 'Member', desc: 'Create & edit own tasks/projects' },
   { email: 'marcus@taskflow.io', role: 'Viewer', desc: 'Read-only access' },
 ];
 
-// Local demo accounts — only defined in dev builds so credentials are tree-shaken
-// from production bundles. Convex mode always uses server-side auth regardless.
+// DEV-only local accounts — tree-shaken from production builds by Vite.
+// In production, all auth goes through /api/auth/login (serverless function).
 const LOCAL_ACCOUNTS: Record<string, { id: string; name: string; email: string; colour: string; role: 'admin' | 'member' | 'viewer'; password: string }> =
   import.meta.env.DEV
     ? {
@@ -38,15 +36,15 @@ const LOCAL_ACCOUNTS: Record<string, { id: string; name: string; email: string; 
 
 export default function LoginPage() {
   const { signIn } = useLocalConvexAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const from = (location.state as any)?.from?.pathname ?? '/';
+  const navigate   = useNavigate();
+  const location   = useLocation();
+  const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? '/';
 
-  const [showPw, setShowPw] = useState(false);
+  const [showPw, setShowPw]           = useState(false);
   const [serverError, setServerError] = useState('');
   const [_lockedUntil, setLockedUntil] = useState(0);
-  const lockedUntilRef = useRef(0);   // mirrors state — always readable in onSubmit closure
-  const failCount = useRef(0);
+  const lockedUntilRef = useRef(0);
+  const failCount      = useRef(0);
 
   const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -55,17 +53,26 @@ export default function LoginPage() {
   const onSubmit = async (data: FormData) => {
     setServerError('');
 
-    // ── Rate limiter (all non-Convex modes) ─────────────────────────────────
-    if (!CONVEX_MODE) {
-      if (Date.now() < lockedUntilRef.current) {
-        const secs = Math.ceil((lockedUntilRef.current - Date.now()) / 1000);
-        setServerError(`Too many attempts. Please wait ${secs} seconds before trying again.`);
-        return;
-      }
+    // ── Client-side rate limit guard (UX) ──────────────────────────────────
+    if (!CONVEX_MODE && Date.now() < lockedUntilRef.current) {
+      const secs = Math.ceil((lockedUntilRef.current - Date.now()) / 1000);
+      setServerError(`Too many attempts. Please wait ${secs} seconds before trying again.`);
+      return;
     }
 
-    if (!CONVEX_MODE && import.meta.env.DEV) {
-      // ── DEV local mode — validate in-memory, no server needed ─────────────
+    // ── Convex mode ──────────────────────────────────────────────────────────
+    if (CONVEX_MODE) {
+      try {
+        await signIn('password', { email: data.email, password: data.password, flow: 'signIn' });
+        navigate(from, { replace: true });
+      } catch {
+        setServerError('Invalid email or password. Please try again.');
+      }
+      return;
+    }
+
+    // ── DEV local mode — validate in-memory, no server round-trip needed ────
+    if (import.meta.env.DEV) {
       const u = LOCAL_ACCOUNTS[data.email.trim().toLowerCase()];
       if (!u || u.password !== data.password) {
         failCount.current += 1;
@@ -78,74 +85,28 @@ export default function LoginPage() {
         return;
       }
       const { password: _pw, ...user } = u;
-      localStorage.setItem('taskflow-local-auth', JSON.stringify(user));
-      useAuthStore.setState({ currentUser: user, token: 'local', isAuthenticated: true });
+      useAuthStore.setState({ currentUser: user, isAuthenticated: true });
       navigate(from, { replace: true });
       return;
     }
 
-    if (!CONVEX_MODE) {
-      // ── Production mode ───────────────────────────────────────────────────
-      // 1. Check locally-stored hashed credentials (same-device login for
-      //    users added via InviteUserModal — fixes CWE-312 plaintext issue).
-      const localCred = getLocalCredential(data.email.trim().toLowerCase());
-      if (localCred) {
-        const passwordOk = await verifyLocalPassword(data.password, localCred.passwordHash);
-        if (!passwordOk) {
-          failCount.current += 1;
-          if (failCount.current >= 5) {
-            const lockTime = Date.now() + 60_000;
-            lockedUntilRef.current = lockTime;
-            setLockedUntil(lockTime);
-          }
-          setServerError('Invalid email or password.');
-          return;
-        }
-        // Credentials match — log in without a server round-trip
-        useAuthStore.setState({
-          currentUser: {
-            id:     localCred.id,
-            name:   localCred.name,
-            email:  localCred.email,
-            colour: localCred.colour,
-            role:   localCred.role,
-          },
-          token:           'local',
-          isAuthenticated: true,
-        });
-        navigate(from, { replace: true });
-        return;
+    // ── Production mode — server handles auth, issues httpOnly cookie ───────
+    const { login } = useAuthStore.getState();
+    const result = await login(data.email, data.password);
+    if (!result.success) {
+      failCount.current += 1;
+      if (failCount.current >= 5) {
+        const lockTime = Date.now() + 60_000;
+        lockedUntilRef.current = lockTime;
+        setLockedUntil(lockTime);
       }
-
-      // 2. Fall back to /api/auth/login serverless function (original 3 demo accounts
-      //    + any users registered cross-device via the server endpoint).
-      const { login } = useAuthStore.getState();
-      const result = await login(data.email, data.password);
-      if (!result.success) {
-        failCount.current += 1;
-        if (failCount.current >= 5) {
-          const lockTime = Date.now() + 60_000;
-          lockedUntilRef.current = lockTime;
-          setLockedUntil(lockTime);
-        }
-        setServerError(result.error ?? 'Invalid email or password.');
-        return;
-      }
-      navigate(from, { replace: true });
+      setServerError(result.error ?? 'Invalid email or password.');
       return;
     }
-
-    // ── Convex mode ──────────────────────────────────────────────────────────
-    try {
-      await signIn('password', { email: data.email, password: data.password, flow: 'signIn' });
-      navigate(from, { replace: true });
-    } catch {
-      setServerError('Invalid email or password. Please try again.');
-    }
+    navigate(from, { replace: true });
   };
 
-  // Looks up the password from LOCAL_ACCOUNTS (never from the display array).
-  // This function is only reachable in DEV builds where the demo panel renders.
+  // Fills demo credentials — only reachable in DEV builds
   const fillDemo = (email: string) => {
     const pw = LOCAL_ACCOUNTS[email]?.password ?? '';
     setValue('email', email);
