@@ -42,6 +42,7 @@ const TimePage        = lazy(() => import('./pages/TimePage'));
 const RoadmapPage          = lazy(() => import('./pages/RoadmapPage'));
 const PublicProjectPage    = lazy(() => import('./pages/PublicProjectPage'));
 const WorkspacesPage       = lazy(() => import('./pages/WorkspacesPage'));
+const ManualPage           = lazy(() => import('./pages/ManualPage'));
 
 function App() {
   const { selectedTaskId, isFocusModeOpen, closeFocusMode, theme } = useUIStore();
@@ -98,6 +99,7 @@ function App() {
         <Suspense fallback={null}>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/manual" element={<ManualPage />} />
             <Route path="/share/:token" element={<PublicProjectPage />} />
             <Route element={<ProtectedRoute><AppShell /></ProtectedRoute>}>
               <Route index element={<DashboardPage />} />
