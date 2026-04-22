@@ -76,15 +76,17 @@ export const useAuthStore = create<AuthStore>()(
 
       restoreSession: async () => {
         // /api/auth/me verifies the httpOnly cookie and returns the user profile.
-        // If the cookie is absent or expired, it returns 401 and we clear local state.
+        // Only a 401/403 means the session is genuinely invalid — clear local state.
+        // 5xx / proxy errors (server starting up, offline) leave state untouched.
         try {
           const res = await fetch(ME_URL, { credentials: 'include' });
           if (res.ok) {
             const data = (await res.json()) as { user: AuthUser };
             set({ currentUser: data.user, isAuthenticated: true });
-          } else {
+          } else if (res.status === 401 || res.status === 403) {
             set({ currentUser: null, isAuthenticated: false });
           }
+          // 5xx or other errors: leave existing state as-is
         } catch {
           // Network error — leave existing state as-is (offline resilience)
         }

@@ -44,6 +44,7 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
 /** True only if this browser fully supports Web Push. */
 export function isPushSupported(): boolean {
   return (
+    CONVEX_MODE &&
     'serviceWorker' in navigator &&
     'PushManager' in window &&
     'Notification' in window

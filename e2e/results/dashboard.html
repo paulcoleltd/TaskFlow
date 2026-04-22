@@ -179,13 +179,13 @@
     <div class="logo-icon">⚡</div>
     <div>
       <h1>TaskFlow — E2E Test Results</h1>
-      <div class="run-meta">Branch: Pauls-Branch &nbsp;·&nbsp; Playwright v1.58 &nbsp;·&nbsp; Chromium + Chromium-Convex &nbsp;·&nbsp; 2026-04-15</div>
+      <div class="run-meta">Branch: Pauls-Branch &nbsp;·&nbsp; Playwright v1.58 &nbsp;·&nbsp; Chromium + Chromium-Convex &nbsp;·&nbsp; 2026-04-22</div>
     </div>
   </div>
   <div class="header-right">
-    <span class="badge badge-pass">✓ 133 LOCAL PASSING</span>
-    <span class="badge badge-pending">⏳ 7 CONVEX PENDING</span>
-    <span class="badge badge-info">14 SUITES · 140 TESTS</span>
+    <span class="badge badge-pass">✓ 143 PASSING</span>
+    <span class="badge badge-pending">⚡ 27 FLAKY</span>
+    <span class="badge badge-info">16 SUITES · 168 TESTS</span>
   </div>
 </div>
 
@@ -199,28 +199,28 @@
   <div class="stats-grid">
     <div class="stat-card sc-blue">
       <div class="stat-label">Total Tests</div>
-      <div class="stat-value c-blue">140</div>
-      <div class="stat-sub">Across 14 suites</div>
+      <div class="stat-value c-blue">168</div>
+      <div class="stat-sub">Across 16 suites</div>
     </div>
     <div class="stat-card sc-green">
       <div class="stat-label">Passing</div>
-      <div class="stat-value c-green">133</div>
-      <div class="stat-sub">Local mode · 9 suites</div>
+      <div class="stat-value c-green">143</div>
+      <div class="stat-sub">116 first-try + 27 flaky</div>
     </div>
     <div class="stat-card sc-red">
       <div class="stat-label">Failed</div>
-      <div class="stat-value c-red">0</div>
-      <div class="stat-sub">Zero failures</div>
+      <div class="stat-value c-red">25</div>
+      <div class="stat-sub">Socket.io + Convex infra</div>
     </div>
     <div class="stat-card sc-amber">
-      <div class="stat-label">Pending</div>
-      <div class="stat-value c-amber">7</div>
-      <div class="stat-sub">Convex cloud required</div>
+      <div class="stat-label">Flaky</div>
+      <div class="stat-value c-amber">27</div>
+      <div class="stat-sub">Passed on retry</div>
     </div>
     <div class="stat-card sc-violet">
       <div class="stat-label">Test Suites</div>
-      <div class="stat-value c-violet">14</div>
-      <div class="stat-sub">8 build phases covered</div>
+      <div class="stat-value c-violet">16</div>
+      <div class="stat-sub">10 build phases covered</div>
     </div>
   </div>
 </section>
@@ -238,33 +238,33 @@
         <svg class="donut-svg" viewBox="0 0 36 36">
           <!-- background ring -->
           <circle cx="18" cy="18" r="15.9" fill="none" stroke="#1B254B" stroke-width="3.5" />
-          <!-- passed: 95% of 100 = 95 units, starts at 12 o'clock (dashoffset=25) -->
+          <!-- passed: 85% of 100 = 85 units, starts at 12 o'clock (dashoffset=25) -->
           <circle cx="18" cy="18" r="15.9" fill="none" stroke="#10B981" stroke-width="3.5"
-            stroke-dasharray="95 5" stroke-dashoffset="25" />
-          <!-- pending: 5% = 5 units, starts at position 20 (after green ends) -->
-          <circle cx="18" cy="18" r="15.9" fill="none" stroke="#F59E0B" stroke-width="3.5"
-            stroke-dasharray="5 95" stroke-dashoffset="20" />
+            stroke-dasharray="85 15" stroke-dashoffset="25" />
+          <!-- failed: 15% = 15 units, starts after green ends -->
+          <circle cx="18" cy="18" r="15.9" fill="none" stroke="#EF4444" stroke-width="3.5"
+            stroke-dasharray="15 85" stroke-dashoffset="-60" />
         </svg>
         <div class="donut-label">
-          <div class="donut-pct">95%</div>
+          <div class="donut-pct">85%</div>
           <div class="donut-sub">pass rate</div>
         </div>
       </div>
       <div class="donut-legend">
         <div class="legend-row">
           <div class="legend-dot" style="background:#10B981"></div>
-          <span style="color:#94A3B8">Passed (Local)</span>
-          <span class="legend-count c-green">133</span>
+          <span style="color:#94A3B8">Passing (incl. flaky)</span>
+          <span class="legend-count c-green">143</span>
         </div>
         <div class="legend-row">
           <div class="legend-dot" style="background:#F59E0B"></div>
-          <span style="color:#94A3B8">Pending (Convex)</span>
-          <span class="legend-count c-amber">7</span>
+          <span style="color:#94A3B8">Flaky (retry pass)</span>
+          <span class="legend-count c-amber">27</span>
         </div>
         <div class="legend-row">
           <div class="legend-dot" style="background:#EF4444"></div>
           <span style="color:#94A3B8">Failed</span>
-          <span class="legend-count c-red">0</span>
+          <span class="legend-count c-red">25</span>
         </div>
       </div>
     </div>
